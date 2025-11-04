@@ -3,6 +3,7 @@ This is a reminder so i dont forget what im doing :)
 
 Whats Getting Done rn:
 - Using advantagekit's talonfx swerve template to get a base down
+- adding switch to go between talon and spark
 
-What's Next:
-- Use CRTE Tuner X tool to fix the TunerConstants.java 
+
+
