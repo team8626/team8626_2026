@@ -35,7 +35,7 @@ public class GyroIOADIS16470 implements GyroIO {
   @Override
   public void updateInputs(GyroIOInputs inputs) {
     inputs.connected = gyro.isConnected();
-    inputs.yawPosition = Rotation2d.fromDegrees(gyro.getAngle());
+    inputs.yawPosition = Rotation2d.fromDegrees(-gyro.getAngle());
     inputs.yawVelocityRadPerSec = Units.degreesToRadians(gyro.getRate());
 
     inputs.odometryYawTimestamps =
