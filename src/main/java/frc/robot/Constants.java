@@ -22,7 +22,7 @@ import edu.wpi.first.wpilibj.RobotBase;
  */
 public final class Constants {
   public static final Mode simMode = Mode.SIM;
-  public static final Mode realMode = Mode.DEV_Spark;
+  public static final Mode realMode = Mode.SPARK;
   public static final Mode currentMode = RobotBase.isReal() ? realMode : simMode;
 
   public static enum Mode {
@@ -30,7 +30,7 @@ public final class Constants {
     CTRE,
 
     /** DEV bot on spark */
-    DEV_Spark,
+    SPARK,
 
     /** Running a physics simulator. */
     SIM,
