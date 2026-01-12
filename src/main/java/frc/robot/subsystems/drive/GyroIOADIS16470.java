@@ -13,8 +13,6 @@
 
 package frc.robot.subsystems.drive;
 
-import static frc.robot.subsystems.drive.DriveConstants.*;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
