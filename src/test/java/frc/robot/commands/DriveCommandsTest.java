@@ -73,7 +73,9 @@ public class DriveCommandsTest {
 
   @Test
   void testJoystickDriveCreatesCommand() {
-    Command command = DriveCommands.joystickDrive(drive, () -> 0.0, () -> 0.0, () -> 0.0);
+    Command command =
+        DriveCommands.joystickDrive(
+            drive, () -> 0.0, () -> 0.0, () -> 0.0, () -> drive.getRotation());
 
     assertNotNull(command);
     assertTrue(command.getRequirements().contains(drive));
@@ -91,7 +93,9 @@ public class DriveCommandsTest {
 
   @Test
   void testJoystickDriveZeroInput() {
-    Command command = DriveCommands.joystickDrive(drive, () -> 0.0, () -> 0.0, () -> 0.0);
+    Command command =
+        DriveCommands.joystickDrive(
+            drive, () -> 0.0, () -> 0.0, () -> 0.0, () -> drive.getRotation());
 
     // Initialize and execute the command
     command.initialize();
@@ -109,7 +113,9 @@ public class DriveCommandsTest {
   void testJoystickDriveDeadbandApplied() {
     // Input below deadband threshold
     double belowDeadband = DEADBAND * 0.5;
-    Command command = DriveCommands.joystickDrive(drive, () -> belowDeadband, () -> 0.0, () -> 0.0);
+    Command command =
+        DriveCommands.joystickDrive(
+            drive, () -> belowDeadband, () -> 0.0, () -> 0.0, () -> drive.getRotation());
 
     command.initialize();
     command.execute();
@@ -122,7 +128,9 @@ public class DriveCommandsTest {
   void testJoystickDriveAboveDeadband() {
     // Input above deadband threshold
     double aboveDeadband = 0.5;
-    Command command = DriveCommands.joystickDrive(drive, () -> aboveDeadband, () -> 0.0, () -> 0.0);
+    Command command =
+        DriveCommands.joystickDrive(
+            drive, () -> aboveDeadband, () -> 0.0, () -> 0.0, () -> drive.getRotation());
 
     command.initialize();
     command.execute();
@@ -134,7 +142,9 @@ public class DriveCommandsTest {
   @Test
   void testJoystickDriveFullInput() {
     // Full input
-    Command command = DriveCommands.joystickDrive(drive, () -> 1.0, () -> 0.0, () -> 0.0);
+    Command command =
+        DriveCommands.joystickDrive(
+            drive, () -> 1.0, () -> 0.0, () -> 0.0, () -> drive.getRotation());
 
     command.initialize();
     command.execute();
@@ -150,7 +160,9 @@ public class DriveCommandsTest {
     // should be less than 0.5 (squared)
 
     double input = 0.5;
-    Command commandHalf = DriveCommands.joystickDrive(drive, () -> input, () -> 0.0, () -> 0.0);
+    Command commandHalf =
+        DriveCommands.joystickDrive(
+            drive, () -> input, () -> 0.0, () -> 0.0, () -> drive.getRotation());
 
     commandHalf.initialize();
     commandHalf.execute();
@@ -158,7 +170,9 @@ public class DriveCommandsTest {
     double velocityAtHalf = flModuleIO.lastDriveVelocitySetpoint;
 
     // Now test with full input
-    Command commandFull = DriveCommands.joystickDrive(drive, () -> 1.0, () -> 0.0, () -> 0.0);
+    Command commandFull =
+        DriveCommands.joystickDrive(
+            drive, () -> 1.0, () -> 0.0, () -> 0.0, () -> drive.getRotation());
 
     commandFull.initialize();
     commandFull.execute();
@@ -178,7 +192,9 @@ public class DriveCommandsTest {
   void testJoystickDriveRotationDeadband() {
     // Rotation input below deadband
     double belowDeadband = DEADBAND * 0.5;
-    Command command = DriveCommands.joystickDrive(drive, () -> 0.0, () -> 0.0, () -> belowDeadband);
+    Command command =
+        DriveCommands.joystickDrive(
+            drive, () -> 0.0, () -> 0.0, () -> belowDeadband, () -> drive.getRotation());
 
     command.initialize();
     command.execute();
@@ -200,7 +216,9 @@ public class DriveCommandsTest {
   @Test
   void testJoystickDriveNegativeInput() {
     // Negative input (backwards)
-    Command command = DriveCommands.joystickDrive(drive, () -> -0.5, () -> 0.0, () -> 0.0);
+    Command command =
+        DriveCommands.joystickDrive(
+            drive, () -> -0.5, () -> 0.0, () -> 0.0, () -> drive.getRotation());
 
     command.initialize();
     command.execute();
@@ -212,7 +230,9 @@ public class DriveCommandsTest {
   @Test
   void testJoystickDriveDiagonalInput() {
     // Diagonal input (forward + strafe)
-    Command command = DriveCommands.joystickDrive(drive, () -> 0.5, () -> 0.5, () -> 0.0);
+    Command command =
+        DriveCommands.joystickDrive(
+            drive, () -> 0.5, () -> 0.5, () -> 0.0, () -> drive.getRotation());
 
     command.initialize();
     command.execute();
@@ -283,7 +303,9 @@ public class DriveCommandsTest {
   @Test
   void testJoystickDriveCombinedInputs() {
     // Test combined translation and rotation
-    Command command = DriveCommands.joystickDrive(drive, () -> 0.5, () -> 0.3, () -> 0.4);
+    Command command =
+        DriveCommands.joystickDrive(
+            drive, () -> 0.5, () -> 0.3, () -> 0.4, () -> drive.getRotation());
 
     command.initialize();
     command.execute();
