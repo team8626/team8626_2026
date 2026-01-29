@@ -1,5 +1,5 @@
-// Copyright 2021-2025 FRC 6328
-// http://github.com/Mechanical-Advantage
+// Copyright 2025-2026 FRC 8626
+// https://github.com/team8626
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -13,7 +13,9 @@
 
 package frc.robot.commands;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.geometry.Rotation2d;
