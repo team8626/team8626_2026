@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.commands.AlignToTargetCommand;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IndexerCommands;
 import frc.robot.subsystems.drive.Drive;
@@ -37,6 +38,10 @@ import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
 import frc.robot.subsystems.indexer.IndexerIOSpark;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIO;
+import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import frc.robot.subsystems.vision.VisionIOSim;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -49,6 +54,7 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Indexer index;
+  private final Vision vision;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -69,6 +75,12 @@ public class RobotContainer {
                 new ModuleIOSpark(2),
                 new ModuleIOSpark(3));
         index = new Indexer(new IndexerIOSpark());
+        vision =
+            new Vision(
+                new VisionIOPhotonVision(),
+                (measurement) ->
+                    drive.addVisionMeasurement(
+                        measurement.pose, measurement.timestamp, measurement.stdDevs));
         break;
       case CTRE:
         // Real robot, instantiate hardware IO implementations
@@ -80,6 +92,12 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {});
         index = new Indexer(new IndexerIO() {});
+        vision =
+            new Vision(
+                new VisionIOPhotonVision(),
+                (measurement) ->
+                    drive.addVisionMeasurement(
+                        measurement.pose, measurement.timestamp, measurement.stdDevs));
         break;
 
       case SIM:
@@ -92,6 +110,13 @@ public class RobotContainer {
                 new ModuleIOSim(),
                 new ModuleIOSim());
         index = new Indexer(new IndexerIOSim());
+        vision =
+            new Vision(
+                new VisionIOSim(),
+                (measurement) ->
+                    drive.addVisionMeasurement(
+                        measurement.pose, measurement.timestamp, measurement.stdDevs));
+        vision.setPoseSupplier(drive::getPose); // Provide current pose for simulation
         break;
 
       default:
@@ -104,6 +129,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {});
         index = new Indexer(new IndexerIO() {});
+        vision = new Vision(new VisionIO() {}, (measurement) -> {});
         break;
     }
 
@@ -184,11 +210,19 @@ public class RobotContainer {
 
     // Run the indexer at max RPM for 8 seconds
     controller.y().onTrue(IndexerCommands.runFor8Seconds(index));
+
+    // Align to front camera's best AprilTag (POV-Up) or back camera's best (POV-Down)
+    controller.povUp().whileTrue(AlignToTargetCommand.alignToFrontCamera(drive, vision));
+    controller.povDown().whileTrue(AlignToTargetCommand.alignToBackCamera(drive, vision));
   }
 
   /** Configure named commands to be identified by autos and paths. */
   private void configureNamedCommands() {
     NamedCommands.registerCommand("RunIndexerFor8Seconds", IndexerCommands.runFor8Seconds(index));
+    NamedCommands.registerCommand(
+        "AlignToFrontCamera", AlignToTargetCommand.alignToFrontCamera(drive, vision));
+    NamedCommands.registerCommand(
+        "AlignToBackCamera", AlignToTargetCommand.alignToBackCamera(drive, vision));
   }
 
   /**
