@@ -1,5 +1,5 @@
-// Copyright 2026 FRC 8626
-// http://github.com/team8626
+// Copyright 2025-2026 FRC 8626
+// https://github.com/team8626
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License

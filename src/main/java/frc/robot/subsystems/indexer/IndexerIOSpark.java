@@ -1,5 +1,5 @@
-// Copyright 2026 FRC 8626
-// http://github.com/team8626
+// Copyright 2025-2026 FRC 8626
+// https://github.com/team8626
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -13,8 +13,20 @@
 
 package frc.robot.subsystems.indexer;
 
-import static frc.robot.subsystems.indexer.IndexerConstants.*;
-import static frc.robot.util.SparkUtil.*;
+import static frc.robot.subsystems.indexer.IndexerConstants.encoderPositionFactor;
+import static frc.robot.subsystems.indexer.IndexerConstants.encoderVelocityFactor;
+import static frc.robot.subsystems.indexer.IndexerConstants.indexCanId;
+import static frc.robot.subsystems.indexer.IndexerConstants.motorCurrentLimit;
+import static frc.robot.subsystems.indexer.IndexerConstants.motorInverted;
+import static frc.robot.subsystems.indexer.IndexerConstants.positionKd;
+import static frc.robot.subsystems.indexer.IndexerConstants.positionKp;
+import static frc.robot.subsystems.indexer.IndexerConstants.velocityKd;
+import static frc.robot.subsystems.indexer.IndexerConstants.velocityKp;
+import static frc.robot.subsystems.indexer.IndexerConstants.velocityKs;
+import static frc.robot.subsystems.indexer.IndexerConstants.velocityKv;
+import static frc.robot.util.SparkUtil.ifOk;
+import static frc.robot.util.SparkUtil.sparkStickyFault;
+import static frc.robot.util.SparkUtil.tryUntilOk;
 
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
