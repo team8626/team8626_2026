@@ -238,4 +238,17 @@ public class Vision extends SubsystemBase {
         && cameraIndex < inputs.bestTargetId.length
         && inputs.bestTargetId[cameraIndex] >= 0;
   }
+
+  /**
+   * Get the best target's AprilTag ID for the given camera.
+   *
+   * @param cameraIndex Camera index (0=front, 1=back)
+   * @return AprilTag ID, or -1 if no valid best target
+   */
+  public int getBestTargetId(int cameraIndex) {
+    if (cameraIndex < 0 || cameraIndex >= inputs.bestTargetId.length) {
+      return -1;
+    }
+    return inputs.bestTargetId[cameraIndex];
+  }
 }

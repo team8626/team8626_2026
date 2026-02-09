@@ -19,7 +19,9 @@ import static frc.robot.subsystems.vision.VisionConstants.alignAngularMaxAcceler
 import static frc.robot.subsystems.vision.VisionConstants.alignAngularMaxVelocity;
 import static frc.robot.subsystems.vision.VisionConstants.alignLinearKp;
 import static frc.robot.subsystems.vision.VisionConstants.alignMaxLinearSpeedMetersPerSec;
+import static frc.robot.subsystems.vision.VisionConstants.alignToDepotDistanceMeters;
 import static frc.robot.subsystems.vision.VisionConstants.alignToTagDistanceMeters;
+import static frc.robot.subsystems.vision.VisionConstants.alignToTowerDistanceMeters;
 import static frc.robot.subsystems.vision.VisionConstants.alignToleranceMeters;
 import static frc.robot.subsystems.vision.VisionConstants.alignToleranceRadians;
 
@@ -34,6 +36,7 @@ import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionConstants;
 import java.util.Optional;
 
 /**
@@ -165,11 +168,56 @@ public class AlignToTargetCommand extends Command {
     angleController.reset(drive.getRotation().getRadians());
     desiredPoseAtStart = null;
     if (vision.hasBestTarget(cameraIndex)) {
-      Optional<Pose3d> tagOpt = vision.getBestTargetFieldPose(cameraIndex);
+      int bestTargetId = vision.getBestTargetId(cameraIndex);
+      Optional<Pose3d> tagOpt;
+      double distanceMeters;
+
+      switch (bestTargetId) {
+        case 31:
+        case 32:
+          // Blue alliance tower
+          tagOpt = VisionConstants.fieldLayout.getTagPose(31);
+          distanceMeters = alignToTowerDistanceMeters;
+          break;
+        case 15:
+        case 16:
+          // Red alliance tower
+          tagOpt = VisionConstants.fieldLayout.getTagPose(15);
+          distanceMeters = alignToTowerDistanceMeters;
+          break;
+        case 29:
+        case 30:
+          // Blue alliance depot
+          tagOpt = VisionConstants.fieldLayout.getTagPose(29);
+          distanceMeters = alignToDepotDistanceMeters;
+          break;
+        case 13:
+        case 14:
+          // Red alliance depot
+          tagOpt = VisionConstants.fieldLayout.getTagPose(13);
+          distanceMeters = alignToDepotDistanceMeters;
+          break;
+        case 25:
+        case 26:
+          // Blue alliance hub
+          tagOpt = VisionConstants.fieldLayout.getTagPose(26);
+          distanceMeters = getEffectiveDistanceMeters();
+          break;
+        case 9:
+        case 10:
+          // Red alliance hub
+          tagOpt = VisionConstants.fieldLayout.getTagPose(10);
+          distanceMeters = getEffectiveDistanceMeters();
+          break;
+        default:
+          tagOpt = vision.getBestTargetFieldPose(cameraIndex);
+          distanceMeters = getEffectiveDistanceMeters();
+          break;
+      }
+
       if (tagOpt.isPresent()) {
         boolean frontFacesTag = (cameraIndex == FRONT_CAMERA);
-        desiredPoseAtStart =
-            desiredPoseFromTag(tagOpt.get(), getEffectiveDistanceMeters(), frontFacesTag);
+        desiredPoseAtStart = desiredPoseFromTag(tagOpt.get(), distanceMeters, frontFacesTag);
       }
     }
   }

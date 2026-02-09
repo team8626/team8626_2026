@@ -119,6 +119,16 @@ public class VisionConstants {
   // Align-to-tag command: distance and control
   /** Target distance in meters from the tag when aligned (robot center to tag). */
   public static final double alignToTagDistanceMeters = 1.0;
+  /**
+   * Distance (meters) when aligning to a tower target. Used when the best target is 31/32 (align to
+   * 31) or 15/16 (align to 15). 1.148m is the depth of the tower floor plate, plus offset.
+   */
+  public static final double alignToTowerDistanceMeters = 1.148 + 0.25;
+  /**
+   * Distance (meters) when aligning to a depot. Used when the best target is 29/30 (align to 29) or
+   * 13/14 (align to 13). 0.5m is the offset from the depot.
+   */
+  public static final double alignToDepotDistanceMeters = 0.5;
   /** P gain for x/y position error (field-relative linear velocity). */
   public static final double alignLinearKp = 2.0;
   /** Max linear speed (m/s) when aligning, for smooth approach. */
