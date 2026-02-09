@@ -67,7 +67,7 @@ Simulation lets you run and drive the robot code on your computer without the re
 
 In this project the sim GUI is **off by default** (so that AdvantageKit log replay works from the command line). If you run `simulateJava` from the command line and **no simulation window appears**, do one of the following:
 
-- Use **VS Code → Simulate Robot Code** and choose the Sim GUI option there, or  
+- Use **VS Code → Simulate Robot Code** and choose the Sim GUI option there, or
 - Turn the GUI on by default: in `build.gradle`, find the line `wpi.sim.addGui().defaultEnabled = false` and change it to `true`. Then `./gradlew simulateJava` will show the sim window. This is optional and only for convenience.
 
 Remember to enable the robot in the Driver Station so the robot moves in sim.

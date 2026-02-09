@@ -16,6 +16,7 @@ package frc.robot.subsystems.vision;
 import static frc.robot.subsystems.vision.VisionConstants.CAMERA_FOV_HORIZONTAL_DEG;
 import static frc.robot.subsystems.vision.VisionConstants.CAMERA_FOV_VERTICAL_DEG;
 import static frc.robot.subsystems.vision.VisionConstants.CAMERA_TILT_DEG;
+import static frc.robot.subsystems.vision.VisionConstants.MULTI_TAG_PAIRS;
 import static frc.robot.subsystems.vision.VisionConstants.SCORE_WEIGHT_AMBIGUITY;
 import static frc.robot.subsystems.vision.VisionConstants.SCORE_WEIGHT_CENTEREDNESS;
 import static frc.robot.subsystems.vision.VisionConstants.SCORE_WEIGHT_DISTANCE;
@@ -27,12 +28,15 @@ import static frc.robot.subsystems.vision.VisionConstants.maxDistanceMeters;
 import static frc.robot.subsystems.vision.VisionConstants.robotToBackCamera;
 import static frc.robot.subsystems.vision.VisionConstants.robotToFrontCamera;
 import static frc.robot.subsystems.vision.VisionConstants.simPoseNoiseStdDev;
+import static frc.robot.subsystems.vision.VisionConstants.simPoseNoiseStdDevMultiTag;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import frc.robot.subsystems.vision.VisionConstants.TagPair;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import org.photonvision.PhotonCamera;
 import org.photonvision.simulation.PhotonCameraSim;
@@ -179,6 +183,34 @@ public class VisionIOSim implements VisionIO {
     return Math.max(0.0, 1.0 - angularDeviation);
   }
 
+  /**
+   * Returns true if at least two of the visible tags form a known multi-tag pair (see
+   * VisionConstants.simMultiTagPairIds). O(1) lookup per pair.
+   */
+  private boolean hasMultiTagPair(List<PhotonTrackedTarget> targets) {
+    if (targets.size() < 2) {
+      return false;
+    }
+    int[] ids = new int[targets.size()];
+    int n = 0;
+    for (var target : targets) {
+      int id = target.getFiducialId();
+      if (id >= 0) {
+        ids[n++] = id;
+      }
+    }
+    for (int i = 0; i < n; i++) {
+      for (int j = i + 1; j < n; j++) {
+        int id1 = Math.min(ids[i], ids[j]);
+        int id2 = Math.max(ids[i], ids[j]);
+        if (MULTI_TAG_PAIRS.contains(TagPair.of(id1, id2))) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   @Override
   public void updateInputs(VisionIOInputs inputs) {
     // Initialize arrays
@@ -241,17 +273,22 @@ public class VisionIOSim implements VisionIO {
           }
         }
 
-        // Add realistic noise to pose
-        double noiseX = random.nextGaussian() * simPoseNoiseStdDev;
-        double noiseY = random.nextGaussian() * simPoseNoiseStdDev;
-        double noiseTheta = random.nextGaussian() * Math.toRadians(1.0); // 1 degree std dev
+        // Multi-tag localization: when a close pair of AprilTags is visible, mimic
+        // MULTI_TAG_PNP_ON_COPROCESSOR with lower pose noise (more accurate estimate).
+        boolean multiTagPair = hasMultiTagPair(targets);
+        double poseNoise = multiTagPair ? simPoseNoiseStdDevMultiTag : simPoseNoiseStdDev;
+        double thetaNoiseDeg = multiTagPair ? 0.5 : 1.0; // degrees std dev
+
+        double noiseX = random.nextGaussian() * poseNoise;
+        double noiseY = random.nextGaussian() * poseNoise;
+        double noiseTheta = random.nextGaussian() * Math.toRadians(thetaNoiseDeg);
 
         inputs.poseX[i] = robotPose.getX() + noiseX;
         inputs.poseY[i] = robotPose.getY() + noiseY;
         inputs.poseRotationDeg[i] =
             robotPose.getRotation().plus(new Rotation2d(noiseTheta)).getDegrees();
 
-        // Simulated ambiguity (better with more tags)
+        // Simulated ambiguity: 0 for multi-tag (matches PhotonVision multi-tag behavior)
         inputs.poseAmbiguity[i] = targets.size() > 1 ? 0.0 : 0.05 + random.nextDouble() * 0.1;
 
         // Calculate average distance (using actual robot pose)
