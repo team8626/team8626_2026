@@ -28,14 +28,11 @@ public interface IndexerIO {
   /** Updates the set of loggable inputs. */
   public default void updateInputs(IndexIOInputs inputs) {}
 
-  /** Run the motor at the specified open loop value. */
+  /** Run the motor at the specified open loop voltage. */
   public default void setOpenLoop(double output) {}
 
   /** Run the motor at the specified velocity in rad/sec. */
   public default void setVelocity(double velocityRadPerSec) {}
-
-  /** Run the motor to the specified position in radians. */
-  public default void setPosition(double positionRad) {}
 
   /** Stop the motor. */
   public default void stop() {}

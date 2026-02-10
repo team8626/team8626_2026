@@ -14,21 +14,18 @@
 package frc.robot.subsystems.indexer;
 
 /**
- * Mock implementation of IndexIO for unit testing. Provides direct control over all input values
- * without hardware.
+ * Mock IndexerIO for unit tests. Exposes inputs for injection and records outputs (setpoints,
+ * stop).
  */
 public class MockIndexerIO implements IndexerIO {
-  // Controllable input values
   public boolean connected = true;
   public double positionRad = 0.0;
   public double velocityRadPerSec = 0.0;
   public double appliedVolts = 0.0;
   public double currentAmps = 0.0;
 
-  // Capture values sent to the motor
   public double lastOpenLoopOutput = 0.0;
   public double lastVelocitySetpoint = 0.0;
-  public double lastPositionSetpoint = 0.0;
   public boolean stopCalled = false;
 
   @Override
@@ -52,17 +49,11 @@ public class MockIndexerIO implements IndexerIO {
   }
 
   @Override
-  public void setPosition(double positionRad) {
-    lastPositionSetpoint = positionRad;
-  }
-
-  @Override
   public void stop() {
     stopCalled = true;
     appliedVolts = 0.0;
   }
 
-  /** Reset all values to defaults */
   public void reset() {
     connected = true;
     positionRad = 0.0;
@@ -71,11 +62,9 @@ public class MockIndexerIO implements IndexerIO {
     currentAmps = 0.0;
     lastOpenLoopOutput = 0.0;
     lastVelocitySetpoint = 0.0;
-    lastPositionSetpoint = 0.0;
     stopCalled = false;
   }
 
-  /** Disconnect the motor for testing error conditions */
   public void disconnect() {
     connected = false;
   }

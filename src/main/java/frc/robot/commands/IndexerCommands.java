@@ -21,42 +21,32 @@ public class IndexerCommands {
 
   private IndexerCommands() {}
 
+  /** Default velocity: one full rotation per second. */
+  public static final double DEFAULT_VELOCITY_RAD_PER_SEC = 2.0 * Math.PI;
+
   /**
-   * Creates a command that runs the index mechanism at a constant velocity for 8 seconds, then
-   * stops.
+   * Runs the indexer at the given velocity for the given duration, then stops.
    *
-   * @param indexer The index subsystem
-   * @param velocityRadPerSec The velocity to run at in radians per second
-   * @return A command that runs the index for 8 seconds
+   * @param indexer The indexer subsystem
+   * @param durationSeconds How long to run (seconds)
+   * @param velocityRadPerSec Velocity in rad/s (positive = forward)
+   * @return Command that runs for duration then stops
    */
-  public static Command runFor8Seconds(Indexer indexer, double velocityRadPerSec) {
+  public static Command runForDuration(
+      Indexer indexer, double durationSeconds, double velocityRadPerSec) {
     return Commands.run(() -> indexer.runVelocity(velocityRadPerSec), indexer)
-        .withTimeout(8.0)
-        .finallyDo(() -> indexer.stop());
+        .withTimeout(durationSeconds)
+        .finallyDo(indexer::stop);
   }
 
   /**
-   * Creates a command that runs the index mechanism at a constant velocity for 8 seconds, then
-   * stops. Uses a default velocity suitable for indexing game pieces.
+   * Runs the indexer at default velocity for the given duration, then stops.
    *
-   * @param indexer The index subsystem
-   * @return A command that runs the index for 8 seconds at default velocity
+   * @param indexer The indexer subsystem
+   * @param durationSeconds How long to run (seconds)
+   * @return Command that runs for duration then stops
    */
-  public static Command runFor8Seconds(Indexer indexer) {
-    // Default velocity: one full rotation (2π radians) per second
-    return runFor8Seconds(indexer, 2.0 * Math.PI);
-  }
-
-  /**
-   * Test command that runs the index at a constant open-loop voltage for 8 seconds. Use this to
-   * verify the motor is connected and responding before tuning PID.
-   *
-   * @param indexer The index subsystem
-   * @return A command that runs the index at open loop for 8 seconds
-   */
-  public static Command testOpenLoop(Indexer indexer) {
-    return Commands.run(() -> indexer.runOpenLoop(3.0), indexer)
-        .withTimeout(8.0)
-        .finallyDo(() -> indexer.stop());
+  public static Command runForDuration(Indexer indexer, double durationSeconds) {
+    return runForDuration(indexer, durationSeconds, DEFAULT_VELOCITY_RAD_PER_SEC);
   }
 }

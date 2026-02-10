@@ -13,18 +13,27 @@
 
 package frc.robot.subsystems.indexer;
 
-import static frc.robot.subsystems.indexer.IndexerConstants.positionStepRad;
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
 
+/**
+ * Indexer subsystem: runs a single motor at a set velocity (closed-loop) or open-loop voltage. Use
+ * {@link #runVelocity(double)} for normal operation; use {@link #runOpenLoop(double)} for testing.
+ * Call {@link #stop()} to stop the motor.
+ */
 public class Indexer extends SubsystemBase {
+  /** Hardware IO implementation (Spark or Simulated). */
   private final IndexerIO io;
+
+  /** Cached inputs from IO, logged each period via AdvantageKit. */
   private final IndexIOInputsAutoLogged inputs = new IndexIOInputsAutoLogged();
+
+  /** Shown on the dashboard when the index motor is not connected. */
   private final Alert motorDisconnectedAlert =
       new Alert("Index motor disconnected.", AlertType.kError);
 
@@ -37,12 +46,11 @@ public class Indexer extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Indexer", inputs);
 
-    // Update alerts
     motorDisconnectedAlert.set(!inputs.connected);
   }
 
   /**
-   * Run the index at a specified velocity.
+   * Run the index motor at a constant velocity.
    *
    * @param velocityRadPerSec Velocity in radians per second
    */
@@ -51,35 +59,7 @@ public class Indexer extends SubsystemBase {
   }
 
   /**
-   * Run the index to a specified position.
-   *
-   * @param positionRad Position in radians
-   */
-  public void runToPosition(double positionRad) {
-    io.setPosition(positionRad);
-  }
-
-  /**
-   * Run the index to a specified angle.
-   *
-   * @param angle Rotation2d angle
-   */
-  public void runToAngle(Rotation2d angle) {
-    io.setPosition(angle.getRadians());
-  }
-
-  /**
-   * Advance the index to the next position (120 degrees forward). This method calculates the next
-   * target position based on the current position and advances by one step (120 degrees).
-   */
-  public void advanceToNextPosition() {
-    double currentPosition = inputs.positionRad;
-    double targetPosition = currentPosition + positionStepRad;
-    io.setPosition(targetPosition);
-  }
-
-  /**
-   * Run the index at open loop voltage.
+   * Run the index motor at open-loop voltage (for testing).
    *
    * @param output Voltage output (-12.0 to 12.0)
    */
@@ -92,35 +72,29 @@ public class Indexer extends SubsystemBase {
     io.stop();
   }
 
-  /** Returns the current position in radians. */
   @AutoLogOutput
   public double getPositionRad() {
     return inputs.positionRad;
   }
 
-  /** Returns the current position as a Rotation2d. */
   @AutoLogOutput
   public Rotation2d getAngle() {
     return new Rotation2d(inputs.positionRad);
   }
 
-  /** Returns the current velocity in radians per second. */
   @AutoLogOutput
   public double getVelocityRadPerSec() {
     return inputs.velocityRadPerSec;
   }
 
-  /** Returns whether the motor is connected. */
   public boolean isConnected() {
     return inputs.connected;
   }
 
-  /** Returns the current applied voltage. */
   public double getAppliedVolts() {
     return inputs.appliedVolts;
   }
 
-  /** Returns the current draw in amps. */
   public double getCurrentAmps() {
     return inputs.currentAmps;
   }

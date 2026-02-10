@@ -208,8 +208,8 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    // Run the indexer at max RPM for 8 seconds
-    controller.y().onTrue(IndexerCommands.runFor8Seconds(index));
+    // Run the indexer for 8 seconds at default velocity
+    controller.y().onTrue(IndexerCommands.runForDuration(index, 8.0));
 
     // Align to front camera's best AprilTag (POV-Up) or back camera's best (POV-Down)
     controller.povUp().whileTrue(AlignToTargetCommand.alignToFrontCamera(drive, vision));
@@ -218,7 +218,8 @@ public class RobotContainer {
 
   /** Configure named commands to be identified by autos and paths. */
   private void configureNamedCommands() {
-    NamedCommands.registerCommand("RunIndexerFor8Seconds", IndexerCommands.runFor8Seconds(index));
+    NamedCommands.registerCommand(
+        "RunIndexerFor8Seconds", IndexerCommands.runForDuration(index, 8.0));
     NamedCommands.registerCommand(
         "AlignToFrontCamera", AlignToTargetCommand.alignToFrontCamera(drive, vision));
     NamedCommands.registerCommand(

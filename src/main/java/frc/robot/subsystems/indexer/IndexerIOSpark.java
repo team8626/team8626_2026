@@ -18,8 +18,6 @@ import static frc.robot.subsystems.indexer.IndexerConstants.encoderVelocityFacto
 import static frc.robot.subsystems.indexer.IndexerConstants.indexCanId;
 import static frc.robot.subsystems.indexer.IndexerConstants.motorCurrentLimit;
 import static frc.robot.subsystems.indexer.IndexerConstants.motorInverted;
-import static frc.robot.subsystems.indexer.IndexerConstants.positionKd;
-import static frc.robot.subsystems.indexer.IndexerConstants.positionKp;
 import static frc.robot.subsystems.indexer.IndexerConstants.velocityKd;
 import static frc.robot.subsystems.indexer.IndexerConstants.velocityKp;
 import static frc.robot.subsystems.indexer.IndexerConstants.velocityKs;
@@ -43,7 +41,7 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 import edu.wpi.first.math.filter.Debouncer;
 import java.util.function.DoubleSupplier;
 
-/** Index IO implementation for SPARK Flex motor controller. */
+/** Hardware IO for indexer using a SPARK Flex. Velocity control only. */
 public class IndexerIOSpark implements IndexerIO {
   private final SparkFlex spark;
   private final RelativeEncoder encoder;
@@ -55,15 +53,16 @@ public class IndexerIOSpark implements IndexerIO {
     encoder = spark.getEncoder();
     controller = spark.getClosedLoopController();
 
-    // Configure motor
-    var config = new SparkFlexConfig();
+    SparkFlexConfig config = new SparkFlexConfig();
+
+    // Motor: inversion, brake, current limit, voltage comp
     config
         .inverted(motorInverted)
         .idleMode(IdleMode.kBrake)
         .smartCurrentLimit(motorCurrentLimit)
         .voltageCompensation(12.0);
 
-    // Configure encoder
+    // Encoder: mechanism radians and rad/s
     config
         .encoder
         .positionConversionFactor(encoderPositionFactor)
@@ -71,14 +70,13 @@ public class IndexerIOSpark implements IndexerIO {
         .uvwMeasurementPeriod(10)
         .uvwAverageDepth(2);
 
-    // Configure closed loop control
+    // Velocity PID + feedforward (only slot we use)
     config
         .closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .pidf(velocityKp, 0.0, velocityKd, 0.0)
-        .pidf(positionKp, 0.0, positionKd, 0.0, ClosedLoopSlot.kSlot1);
+        .pidf(velocityKp, 0.0, velocityKd, 0.0);
 
-    // Configure signal update rates
+    // Logging: encoder and output at 20 ms
     config
         .signals
         .primaryEncoderPositionAlwaysOn(true)
@@ -89,7 +87,6 @@ public class IndexerIOSpark implements IndexerIO {
         .busVoltagePeriodMs(20)
         .outputCurrentPeriodMs(20);
 
-    // Apply configuration
     tryUntilOk(
         spark,
         5,
@@ -97,7 +94,6 @@ public class IndexerIOSpark implements IndexerIO {
             spark.configure(
                 config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
 
-    // Reset encoder to zero position
     tryUntilOk(spark, 5, () -> encoder.setPosition(0.0));
   }
 
@@ -123,7 +119,6 @@ public class IndexerIOSpark implements IndexerIO {
 
   @Override
   public void setVelocity(double velocityRadPerSec) {
-    // Use velocity PID slot (slot 0) with feedforward
     double ffVolts = velocityKs * Math.signum(velocityRadPerSec) + velocityKv * velocityRadPerSec;
     controller.setReference(
         velocityRadPerSec,
@@ -131,12 +126,6 @@ public class IndexerIOSpark implements IndexerIO {
         ClosedLoopSlot.kSlot0,
         ffVolts,
         ArbFFUnits.kVoltage);
-  }
-
-  @Override
-  public void setPosition(double positionRad) {
-    // Use position PID slot (slot 1)
-    controller.setReference(positionRad, ControlType.kPosition, ClosedLoopSlot.kSlot1);
   }
 
   @Override
