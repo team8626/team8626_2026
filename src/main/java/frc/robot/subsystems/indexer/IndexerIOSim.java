@@ -25,13 +25,40 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
-/** Simulation IO for indexer: velocity control and open-loop only. */
+/**
+ * Simulation IO for the indexer subsystem.
+ *
+ * <p><b>Open-loop mode:</b> The motor is driven by a commanded voltage (or duty cycle) with no
+ * feedback. Speed depends on load and battery voltage; useful for simple on/off or manual control
+ * where exact speed is not critical.
+ *
+ * <p><b>Closed-loop (velocity) mode:</b> A target velocity (setpoint) is given, and the actual
+ * velocity is measured and fed back. The controller adjusts the motor output so the actual velocity
+ * tracks the setpoint despite load or voltage changes. This implementation uses a PID controller
+ * plus feedforward (Ks, Kv) to achieve accurate, responsive velocity control.
+ *
+ * <p><b>PID controller:</b> Computes a correction from the velocity error (setpoint minus actual).
+ * <ul>
+ *   <li><b>Kp</b> (proportional): Output proportional to error; larger Kp gives a stronger, faster
+ *       response but can cause overshoot or oscillation.
+ *   <li><b>Ki</b> (integral): Not used here (0). Would eliminate steady-state error over time.
+ *   <li><b>Kd</b> (derivative): Responds to the rate of change of error; helps dampen overshoot
+ *       and smooth the response.
+ * </ul>
+ * Tuning (velocityKp, velocityKd in {@link IndexerConstants}) balances response speed and
+ * stability.
+ */
 public class IndexerIOSim implements IndexerIO {
+  /** Simulates indexer motor dynamics (Neo Vortex + gearbox) for physics-accurate behavior. */
   private final DCMotorSim motorSim;
+  /** PID used to correct velocity error when in velocity closed-loop mode. */
   private final PIDController velocityController = new PIDController(velocityKp, 0, velocityKd);
 
+  /** True when setVelocity() is active; false for open-loop (setOpenLoop/stop). */
   private boolean velocityClosedLoop = false;
+  /** Feedforward voltage (Ks * sign + Kv * setpoint) added to PID output in velocity mode. */
   private double velocityFFVolts = 0.0;
+  /** Voltage commanded to the motor; written by open-loop or by velocity closed-loop in updateInputs. */
   private double appliedVolts = 0.0;
 
   public IndexerIOSim() {

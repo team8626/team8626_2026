@@ -46,6 +46,7 @@ public class Indexer extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Indexer", inputs);
 
+    // Show alert if the index motor is not connected.
     motorDisconnectedAlert.set(!inputs.connected);
   }
 
