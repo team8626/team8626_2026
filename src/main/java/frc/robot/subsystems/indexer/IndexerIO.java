@@ -13,26 +13,35 @@
 
 package frc.robot.subsystems.indexer;
 
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface IndexerIO {
   @AutoLog
   public static class IndexIOInputs {
     public boolean connected = false;
-    public double positionRad = 0.0;
-    public double velocityRadPerSec = 0.0;
-    public double appliedVolts = 0.0;
-    public double currentAmps = 0.0;
+    public Angle position = Radians.of(0.0);
+    public AngularVelocity velocity = RadiansPerSecond.of(0.0);
+    public Voltage appliedVoltage = Volts.of(0.0);
+    public Current current = Amps.of(0.0);
   }
 
   /** Updates the set of loggable inputs. */
   public default void updateInputs(IndexIOInputs inputs) {}
 
   /** Run the motor at the specified open loop voltage. */
-  public default void setOpenLoop(double output) {}
+  public default void setOpenLoop(Voltage output) {}
 
   /** Run the motor at the specified velocity in rad/sec. */
-  public default void setVelocity(double velocityRadPerSec) {}
+  public default void setVelocity(AngularVelocity velocity) {}
 
   /** Stop the motor. */
   public default void stop() {}

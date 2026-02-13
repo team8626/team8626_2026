@@ -13,6 +13,10 @@
 
 package frc.robot.subsystems.indexer;
 
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.subsystems.indexer.IndexerConstants.gearReduction;
 import static frc.robot.subsystems.indexer.IndexerConstants.velocityKd;
 import static frc.robot.subsystems.indexer.IndexerConstants.velocityKp;
@@ -23,6 +27,8 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
 /**
@@ -38,13 +44,15 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
  * plus feedforward (Ks, Kv) to achieve accurate, responsive velocity control.
  *
  * <p><b>PID controller:</b> Computes a correction from the velocity error (setpoint minus actual).
+ *
  * <ul>
  *   <li><b>Kp</b> (proportional): Output proportional to error; larger Kp gives a stronger, faster
  *       response but can cause overshoot or oscillation.
  *   <li><b>Ki</b> (integral): Not used here (0). Would eliminate steady-state error over time.
- *   <li><b>Kd</b> (derivative): Responds to the rate of change of error; helps dampen overshoot
- *       and smooth the response.
+ *   <li><b>Kd</b> (derivative): Responds to the rate of change of error; helps dampen overshoot and
+ *       smooth the response.
  * </ul>
+ *
  * Tuning (velocityKp, velocityKd in {@link IndexerConstants}) balances response speed and
  * stability.
  */
@@ -58,7 +66,10 @@ public class IndexerIOSim implements IndexerIO {
   private boolean velocityClosedLoop = false;
   /** Feedforward voltage (Ks * sign + Kv * setpoint) added to PID output in velocity mode. */
   private double velocityFFVolts = 0.0;
-  /** Voltage commanded to the motor; written by open-loop or by velocity closed-loop in updateInputs. */
+  /**
+   * Voltage commanded to the motor; written by open-loop or by velocity closed-loop in
+   * updateInputs.
+   */
   private double appliedVolts = 0.0;
 
   public IndexerIOSim() {
@@ -81,23 +92,25 @@ public class IndexerIOSim implements IndexerIO {
     motorSim.update(0.02);
 
     inputs.connected = true;
-    inputs.positionRad = motorSim.getAngularPositionRad();
-    inputs.velocityRadPerSec = motorSim.getAngularVelocityRadPerSec();
-    inputs.appliedVolts = appliedVolts;
-    inputs.currentAmps = Math.abs(motorSim.getCurrentDrawAmps());
+    inputs.position = Radians.of(motorSim.getAngularPositionRad());
+    inputs.velocity = RadiansPerSecond.of(motorSim.getAngularVelocityRadPerSec());
+    inputs.appliedVoltage = Volts.of(appliedVolts);
+    inputs.current = Amps.of(Math.abs(motorSim.getCurrentDrawAmps()));
   }
 
   @Override
-  public void setOpenLoop(double output) {
+  public void setOpenLoop(Voltage output) {
     velocityClosedLoop = false;
-    appliedVolts = output;
+    appliedVolts = output.in(Volts);
   }
 
   @Override
-  public void setVelocity(double velocityRadPerSec) {
+  public void setVelocity(AngularVelocity velocity) {
     velocityClosedLoop = true;
-    velocityFFVolts = velocityKs * Math.signum(velocityRadPerSec) + velocityKv * velocityRadPerSec;
-    velocityController.setSetpoint(velocityRadPerSec);
+    velocityFFVolts =
+        velocityKs * Math.signum(velocity.in(RadiansPerSecond))
+            + velocityKv * velocity.in(RadiansPerSecond);
+    velocityController.setSetpoint(velocity.in(RadiansPerSecond));
   }
 
   @Override
