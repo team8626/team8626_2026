@@ -34,9 +34,11 @@ public class IndexerConstants {
   //   up and slowing down around the target), or sounds rough.
   public static final double velocityKp = 0.1;
   //
-  // velocityKd — Derivative gain. Responds to rate of change of error; dampens overshoot (going past
+  // velocityKd — Derivative gain. Responds to rate of change of error; dampens overshoot (going
+  // past
   //   the target). Tune up if there is noticeable overshoot or oscillation after a step change
-  //   (speed shoots past then wobbles); tune down (or to 0) if the response becomes noisy or twitchy
+  //   (speed shoots past then wobbles); tune down (or to 0) if the response becomes noisy or
+  // twitchy
   //   from derivative kick or encoder noise (small bumps in the feedback make the output jump).
   public static final double velocityKd = 0.0;
   //
@@ -46,7 +48,8 @@ public class IndexerConstants {
   //   speed.
   public static final double velocityKs = 0.05;
   //
-  // velocityKv — Feedforward: volts per (rad/s). Approximate linear relationship between velocity and
+  // velocityKv — Feedforward: volts per (rad/s). Approximate linear relationship between velocity
+  // and
   //   voltage (e.g. 12V / 100 rad/s ≈ 0.12). Tune up if the indexer runs slow for a given setpoint;
   //   tune down if it runs too fast or the PID is fighting the feedforward (e.g. once settled, the
   //   controller keeps adding a big correction in the wrong direction).

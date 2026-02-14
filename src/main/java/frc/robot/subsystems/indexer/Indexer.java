@@ -13,13 +13,18 @@
 
 package frc.robot.subsystems.indexer;
 
-import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
+import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Indexer subsystem: runs a single motor at a set velocity (closed-loop) or open-loop voltage. Use
@@ -55,8 +60,8 @@ public class Indexer extends SubsystemBase {
    *
    * @param velocityRadPerSec Velocity in radians per second
    */
-  public void runVelocity(double velocityRadPerSec) {
-    io.setVelocity(velocityRadPerSec);
+  public void runVelocity(AngularVelocity velocity) {
+    io.setVelocity(velocity);
   }
 
   /**
@@ -64,7 +69,7 @@ public class Indexer extends SubsystemBase {
    *
    * @param output Voltage output (-12.0 to 12.0)
    */
-  public void runOpenLoop(double output) {
+  public void runOpenLoop(Voltage output) {
     io.setOpenLoop(output);
   }
 
@@ -74,29 +79,29 @@ public class Indexer extends SubsystemBase {
   }
 
   @AutoLogOutput
-  public double getPositionRad() {
-    return inputs.positionRad;
+  public Angle getPosition() {
+    return inputs.position;
   }
 
   @AutoLogOutput
   public Rotation2d getAngle() {
-    return new Rotation2d(inputs.positionRad);
+    return new Rotation2d(inputs.position.in(Radians));
   }
 
   @AutoLogOutput
-  public double getVelocityRadPerSec() {
-    return inputs.velocityRadPerSec;
+  public AngularVelocity getVelocity() {
+    return inputs.velocity;
   }
 
   public boolean isConnected() {
     return inputs.connected;
   }
 
-  public double getAppliedVolts() {
-    return inputs.appliedVolts;
+  public Voltage getAppliedVoltage() {
+    return inputs.appliedVoltage;
   }
 
-  public double getCurrentAmps() {
-    return inputs.currentAmps;
+  public Current getCurrent() {
+    return inputs.current;
   }
 }

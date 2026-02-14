@@ -13,6 +13,10 @@
 
 package frc.robot.subsystems.indexer;
 
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.subsystems.indexer.IndexerConstants.encoderPositionFactor;
 import static frc.robot.subsystems.indexer.IndexerConstants.encoderVelocityFactor;
 import static frc.robot.subsystems.indexer.IndexerConstants.indexCanId;
@@ -39,6 +43,8 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Voltage;
 import java.util.function.DoubleSupplier;
 
 /** Hardware IO for indexer using a SPARK Flex. Velocity control only. */
@@ -101,35 +107,36 @@ public class IndexerIOSpark implements IndexerIO {
   public void updateInputs(IndexIOInputs inputs) {
     sparkStickyFault = false;
 
-    ifOk(spark, encoder::getPosition, (value) -> inputs.positionRad = value);
-    ifOk(spark, encoder::getVelocity, (value) -> inputs.velocityRadPerSec = value);
+    ifOk(spark, encoder::getPosition, (value) -> inputs.position = Radians.of(value));
+    ifOk(spark, encoder::getVelocity, (value) -> inputs.velocity = RadiansPerSecond.of(value));
     ifOk(
         spark,
         new DoubleSupplier[] {spark::getAppliedOutput, spark::getBusVoltage},
-        (values) -> inputs.appliedVolts = values[0] * values[1]);
-    ifOk(spark, spark::getOutputCurrent, (value) -> inputs.currentAmps = value);
+        (values) -> inputs.appliedVoltage = Volts.of(values[0] * values[1]));
+    ifOk(spark, spark::getOutputCurrent, (value) -> inputs.current = Amps.of(value));
 
     inputs.connected = connectedDebounce.calculate(!sparkStickyFault);
   }
 
   @Override
-  public void setOpenLoop(double output) {
+  public void setOpenLoop(Voltage output) {
     spark.setVoltage(output);
   }
 
   @Override
-  public void setVelocity(double velocityRadPerSec) {
-    double ffVolts = velocityKs * Math.signum(velocityRadPerSec) + velocityKv * velocityRadPerSec;
-    controller.setReference(
-        velocityRadPerSec,
+  public void setVelocity(AngularVelocity velocity) {
+    double ffVolts =
+        velocityKs * Math.signum(velocity.in(RadiansPerSecond))
+            + velocityKv * velocity.in(RadiansPerSecond);
+    controller.setSetpoint(
+        velocity.in(RadiansPerSecond),
         ControlType.kVelocity,
         ClosedLoopSlot.kSlot0,
         ffVolts,
         ArbFFUnits.kVoltage);
   }
 
-  @Override
   public void stop() {
-    spark.setVoltage(0.0);
+    spark.setVoltage(Volts.of(0.0));
   }
 }

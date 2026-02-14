@@ -13,6 +13,9 @@
 
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.RPM;
+
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.indexer.Indexer;
@@ -21,20 +24,20 @@ public class IndexerCommands {
 
   private IndexerCommands() {}
 
-  /** Default velocity: one full rotation per second. */
-  public static final double DEFAULT_VELOCITY_RAD_PER_SEC = 2.0 * Math.PI;
+  /** Default velocity */
+  public static final AngularVelocity DEFAULT_VELOCITY = RPM.of(100);
 
   /**
    * Runs the indexer at the given velocity for the given duration, then stops.
    *
    * @param indexer The indexer subsystem
    * @param durationSeconds How long to run (seconds)
-   * @param velocityRadPerSec Velocity in rad/s (positive = forward)
+   * @param velocity Velocity (AngularVelocity) (positive = forward)
    * @return Command that runs for duration then stops
    */
   public static Command runForDuration(
-      Indexer indexer, double durationSeconds, double velocityRadPerSec) {
-    return Commands.run(() -> indexer.runVelocity(velocityRadPerSec), indexer)
+      Indexer indexer, double durationSeconds, AngularVelocity velocity) {
+    return Commands.run(() -> indexer.runVelocity(velocity), indexer)
         .withTimeout(durationSeconds)
         .finallyDo(indexer::stop);
   }
@@ -47,6 +50,6 @@ public class IndexerCommands {
    * @return Command that runs for duration then stops
    */
   public static Command runForDuration(Indexer indexer, double durationSeconds) {
-    return runForDuration(indexer, durationSeconds, DEFAULT_VELOCITY_RAD_PER_SEC);
+    return runForDuration(indexer, durationSeconds, DEFAULT_VELOCITY);
   }
 }
