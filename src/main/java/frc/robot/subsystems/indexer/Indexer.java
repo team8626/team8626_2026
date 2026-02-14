@@ -16,6 +16,7 @@ package frc.robot.subsystems.indexer;
 import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
@@ -78,8 +79,8 @@ public class Indexer extends SubsystemBase {
   }
 
   @AutoLogOutput
-  public double getPositionRad() {
-    return inputs.position.in(Radians);
+  public Angle getPosition() {
+    return inputs.position;
   }
 
   @AutoLogOutput
