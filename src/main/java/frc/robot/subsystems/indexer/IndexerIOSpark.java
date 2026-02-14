@@ -128,12 +128,6 @@ public class IndexerIOSpark implements IndexerIO {
     double ffVolts =
         velocityKs * Math.signum(velocity.in(RadiansPerSecond))
             + velocityKv * velocity.in(RadiansPerSecond);
-    // controller.setReference(
-    //     velocity.in(RadiansPerSecond),
-    //     ControlType.kVelocity,
-    //     ClosedLoopSlot.kSlot0,
-    //     ffVolts,
-    //     ArbFFUnits.kVoltage);
     controller.setSetpoint(
         velocity.in(RadiansPerSecond),
         ControlType.kVelocity,
