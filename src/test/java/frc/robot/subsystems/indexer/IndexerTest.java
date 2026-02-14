@@ -47,7 +47,7 @@ public class IndexerTest {
   @Test
   void testInitialPosition() {
     indexer.periodic();
-    assertEquals(0.0, indexer.getPositionRad(), DELTA);
+    assertEquals(0.0, indexer.getPosition().in(Radians), DELTA);
     assertEquals(0.0, indexer.getAngle().getRadians(), DELTA);
   }
 
@@ -86,7 +86,7 @@ public class IndexerTest {
     io.position = Radians.of(1.5);
     indexer.periodic();
 
-    assertEquals(1.5, indexer.getPositionRad(), DELTA);
+    assertEquals(1.5, indexer.getPosition().in(Radians), DELTA);
   }
 
   @Test
