@@ -340,7 +340,6 @@ public class DriveTest {
 
   @Test
   void testBumpTrigger() {
-    Pose2d bumpPose;
     TeleopDrive teleopDrive = new TeleopDrive(drive, null);
 
     // Left bump zone - Current Alliance
