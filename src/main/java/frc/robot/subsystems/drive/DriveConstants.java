@@ -13,15 +13,34 @@
 
 package frc.robot.subsystems.drive;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearAcceleration;
+import edu.wpi.first.units.measure.LinearVelocity;
+import frc.robot.util.TunableControls.ControlConstants;
+import frc.robot.util.TunableControls.TunableControlConstants;
 
 public class DriveConstants {
-  public static final double maxSpeedMetersPerSec = 4.8;
+  //   public static final double maxSpeedMetersPerSec = 4.8;
+
+  public static final LinearVelocity DEFAULT_DRIVE_SPEED = MetersPerSecond.of(3.2);
+  public static final AngularVelocity DEFAULT_ROT_SPEED = RotationsPerSecond.of(0.75);
+  public static final LinearVelocity FAST_DRIVE_SPEED = MetersPerSecond.of(4.5);
+  public static final AngularVelocity FAST_ROT_SPEED = RotationsPerSecond.of(2);
+  public static final LinearAcceleration MAX_TELEOP_ACCEL = MetersPerSecondPerSecond.of(25);
+
+  public static final LinearVelocity SPEED_AT_12V =
+      MetersPerSecond.of(5.85); // theoretical free speed
+
   public static final double odometryFrequency = 100.0; // Hz
   public static final double trackWidth = Units.inchesToMeters(26.5);
   public static final double wheelBase = Units.inchesToMeters(26.5);
@@ -105,10 +124,21 @@ public class DriveConstants {
           robotMOI,
           new ModuleConfig(
               wheelRadiusMeters,
-              maxSpeedMetersPerSec,
+              SPEED_AT_12V.in(MetersPerSecond),
               wheelCOF,
               driveGearbox.withReduction(driveMotorReduction),
               driveMotorCurrentLimit,
               1),
           moduleTranslations);
+
+  // Alignment
+  private static final ControlConstants TRENCH_TRANSLATION_BASE_CONSTANTS =
+      new ControlConstants().withPID(6, 0, 0);
+  private static final ControlConstants ROTATION_BASE_CONSTANTS =
+      new ControlConstants().withPID(8, 0, 0).withContinuous(-180, 180);
+
+  public static final TunableControlConstants TRENCH_TRANSLATION_CONSTANTS =
+      new TunableControlConstants("Swerve/Trench Translation", TRENCH_TRANSLATION_BASE_CONSTANTS);
+  public static final TunableControlConstants ROTATION_CONSTANTS =
+      new TunableControlConstants("Swerve/Rotation", ROTATION_BASE_CONSTANTS);
 }
