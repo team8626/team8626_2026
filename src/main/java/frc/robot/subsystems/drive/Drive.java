@@ -35,6 +35,8 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -193,7 +195,7 @@ public class Drive extends SubsystemBase {
     // Calculate module setpoints
     ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
-    SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, maxSpeedMetersPerSec);
+    SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, DriveConstants.SPEED_AT_12V);
 
     // Log unoptimized setpoints
     Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
@@ -206,6 +208,17 @@ public class Drive extends SubsystemBase {
 
     // Log optimized setpoints (runSetpoint mutates each state)
     Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
+  }
+
+  /**
+   * Runs the drive with the specified field-relative velocities.
+   *
+   * @param xVel Forward velocity in meters/sec
+   * @param yVel Sideways velocity in meters/sec
+   * @param omega Angular velocity in radians/sec
+   */
+  public void driveFieldCentric(LinearVelocity xVel, LinearVelocity yVel, AngularVelocity omega) {
+    runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(xVel, yVel, omega, getRotation()));
   }
 
   /** Runs the drive in a straight line with the specified drive output. */
@@ -315,11 +328,11 @@ public class Drive extends SubsystemBase {
 
   /** Returns the maximum linear speed in meters per sec. */
   public double getMaxLinearSpeedMetersPerSec() {
-    return maxSpeedMetersPerSec;
+    return DriveConstants.SPEED_AT_12V.in(MetersPerSecond);
   }
 
   /** Returns the maximum angular speed in radians per sec. */
   public double getMaxAngularSpeedRadPerSec() {
-    return maxSpeedMetersPerSec / driveBaseRadius;
+    return DriveConstants.DEFAULT_ROT_SPEED.in(RadiansPerSecond) / driveBaseRadius;
   }
 }
