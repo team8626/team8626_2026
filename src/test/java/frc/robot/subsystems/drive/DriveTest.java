@@ -13,6 +13,8 @@
 
 package frc.robot.subsystems.drive;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -21,6 +23,7 @@ import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import frc.robot.commands.TeleopDrive;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -195,13 +198,16 @@ public class DriveTest {
 
   @Test
   void testGetMaxLinearSpeed() {
-    assertEquals(DriveConstants.maxSpeedMetersPerSec, drive.getMaxLinearSpeedMetersPerSec(), DELTA);
+    assertEquals(
+        DriveConstants.SPEED_AT_12V.in(MetersPerSecond),
+        drive.getMaxLinearSpeedMetersPerSec(),
+        DELTA);
   }
 
   @Test
   void testGetMaxAngularSpeed() {
     double expectedAngularSpeed =
-        DriveConstants.maxSpeedMetersPerSec / DriveConstants.driveBaseRadius;
+        DriveConstants.DEFAULT_ROT_SPEED.in(RadiansPerSecond) / DriveConstants.driveBaseRadius;
     assertEquals(expectedAngularSpeed, drive.getMaxAngularSpeedRadPerSec(), DELTA);
   }
 
@@ -299,18 +305,87 @@ public class DriveTest {
     drive.periodic();
 
     // Command velocities that exceed max speed
-    double excessiveSpeed = DriveConstants.maxSpeedMetersPerSec * 2.0;
+    double excessiveSpeed = DriveConstants.SPEED_AT_12V.in(MetersPerSecond) * 2.0;
     ChassisSpeeds speeds = new ChassisSpeeds(excessiveSpeed, excessiveSpeed, 0.0);
     drive.runVelocity(speeds);
 
     // Module velocities should be desaturated (scaled down)
     // All modules should have non-zero but limited velocities
     // The exact values depend on kinematics, but none should exceed max
-    double maxModuleSpeed = DriveConstants.maxSpeedMetersPerSec / DriveConstants.wheelRadiusMeters;
+    double maxModuleSpeed =
+        DriveConstants.SPEED_AT_12V.in(MetersPerSecond) / DriveConstants.wheelRadiusMeters;
 
     assertTrue(Math.abs(flModuleIO.lastDriveVelocitySetpoint) <= maxModuleSpeed + DELTA);
     assertTrue(Math.abs(frModuleIO.lastDriveVelocitySetpoint) <= maxModuleSpeed + DELTA);
     assertTrue(Math.abs(blModuleIO.lastDriveVelocitySetpoint) <= maxModuleSpeed + DELTA);
     assertTrue(Math.abs(brModuleIO.lastDriveVelocitySetpoint) <= maxModuleSpeed + DELTA);
+  }
+
+  @Test
+  void testBumpZoneAngle() {
+    assertTrue(TeleopDrive.getBumpLockAngle(Rotation2d.fromDegrees(5.0)).getDegrees() == 45.0);
+    assertTrue(TeleopDrive.getBumpLockAngle(Rotation2d.fromDegrees(-5.0)).getDegrees() == -45.0);
+    assertTrue(TeleopDrive.getBumpLockAngle(Rotation2d.fromDegrees(175.0)).getDegrees() == 135.0);
+    assertTrue(TeleopDrive.getBumpLockAngle(Rotation2d.fromDegrees(-175.0)).getDegrees() == -135.0);
+  }
+
+  @Test
+  void testTrenchZoneAngle() {
+    assertTrue(TeleopDrive.getTrenchLockAngle(Rotation2d.fromDegrees(100.0)).getDegrees() == 180.0);
+    assertTrue(
+        TeleopDrive.getTrenchLockAngle(Rotation2d.fromDegrees(-100.0)).getDegrees() == -180.0);
+    assertTrue(TeleopDrive.getTrenchLockAngle(Rotation2d.fromDegrees(80.0)).getDegrees() == 0.0);
+    assertTrue(TeleopDrive.getTrenchLockAngle(Rotation2d.fromDegrees(-80.0)).getDegrees() == 0.0);
+  }
+
+  @Test
+  void testBumpTrigger() {
+    Pose2d bumpPose;
+    TeleopDrive teleopDrive = new TeleopDrive(drive, null);
+
+    // Left bump zone - Current Alliance
+    drive.setPose(new Pose2d(4.0, 5.5, new Rotation2d()));
+    assertTrue(teleopDrive.inBumpZone());
+
+    // Right bump zone - Current Alliance
+    drive.setPose(new Pose2d(4.0, 2.5, new Rotation2d()));
+    assertTrue(teleopDrive.inBumpZone());
+
+    // Left bump zone - Opposite Alliance
+    drive.setPose(new Pose2d(12.0, 5.5, new Rotation2d()));
+    assertTrue(teleopDrive.inBumpZone());
+
+    // Right bump zone - Opposite Alliance
+    drive.setPose(new Pose2d(12.0, 2.5, new Rotation2d()));
+    assertTrue(teleopDrive.inBumpZone());
+
+    // Outside bump zones
+    drive.setPose(new Pose2d(8.0, 5.5, new Rotation2d()));
+    assertTrue(!teleopDrive.inBumpZone());
+  }
+
+  @Test
+  void testTrenchTrigger() {
+    TeleopDrive teleopDrive = new TeleopDrive(drive, null);
+
+    // Left trench zone - Current Alliance
+    drive.setPose(new Pose2d(3.5, 7.5, new Rotation2d()));
+    assertTrue(teleopDrive.inTrenchZone());
+
+    // Right trench zone - Current Alliance
+    drive.setPose(new Pose2d(4.50, .75, new Rotation2d()));
+    assertTrue(teleopDrive.inTrenchZone());
+
+    // Left trench zone - Opposite Alliance
+    drive.setPose(new Pose2d(12.0, 7.5, new Rotation2d()));
+    assertTrue(teleopDrive.inTrenchZone());
+
+    // Right trench zone - Opposite Alliance
+    drive.setPose(new Pose2d(12.0, 0.75, new Rotation2d()));
+    assertTrue(teleopDrive.inTrenchZone());
+
+    // Outside trench zones
+    drive.setPose(new Pose2d(8.0, 5.5, new Rotation2d()));
+    assertTrue(!teleopDrive.inTrenchZone());
   }
 }
