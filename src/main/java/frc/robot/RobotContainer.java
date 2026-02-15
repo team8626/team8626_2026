@@ -17,8 +17,6 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -28,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AlignToTargetCommand;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IndexerCommands;
+import frc.robot.commands.TeleopDrive;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOADIS16470;
@@ -57,7 +56,11 @@ public class RobotContainer {
   private final Vision vision;
 
   // Controller
-  private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController controller =
+      new CommandXboxController(0); // TODO: move port# to Constants
+
+  // Commands
+  private final TeleopDrive teleopDrive;
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -152,6 +155,9 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
+    // Set up commands
+    teleopDrive = new TeleopDrive(drive, controller);
+
     // Configure the button bindings
     configureButtonBindings();
 
@@ -167,23 +173,7 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     // Default command, normal field-relative drive
-    // Left stick for field navigation, triggers for rotation (right - left)
-    drive.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            drive,
-            () -> controller.getLeftY(),
-            () -> controller.getLeftX(),
-            () -> controller.getRightTriggerAxis() - controller.getLeftTriggerAxis(),
-            () -> {
-              // Blue alliance: flip 180° to match field orientation from driver's perspective
-              boolean isBlue =
-                  DriverStation.getAlliance().isPresent()
-                      && DriverStation.getAlliance().get() == Alliance.Blue;
-              return isBlue
-                  ? drive.getRotation()
-                  : drive.getRotation().plus(new Rotation2d(Math.PI));
-            }));
-
+    drive.setDefaultCommand(teleopDrive);
     // Lock to 0° when A button is held
     controller
         .a()
