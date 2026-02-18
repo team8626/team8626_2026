@@ -71,7 +71,9 @@ public class ShooterIOSim implements ShooterIO {
 
     inputs.velocityMotorLeft = RadiansPerSecond.of(wheelSim.getAngularVelocityRadPerSec());
     inputs.velocityMotorRight = RadiansPerSecond.of(wheelSim.getAngularVelocityRadPerSec());
-    inputs.velocityShooterWheel = RadiansPerSecond.of(wheelSim.getAngularVelocityRadPerSec() / ShooterConstants.gearReduction);
+    inputs.velocityShooterWheel =
+        RadiansPerSecond.of(
+            wheelSim.getAngularVelocityRadPerSec() / ShooterConstants.gearReduction);
     inputs.desiredWheelVelocity = desiredWheelVelocity;
 
     inputs.appliedVoltageMotorLeft = Volts.of(appliedVolts);

@@ -14,7 +14,6 @@
 package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.subsystems.shooter.ShooterConstants.*;
 import static frc.robot.util.SparkUtil.ifOk;
 import static frc.robot.util.SparkUtil.sparkStickyFault;
 import static frc.robot.util.SparkUtil.tryUntilOk;
@@ -32,28 +31,33 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.units.measure.AngularVelocity;
 import java.util.function.DoubleSupplier;
 
 /** Shooter IO implementation for SPARK Flex motor controller. */
 public class ShooterIOSpark implements ShooterIO {
   private final SparkFlex sparkLead;
   private final SparkFlex sparkFollow;
+  private final SparkFlexConfig config;
   private final RelativeEncoder encoder;
   private final SparkClosedLoopController controller;
   private final Debouncer connectedDebounce = new Debouncer(0.5);
 
+  private double kV = ShooterConstants.velocityKv;
+  private double kS = ShooterConstants.velocityKs;
+
   public ShooterIOSpark() {
-    sparkLead = new SparkFlex(shooterLeadCanId, MotorType.kBrushless);
-    sparkFollow = new SparkFlex(shooterFollowCanId, MotorType.kBrushless);
+    sparkLead = new SparkFlex(ShooterConstants.shooterLeadCanId, MotorType.kBrushless);
+    sparkFollow = new SparkFlex(ShooterConstants.shooterFollowCanId, MotorType.kBrushless);
     encoder = sparkLead.getEncoder();
     controller = sparkLead.getClosedLoopController();
 
     // Configure motor
-    var config = new SparkFlexConfig();
+    config = new SparkFlexConfig();
     config
-        .inverted(motorInverted)
+        .inverted(ShooterConstants.motorInverted)
         .idleMode(IdleMode.kBrake)
-        .smartCurrentLimit(motorCurrentLimit)
+        .smartCurrentLimit(ShooterConstants.motorCurrentLimit)
         .voltageCompensation(12.0);
 
     // Configure follower moter
@@ -64,8 +68,8 @@ public class ShooterIOSpark implements ShooterIO {
     // Configure encoder
     config
         .encoder
-        .positionConversionFactor(encoderPositionFactor)
-        .velocityConversionFactor(encoderVelocityFactor)
+        .positionConversionFactor(ShooterConstants.encoderPositionFactor)
+        .velocityConversionFactor(ShooterConstants.encoderVelocityFactor)
         .uvwMeasurementPeriod(10)
         .uvwAverageDepth(2);
 
@@ -73,12 +77,7 @@ public class ShooterIOSpark implements ShooterIO {
     config
         .closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .pid(velocityKp, 0.0, velocityKd, ClosedLoopSlot.kSlot0)
-        .pid(
-            positionKp,
-            0.0,
-            positionKd,
-            ClosedLoopSlot.kSlot1); // TODO: Ask Mr. Dumet how to resolve these again
+        .pid(ShooterConstants.velocityKp, 0.0, ShooterConstants.velocityKd, ClosedLoopSlot.kSlot0);
 
     // Configure signal update rates
     config
@@ -113,9 +112,6 @@ public class ShooterIOSpark implements ShooterIO {
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
     sparkStickyFault = false;
-
-    // ifOk(sparkLead, encoder::getPosition, (value) -> inputs.positionRad = value);//TODO: ask
-    // Mr.Dumet for removal
 
     // Update velocities
     ifOk(
@@ -157,11 +153,14 @@ public class ShooterIOSpark implements ShooterIO {
   }
 
   @Override
-  public void setVelocity(double velocityRadPerSec) {
+  public void setVelocity(AngularVelocity wheelVelocity) {
     // Use velocity PID slot (slot 0) with feedforward
-    double ffVolts = velocityKs * Math.signum(velocityRadPerSec) + velocityKv * velocityRadPerSec;
+    AngularVelocity motorVelocity = wheelVelocity.times(ShooterConstants.gearReduction);
+    double ffVolts =
+        kS * Math.signum(motorVelocity.in(RadiansPerSecond))
+            + kV * motorVelocity.in(RadiansPerSecond);
     controller.setSetpoint(
-        velocityRadPerSec,
+        motorVelocity.in(RadiansPerSecond),
         ControlType.kVelocity,
         ClosedLoopSlot.kSlot0,
         ffVolts,
@@ -177,5 +176,19 @@ public class ShooterIOSpark implements ShooterIO {
   @Override
   public void stop() {
     sparkLead.setVoltage(0.0);
+  }
+
+  @Override
+  public void setPID(double new_kP, double new_kD, double new_kV, double new_kS) {
+    config.closedLoop.pid(new_kP, 0.0, new_kD, ClosedLoopSlot.kSlot0);
+    kV = new_kV;
+    kS = new_kS;
+
+    tryUntilOk(
+        sparkLead,
+        5,
+        () ->
+            sparkLead.configure(
+                config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
   }
 }
