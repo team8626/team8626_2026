@@ -13,15 +13,7 @@
 
 package frc.robot.subsystems.indexer;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Volts;
-import static frc.robot.subsystems.indexer.IndexerConstants.gearReduction;
-import static frc.robot.subsystems.indexer.IndexerConstants.velocityKd;
-import static frc.robot.subsystems.indexer.IndexerConstants.velocityKp;
-import static frc.robot.subsystems.indexer.IndexerConstants.velocityKs;
-import static frc.robot.subsystems.indexer.IndexerConstants.velocityKv;
+import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -60,7 +52,11 @@ public class IndexerIOSim implements IndexerIO {
   /** Simulates indexer motor dynamics (Neo Vortex + gearbox) for physics-accurate behavior. */
   private final DCMotorSim motorSim;
   /** PID used to correct velocity error when in velocity closed-loop mode. */
-  private final PIDController velocityController = new PIDController(velocityKp, 0, velocityKd);
+  private final PIDController velocityController =
+      new PIDController(IndexerConstants.velocityKp, 0, IndexerConstants.velocityKd);
+
+  private double kV = IndexerConstants.velocityKv;
+  private double kS = IndexerConstants.velocityKs;
 
   /** True when setVelocity() is active; false for open-loop (setOpenLoop/stop). */
   private boolean velocityClosedLoop = false;
@@ -72,10 +68,14 @@ public class IndexerIOSim implements IndexerIO {
    */
   private double appliedVolts = 0.0;
 
+  /** Target velocity for closed-loop control. */
+  private AngularVelocity desiredWheelVelocity = RPM.of(0.0);
+
   public IndexerIOSim() {
     motorSim =
         new DCMotorSim(
-            LinearSystemId.createDCMotorSystem(DCMotor.getNeoVortex(1), 0.01, gearReduction),
+            LinearSystemId.createDCMotorSystem(
+                DCMotor.getNeoVortex(1), 0.0012, 1 /*IndexerConstants.gearReduction*/),
             DCMotor.getNeoVortex(1));
   }
 
@@ -92,10 +92,15 @@ public class IndexerIOSim implements IndexerIO {
     motorSim.update(0.02);
 
     inputs.connected = true;
-    inputs.position = Radians.of(motorSim.getAngularPositionRad());
-    inputs.velocity = RadiansPerSecond.of(motorSim.getAngularVelocityRadPerSec());
+    inputs.actualWheelVelocity =
+        motorSim.getAngularVelocity().divide(IndexerConstants.GEAR_REDUCTION);
+    inputs.desiredWheelVelocity = desiredWheelVelocity;
     inputs.appliedVoltage = Volts.of(appliedVolts);
     inputs.current = Amps.of(Math.abs(motorSim.getCurrentDrawAmps()));
+    inputs.atGoal =
+        velocityClosedLoop
+            || Math.abs(inputs.desiredWheelVelocity.in(RPM) - inputs.actualWheelVelocity.in(RPM))
+                < IndexerConstants.VELOCITY_TOLERANCE.in(RPM);
   }
 
   @Override
@@ -105,17 +110,30 @@ public class IndexerIOSim implements IndexerIO {
   }
 
   @Override
-  public void setVelocity(AngularVelocity velocity) {
+  public void setVelocity(AngularVelocity new_velocity) {
     velocityClosedLoop = true;
+    desiredWheelVelocity = new_velocity;
+
+    AngularVelocity motorAngularVelocity =
+        desiredWheelVelocity.times(IndexerConstants.GEAR_REDUCTION);
+
     velocityFFVolts =
-        velocityKs * Math.signum(velocity.in(RadiansPerSecond))
-            + velocityKv * velocity.in(RadiansPerSecond);
-    velocityController.setSetpoint(velocity.in(RadiansPerSecond));
+        kS * Math.signum(motorAngularVelocity.in(RadiansPerSecond))
+            + kV * motorAngularVelocity.in(RadiansPerSecond);
+    velocityController.setSetpoint(motorAngularVelocity.in(RadiansPerSecond));
   }
 
   @Override
   public void stop() {
     velocityClosedLoop = false;
+    desiredWheelVelocity = RPM.of(0.0);
     appliedVolts = 0.0;
+  }
+
+  @Override
+  public void setPID(double new_kP, double new_kD, double new_kV, double new_kS) {
+    velocityController.setPID(new_kP, 0, new_kD);
+    kV = new_kV;
+    kS = new_kS;
   }
 }
