@@ -13,6 +13,10 @@
 
 package frc.robot.subsystems.shooter;
 
+import static edu.wpi.first.units.Units.*;
+
+import edu.wpi.first.units.measure.AngularVelocity;
+
 public class ShooterConstants {
   // Hardware configuration
   public static final int shooterLeadCanId = 20; // TODO: Set actual CAN ID
@@ -22,7 +26,8 @@ public class ShooterConstants {
 
   // Mechanical configuration
   public static final double gearReduction = 1;
-  public static final double flywheelMOI = 19.4;
+  public static final AngularVelocity MAX_VELOCITY = RPM.of(5676.0 / gearReduction);
+  public static final double flywheelMOI = 0.00568;
   // Encoder conversion factors
   // Convert motor rotations to mechanism radians
   public static final double encoderPositionFactor =

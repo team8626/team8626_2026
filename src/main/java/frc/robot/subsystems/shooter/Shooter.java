@@ -15,7 +15,8 @@ package frc.robot.subsystems.shooter;
 
 // import static frc.robot.subsystems.shooter.ShooterConstants.positionStepRad;
 
-import edu.wpi.first.math.geometry.Rotation2d;
+import static edu.wpi.first.units.Units.RPM;
+
 import edu.wpi.first.units.measure.*;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -47,37 +48,14 @@ public class Shooter extends SubsystemBase {
    *
    * @param velocityRadPerSec Velocity in radians per second
    */
-  public void runVelocity(double velocityRadPerSec) {
-    io.setVelocity(velocityRadPerSec);
-  }
+  public void runVelocity(AngularVelocity velocity) {
+    AngularVelocity newVelocity = velocity;
 
-  /**
-   * Run the shooter to a specified position.
-   *
-   * @param positionRad Position in radians
-   */
-  public void runToPosition(double positionRad) {
-    io.setPosition(positionRad);
+    if ((velocity.abs(RPM)) > ShooterConstants.MAX_VELOCITY.in(RPM)) {
+      newVelocity = RPM.of(ShooterConstants.MAX_VELOCITY.copySign(velocity, RPM));
+    }
+    io.setVelocity(newVelocity);
   }
-
-  /**
-   * Run the shooter to a specified angle.
-   *
-   * @param angle Rotation2d angle
-   */
-  public void runToAngle(Rotation2d angle) {
-    io.setPosition(angle.getRadians());
-  }
-
-  /**
-   * Advance the shooter to the next position (120 degrees forward). This method calculates the next
-   * target position based on the current position and advances by one step (120 degrees).
-   */
-  /*public void advanceToNextPosition() {
-    double currentPosition = inputs.positionRad;//TODO: ask for removal
-    double targetPosition = currentPosition + positionStepRad;
-    io.setPosition(targetPosition);
-  }*/
 
   /**
    * Run the shooter at open loop voltage.
@@ -93,22 +71,14 @@ public class Shooter extends SubsystemBase {
     io.stop();
   }
 
-  /** Returns the current position in radians. */
-  /*@AutoLogOutput
-  public double getPositionRad() {
-    return inputs.positionRad;
-  }*/
-
-  /** Returns the current position as a Rotation2d. */
-  /*@AutoLogOutput
-  public Rotation2d getAngle() {
-    return new Rotation2d(inputs.positionRad);
-  }*/
-
   /** Returns the current velocity in radians per second. */
   @AutoLogOutput
-  public AngularVelocity getVelocityRadPerSec() {
+  public AngularVelocity getVelocity() {
     return inputs.velocityShooterWheel;
+  }
+
+  public boolean isAtGoal() {
+    return inputs.isAtGoal;
   }
 
   /** Returns whether the motor is connected. */

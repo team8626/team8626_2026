@@ -14,28 +14,28 @@
 package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.subsystems.shooter.ShooterConstants.*;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 
 /** Physics sim implementation of shooter IO. */
 public class ShooterIOSim implements ShooterIO {
   private final FlywheelSim wheelSim;
 
+  private double kV = ShooterConstants.velocityKv;
+  private double kS = ShooterConstants.velocityKs;
+
   private boolean velocityClosedLoop = false;
 
-  @SuppressWarnings(
-      "unused") // TODO: remove once positionClosedLoop is removed, just here to suppress warnings
-  private boolean positionClosedLoop = false; // TODO: Ask for removal
-
-  private PIDController velocityController = new PIDController(velocityKp, 0, velocityKd);
-  private PIDController positionController = new PIDController(positionKp, 0, positionKd);
+  private PIDController velocityController =
+      new PIDController(ShooterConstants.velocityKp, 0, ShooterConstants.velocityKd);
   private double velocityFFVolts = 0.0;
   private double appliedVolts = 0.0;
+  private AngularVelocity desiredWheelVelocity = RPM.of(0.0);
 
   public ShooterIOSim() {
     // Create motor sim model
@@ -45,7 +45,9 @@ public class ShooterIOSim implements ShooterIO {
     wheelSim =
         new FlywheelSim(
             LinearSystemId.createFlywheelSystem(
-                DCMotor.getNeoVortex(2), flywheelMOI, gearReduction),
+                DCMotor.getNeoVortex(2),
+                ShooterConstants.flywheelMOI,
+                ShooterConstants.gearReduction),
             DCMotor.getNeoVortex(2),
             0.00363458292);
   }
@@ -56,13 +58,8 @@ public class ShooterIOSim implements ShooterIO {
     if (velocityClosedLoop) {
       appliedVolts =
           velocityFFVolts + velocityController.calculate(wheelSim.getAngularVelocityRadPerSec());
-    } /*else if (positionClosedLoop) {
-        appliedVolts =
-            positionController.calculate(
-                wheelSim.getAngularPositionRad()); // TODO: ask Mr. Dumet if this is needed
-      }*/ else {
+    } else {
       velocityController.reset();
-      positionController.reset();
     }
 
     // Update simulation state
@@ -74,7 +71,8 @@ public class ShooterIOSim implements ShooterIO {
 
     inputs.velocityMotorLeft = RadiansPerSecond.of(wheelSim.getAngularVelocityRadPerSec());
     inputs.velocityMotorRight = RadiansPerSecond.of(wheelSim.getAngularVelocityRadPerSec());
-    inputs.velocityShooterWheel = RadiansPerSecond.of(0); // TODO: get the correct value
+    inputs.velocityShooterWheel = RadiansPerSecond.of(wheelSim.getAngularVelocityRadPerSec() / ShooterConstants.gearReduction);
+    inputs.desiredWheelVelocity = desiredWheelVelocity;
 
     inputs.appliedVoltageMotorLeft = Volts.of(appliedVolts);
     inputs.appliedVoltageMotorRight = Volts.of(appliedVolts);
@@ -86,32 +84,36 @@ public class ShooterIOSim implements ShooterIO {
   @Override
   public void setOpenLoop(double output) {
     velocityClosedLoop = false;
-    positionClosedLoop = false;
     appliedVolts = output;
   }
 
   @Override
-  public void setVelocity(double velocityRadPerSec) {
+  public void setVelocity(AngularVelocity newVelocity) {
     velocityClosedLoop = true;
-    positionClosedLoop = false;
-    velocityFFVolts =
-        velocityKs * Math.signum(velocityRadPerSec)
-            + velocityKv * velocityRadPerSec; // calculates FeedForwardVolts
-    velocityController.setSetpoint(
-        velocityRadPerSec); // Sets closed loop goal (tells PID what to aim for)
-  }
+    desiredWheelVelocity = newVelocity;
 
-  @Override
-  public void setPosition(double positionRad) { // TODO: Ask Mr. Dumet for removal
-    velocityClosedLoop = false;
-    positionClosedLoop = true;
-    positionController.setSetpoint(positionRad);
+    AngularVelocity motorAngularVelocity =
+        desiredWheelVelocity.times(ShooterConstants.gearReduction);
+
+    velocityFFVolts =
+        kS * Math.signum(motorAngularVelocity.in(RadiansPerSecond))
+            + kV * motorAngularVelocity.in(RadiansPerSecond); // calculates FeedForwardVolts
+    velocityController.setSetpoint(
+        motorAngularVelocity.in(
+            RadiansPerSecond)); // Sets closed loop goal (tells PID what to aim for)
   }
 
   @Override
   public void stop() {
     velocityClosedLoop = false;
-    positionClosedLoop = false;
+    desiredWheelVelocity = RPM.zero();
     appliedVolts = 0.0;
+  }
+
+  @Override
+  public void setPID(double new_kP, double new_kD, double new_kV, double new_kS) {
+    velocityController.setPID(new_kP, 0, new_kD);
+    kV = new_kV;
+    kS = new_kS;
   }
 }

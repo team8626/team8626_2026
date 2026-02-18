@@ -22,10 +22,12 @@ public interface ShooterIO {
   @AutoLog
   public static class ShooterIOInputs {
     public boolean connected = false;
+    public boolean isAtGoal = true;
 
     public AngularVelocity velocityMotorLeft = RPM.of(0);
     public AngularVelocity velocityMotorRight = RPM.of(0);
     public AngularVelocity velocityShooterWheel = RPM.of(0);
+    public AngularVelocity desiredWheelVelocity = RPM.zero();
 
     public Voltage appliedVoltageMotorLeft = Volts.of(0);
     public Voltage appliedVoltageMotorRight = Volts.of(0);
@@ -35,17 +37,17 @@ public interface ShooterIO {
   }
 
   /** Updates the set of loggable inputs. */
-  public default void updateInputs(ShooterIOInputs inputs) {}
+  public void updateInputs(ShooterIOInputs inputs);
 
   /** Run the motor at the specified open loop value. */
-  public default void setOpenLoop(double output) {}
+  public void setOpenLoop(double output);
 
   /** Run the motor at the specified velocity in rad/sec. */
-  public default void setVelocity(double velocityRadPerSec) {}
-
-  /** Run the motor to the specified position in radians. */
-  public default void setPosition(double positionRad) {}
+  public void setVelocity(AngularVelocity velocity);
 
   /** Stop the motor. */
-  public default void stop() {}
+  public void stop();
+
+  /** set the PID */
+  public void setPID(double new_kP, double new_kD, double new_kV, double new_kS);
 }
