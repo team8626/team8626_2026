@@ -13,23 +13,22 @@
 
 package frc.robot.subsystems.indexer;
 
-import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RPM;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.util.LoggedTunableNumber;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 /**
  * Indexer subsystem: runs a single motor at a set velocity (closed-loop) or open-loop voltage. Use
- * {@link #runVelocity(double)} for normal operation; use {@link #runOpenLoop(double)} for testing.
- * Call {@link #stop()} to stop the motor.
+ * {@link #runVelocity(AngularVelocity)} for normal operation; use {@link #runOpenLoop(Voltage)} for
+ * testing. Call {@link #stop()} to stop the motor.
  */
 public class Indexer extends SubsystemBase {
   /** Hardware IO implementation (Spark or Simulated). */
@@ -42,12 +41,24 @@ public class Indexer extends SubsystemBase {
   private final Alert motorDisconnectedAlert =
       new Alert("Index motor disconnected.", AlertType.kError);
 
+  private final LoggedTunableNumber flywheelKP =
+      new LoggedTunableNumber("Spindexer/Flywheel/kP", IndexerConstants.velocityKp);
+  private final LoggedTunableNumber flywheelKD =
+      new LoggedTunableNumber("Spindexer/Flywheel/kD", IndexerConstants.velocityKd);
+  private final LoggedTunableNumber flywheelKV =
+      new LoggedTunableNumber("Spindexer/Flywheel/kV", IndexerConstants.velocityKv);
+  private final LoggedTunableNumber flywheelKS =
+      new LoggedTunableNumber("Spindexer/Flywheel/kS", IndexerConstants.velocityKs);
+  private final LoggedTunableNumber flywheelRPM =
+      new LoggedTunableNumber("Spindexer/Flywheel/WheelRPM", 0);
+
   public Indexer(IndexerIO io) {
     this.io = io;
   }
 
   @Override
   public void periodic() {
+    updateTunables();
     io.updateInputs(inputs);
     Logger.processInputs("Indexer", inputs);
 
@@ -61,7 +72,15 @@ public class Indexer extends SubsystemBase {
    * @param velocityRadPerSec Velocity in radians per second
    */
   public void runVelocity(AngularVelocity velocity) {
-    io.setVelocity(velocity);
+    AngularVelocity new_velocity = velocity;
+
+    // Check if the velocity is in bounds before setting it.
+    // otherwise set it to the max velocity with the same sign.
+    // This prevents the controller from trying to reach an invalid setpoint.
+    if ((velocity.abs(RPM)) > IndexerConstants.MAX_VELOCITY.in(RPM)) {
+      new_velocity = RPM.of(IndexerConstants.MAX_VELOCITY.copySign(new_velocity, RPM));
+    }
+    io.setVelocity(new_velocity);
   }
 
   /**
@@ -79,18 +98,8 @@ public class Indexer extends SubsystemBase {
   }
 
   @AutoLogOutput
-  public Angle getPosition() {
-    return inputs.position;
-  }
-
-  @AutoLogOutput
-  public Rotation2d getAngle() {
-    return new Rotation2d(inputs.position.in(Radians));
-  }
-
-  @AutoLogOutput
   public AngularVelocity getVelocity() {
-    return inputs.velocity;
+    return inputs.actualWheelVelocity;
   }
 
   public boolean isConnected() {
@@ -103,5 +112,18 @@ public class Indexer extends SubsystemBase {
 
   public Current getCurrent() {
     return inputs.current;
+  }
+
+  private void updateTunables() {
+    if (flywheelKP.hasChanged(hashCode())
+        || flywheelKD.hasChanged(hashCode())
+        || flywheelKV.hasChanged(hashCode())
+        || flywheelKS.hasChanged(hashCode())) {
+      io.setPID(flywheelKP.get(), flywheelKD.get(), flywheelKV.get(), flywheelKS.get());
+    }
+
+    if (flywheelRPM.hasChanged(hashCode())) {
+      io.setVelocity(RPM.of(flywheelRPM.get()));
+    }
   }
 }
