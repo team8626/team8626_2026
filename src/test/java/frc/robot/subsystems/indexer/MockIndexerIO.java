@@ -15,11 +15,8 @@ package frc.robot.subsystems.indexer;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
@@ -30,10 +27,11 @@ import edu.wpi.first.units.measure.Voltage;
  */
 public class MockIndexerIO implements IndexerIO {
   public boolean connected = true;
-  public Angle position = Radians.of(0.0);
-  public AngularVelocity velocity = RadiansPerSecond.of(0.0);
-  public Voltage appliedVolts = Volts.of(0.0);
-  public Current currentAmps = Amps.of(0.0);
+  public AngularVelocity actualWheelVelocity = RPM.of(0.0);
+  public AngularVelocity desiredWheelVelocity = RPM.of(0.0);
+  public Voltage appliedVoltage = Volts.of(0.0);
+  public Current current = Amps.of(0.0);
+  public boolean atGoal = true;
 
   public Voltage lastOpenLoopOutput = Volts.of(0.0);
   public AngularVelocity lastVelocitySetpoint = RPM.of(0.0);
@@ -42,16 +40,17 @@ public class MockIndexerIO implements IndexerIO {
   @Override
   public void updateInputs(IndexIOInputs inputs) {
     inputs.connected = connected;
-    inputs.position = position;
-    inputs.velocity = velocity;
-    inputs.appliedVoltage = appliedVolts;
-    inputs.current = currentAmps;
+    inputs.actualWheelVelocity = actualWheelVelocity;
+    inputs.desiredWheelVelocity = desiredWheelVelocity;
+    inputs.appliedVoltage = appliedVoltage;
+    inputs.current = current;
+    inputs.atGoal = atGoal;
   }
 
   @Override
   public void setOpenLoop(Voltage output) {
     lastOpenLoopOutput = output;
-    appliedVolts = output;
+    appliedVoltage = output;
   }
 
   @Override
@@ -62,15 +61,17 @@ public class MockIndexerIO implements IndexerIO {
   @Override
   public void stop() {
     stopCalled = true;
-    appliedVolts = Volts.of(0.0);
+    appliedVoltage = Volts.of(0.0);
   }
 
   public void reset() {
     connected = true;
-    position = Radians.of(0.0);
-    velocity = RadiansPerSecond.of(0.0);
-    appliedVolts = Volts.of(0.0);
-    currentAmps = Amps.of(0.0);
+    actualWheelVelocity = RPM.of(0.0);
+    desiredWheelVelocity = RPM.of(0.0);
+    appliedVoltage = Volts.of(0.0);
+    current = Amps.of(0.0);
+    atGoal = true;
+
     lastOpenLoopOutput = Volts.of(0.0);
     lastVelocitySetpoint = RPM.of(0.0);
     stopCalled = false;
