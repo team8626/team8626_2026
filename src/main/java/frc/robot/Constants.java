@@ -15,6 +15,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Inches;
 
+import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Distance;
@@ -26,16 +27,15 @@ import edu.wpi.first.wpilibj.RobotBase;
  * (log replay from a file).
  */
 public final class Constants {
+  public static final RobotType robot = RobotType.SIMBOT;
+
   public static final Mode simMode = Mode.SIM;
-  public static final Mode realMode = Mode.SPARK;
+  public static final Mode realMode = Mode.REAL;
   public static final Mode currentMode = RobotBase.isReal() ? realMode : simMode;
 
   public static enum Mode {
     /** Running on a real robot. */
-    CTRE,
-
-    /** DEV bot on spark */
-    SPARK,
+    REAL,
 
     /** Running a physics simulator. */
     SIM,
@@ -44,16 +44,44 @@ public final class Constants {
     REPLAY
   }
 
+  public static enum RobotType {
+    REBUILT_COMPBOT,
+    TSUNAMI,
+    SIMBOT
+  }
+
   public static class RobotConstants {
-    /** Drivetrain */
-    // TODO: confirm dimensions, including bumpers, and use a single location for robot constants
-    public static final Distance frameWidth = Inches.of(27.5);
 
-    public static final Distance frameLength = Inches.of(27);
-    public static final Distance bumperThickness = Inches.of(3.625);
+    public static final CANBus CAN_FD_BUS = new CANBus("Bobby");
+    public static final CANBus CAN_RIO_BUS = new CANBus("rio");
+  }
 
-    public static final Distance width = frameWidth.plus(bumperThickness.times(2));
-    public static final Distance length = frameLength.plus(bumperThickness.times(2));
+  public static class Dimensions {
+    public static final Distance BUMPER_THICKNESS; // frame to edge of bumper
+    public static final Distance BUMPER_HEIGHT; // height from floor to top of bumper
+    public static final Distance FRAME_SIZE_Y; // left to right (y-axis)
+    public static final Distance FRAME_SIZE_X; // front to back (x-axis)
+
+    static {
+      switch (robot) {
+        case REBUILT_COMPBOT, SIMBOT -> {
+          BUMPER_THICKNESS = Inches.of(3.625);
+          BUMPER_HEIGHT = Inches.of(7);
+          FRAME_SIZE_Y = Inches.of(27.5);
+          FRAME_SIZE_X = Inches.of(27);
+        }
+        case TSUNAMI -> {
+          BUMPER_THICKNESS = Inches.of(4);
+          BUMPER_HEIGHT = Inches.of(7);
+          FRAME_SIZE_Y = Inches.of(27);
+          FRAME_SIZE_X = Inches.of(27);
+        }
+        default -> throw new IllegalStateException("Unexpected robot: " + robot);
+      }
+    }
+
+    public static final Distance FULL_WIDTH = FRAME_SIZE_Y.plus(BUMPER_THICKNESS.times(2));
+    public static final Distance FULL_LENGTH = FRAME_SIZE_X.plus(BUMPER_THICKNESS.times(2));
   }
 
   public static class ControllerConstants {

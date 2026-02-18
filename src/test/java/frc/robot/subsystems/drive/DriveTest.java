@@ -13,6 +13,7 @@
 
 package frc.robot.subsystems.drive;
 
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -207,7 +208,9 @@ public class DriveTest {
   @Test
   void testGetMaxAngularSpeed() {
     double expectedAngularSpeed =
-        DriveConstants.DEFAULT_ROT_SPEED.in(RadiansPerSecond) / DriveConstants.driveBaseRadius;
+        DriveConstants.DEFAULT_ROT_SPEED.in(RadiansPerSecond)
+            / DriveConstants.DRIVE_BASE_RADIUS.in(Meters);
+
     assertEquals(expectedAngularSpeed, drive.getMaxAngularSpeedRadPerSec(), DELTA);
   }
 
@@ -313,7 +316,7 @@ public class DriveTest {
     // All modules should have non-zero but limited velocities
     // The exact values depend on kinematics, but none should exceed max
     double maxModuleSpeed =
-        DriveConstants.SPEED_AT_12V.in(MetersPerSecond) / DriveConstants.wheelRadiusMeters;
+        DriveConstants.SPEED_AT_12V.in(MetersPerSecond) / DriveConstants.WHEEL_RADIUS.in(Meters);
 
     assertTrue(Math.abs(flModuleIO.lastDriveVelocitySetpoint) <= maxModuleSpeed + DELTA);
     assertTrue(Math.abs(frModuleIO.lastDriveVelocitySetpoint) <= maxModuleSpeed + DELTA);
