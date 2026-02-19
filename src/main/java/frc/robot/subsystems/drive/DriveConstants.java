@@ -451,7 +451,8 @@ public class DriveConstants {
   }
 
   // --------------------------------------------------------------------------
-  // Alignment PID constants, used in TeleopDrive and any auto commands that require aligning to the trench
+  // Alignment PID constants, used in TeleopDrive and any auto commands that require aligning to the
+  // trench
   private static final ControlConstants TRENCH_TRANSLATION_BASE_CONSTANTS =
       new ControlConstants().withPID(6, 0, 0);
   private static final ControlConstants ROTATION_BASE_CONSTANTS =
