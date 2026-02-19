@@ -68,6 +68,7 @@ public class ShooterIOSim implements ShooterIO {
 
     // Update inputs
     inputs.connected = true;
+    inputs.isAtGoal = velocityController.atSetpoint();
 
     inputs.velocityMotorLeft = RadiansPerSecond.of(wheelSim.getAngularVelocityRadPerSec());
     inputs.velocityMotorRight = RadiansPerSecond.of(wheelSim.getAngularVelocityRadPerSec());
