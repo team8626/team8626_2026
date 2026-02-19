@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -23,12 +24,14 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.ControllerConstants;
-import frc.robot.Constants.FieldConstants;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.util.SlewRateLimiter2d;
 import frc.robot.util.TunableControls.TunablePIDController;
 import java.util.function.DoubleSupplier;
+import org.littletonrobotics.frc2026.FieldConstants;
+import org.littletonrobotics.frc2026.util.geometry.AllianceFlipUtil;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -49,6 +52,8 @@ public class TeleopDrive extends Command {
 
   @AutoLogOutput
   private final Trigger inBumpZoneTrigger = new Trigger(this::inBumpZone).debounce(0.1);
+
+  @AutoLogOutput private final Trigger hubAimTrigger = RobotContainer.getHubAimTrigger();
 
   private final TunablePIDController trenchYController =
       new TunablePIDController(DriveConstants.TRENCH_TRANSLATION_CONSTANTS);
@@ -71,9 +76,11 @@ public class TeleopDrive extends Command {
     inTrenchZoneTrigger.onTrue(updateDriveMode(DriveMode.TRENCH_LOCK));
     inBumpZoneTrigger.onTrue(updateDriveMode(DriveMode.BUMP_LOCK));
     inTrenchZoneTrigger.or(inBumpZoneTrigger).onFalse(updateDriveMode(DriveMode.NORMAL));
+    hubAimTrigger.whileTrue(updateDriveMode(DriveMode.HUB_LOCK));
+
     for (int i = 0; i < 4; i++) {
-      Logger.recordOutput("Trench" + i, FieldConstants.TRENCH_ZONES[i]);
-      Logger.recordOutput("Bump" + i, FieldConstants.BUMP_ZONES[i]);
+      Logger.recordOutput("Trench" + i, TeleopDriveConstants.TRENCH_ZONES[i]);
+      Logger.recordOutput("Bump" + i, TeleopDriveConstants.BUMP_ZONES[i]);
     }
     addRequirements(drive);
   }
@@ -94,7 +101,7 @@ public class TeleopDrive extends Command {
 
   public boolean inTrenchZone() {
     Pose2d robotPose = drive.getPose();
-    for (Translation2d[] zone : FieldConstants.TRENCH_ZONES) {
+    for (Translation2d[] zone : TeleopDriveConstants.TRENCH_ZONES) {
       if (robotPose.getX() >= zone[0].getX()
           && robotPose.getX() <= zone[1].getX()
           && robotPose.getY() >= zone[0].getY()
@@ -107,10 +114,10 @@ public class TeleopDrive extends Command {
 
   private Distance getTrenchY() {
     Pose2d robotPose = drive.getPose();
-    if (robotPose.getMeasureY().gte(FieldConstants.FIELD_WIDTH.div(2))) {
-      return FieldConstants.FIELD_WIDTH.minus(FieldConstants.TRENCH_CENTER);
+    if (robotPose.getMeasureY().gte(TeleopDriveConstants.FIELD_WIDTH.div(2))) {
+      return TeleopDriveConstants.FIELD_WIDTH.minus(TeleopDriveConstants.TRENCH_CENTER);
     }
-    return FieldConstants.TRENCH_CENTER;
+    return TeleopDriveConstants.TRENCH_CENTER;
   }
 
   public static Rotation2d getTrenchLockAngle(Rotation2d currentRotation) {
@@ -131,7 +138,7 @@ public class TeleopDrive extends Command {
 
   public boolean inBumpZone() {
     Pose2d robotPose = drive.getPose();
-    for (Translation2d[] zone : FieldConstants.BUMP_ZONES) {
+    for (Translation2d[] zone : TeleopDriveConstants.BUMP_ZONES) {
       if (robotPose.getX() >= zone[0].getX()
           && robotPose.getX() <= zone[1].getX()
           && robotPose.getY() >= zone[0].getY()
@@ -196,6 +203,16 @@ public class TeleopDrive extends Command {
             MetersPerSecond.of(linearVelocity.getY()),
             RadiansPerSecond.of(rotSpeedToDiagonal));
         break;
+      case HUB_LOCK:
+        double rotSpeedToHub =
+            rotationController.calculate(
+                drive.getRotation().getRadians(),
+                getHubLockAngle(drive.getRotation()).getRadians());
+        drive.driveFieldCentric(
+            MetersPerSecond.of(linearVelocity.getX()),
+            MetersPerSecond.of(linearVelocity.getY()),
+            RadiansPerSecond.of(rotSpeedToHub));
+        break;
     }
   }
 
@@ -219,6 +236,18 @@ public class TeleopDrive extends Command {
         });
   }
 
+  private Rotation2d getHubLockAngle(Rotation2d currentRotation) {
+    Pose2d robotPose = drive.getPose();
+    Translation2d hubTranslation =
+        AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint)
+            .minus(new Translation3d(robotPose.getTranslation()))
+            .toTranslation2d();
+    Rotation2d angleToHub =
+        new Rotation2d(Math.atan2(hubTranslation.getY(), hubTranslation.getX()))
+            .plus(Rotation2d.k180deg);
+    return angleToHub;
+  }
+
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {}
@@ -232,6 +261,7 @@ public class TeleopDrive extends Command {
   private enum DriveMode {
     NORMAL,
     TRENCH_LOCK,
-    BUMP_LOCK
+    BUMP_LOCK,
+    HUB_LOCK
   }
 }
