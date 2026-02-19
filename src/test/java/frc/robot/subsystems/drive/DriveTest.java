@@ -151,7 +151,7 @@ public class DriveTest {
     double normalizedAngle = Math.abs(flAngle);
     // Allow for angle to be near 90 or optimized equivalent
     boolean validAngle = (normalizedAngle > 45.0 && normalizedAngle < 135.0);
-    assertTrue(validAngle, "Module turn angle should be ~90 deg for strafe: " + flAngle);
+    assertTrue(validAngle, "Module turn angle should be ~90° for strafe: " + flAngle);
   }
 
   @Test
