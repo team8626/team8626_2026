@@ -36,7 +36,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 /** Default drive command to run that drives based on controller input */
-public class TeleopDrive extends Command {
+public class TeleopDriveCommand extends Command {
   private final Drive drive;
   private final DoubleSupplier xSupplier;
   private final DoubleSupplier ySupplier;
@@ -65,7 +65,7 @@ public class TeleopDrive extends Command {
   @AutoLogOutput private double trenchLockAngle = 9999;
 
   /** Creates a new TeleopDrive. */
-  public TeleopDrive(Drive drive, CommandXboxController controller) {
+  public TeleopDriveCommand(Drive drive, CommandXboxController controller) {
     this.drive = drive;
     this.xSupplier = () -> -controller.getLeftY() * flipFactor;
     this.ySupplier = () -> -controller.getLeftX() * flipFactor;
