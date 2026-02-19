@@ -158,7 +158,7 @@ public class DriveSimIntegrationTest {
         finalPose.getRotation().getDegrees() - initialPose.getRotation().getDegrees();
 
     System.out.printf(
-        "[Rotation Only] Position delta: (%.3f, %.3f)m, Rotation delta: %.1f°%n",
+        "[Rotation Only] Position delta: (%.3f, %.3f)m, Rotation delta: %.1f deg%n",
         deltaX, deltaY, deltaRotation);
   }
 
@@ -180,7 +180,7 @@ public class DriveSimIntegrationTest {
     assertTrue(finalPose.getX() != 0.0 || finalPose.getY() != 0.0, "Robot should have moved");
 
     System.out.printf(
-        "[Combined Motion] Final pose: (%.3f, %.3f)m, %.1f°%n",
+        "[Combined Motion] Final pose: (%.3f, %.3f)m, %.1f deg%n",
         finalPose.getX(), finalPose.getY(), finalPose.getRotation().getDegrees());
   }
 
@@ -294,7 +294,7 @@ public class DriveSimIntegrationTest {
     assertNotNull(pose);
 
     System.out.printf(
-        "[Gyro Test] Pose with gyro: (%.3f, %.3f, %.1f°)%n",
+        "[Gyro Test] Pose with gyro: (%.3f, %.3f, %.1f deg)%n",
         pose.getX(), pose.getY(), pose.getRotation().getDegrees());
   }
 
@@ -389,7 +389,7 @@ public class DriveSimIntegrationTest {
   @Test
   void testSpinInPlace() {
     // Spin in place for a full rotation
-    double rotationSpeed = Math.PI; // rad/s, should complete 180° in 1 second
+    double rotationSpeed = Math.PI; // rad/s, should complete 180 deg in 1 second
     gyroIO.setAngularVelocity(rotationSpeed);
 
     drive.setPose(new Pose2d());
@@ -411,7 +411,7 @@ public class DriveSimIntegrationTest {
                 + Math.pow(finalPose.getY() - initialPose.getY(), 2));
 
     System.out.printf(
-        "[Spin Test] Position drift: %.3fm, Final rotation: %.1f°%n",
+        "[Spin Test] Position drift: %.3fm, Final rotation: %.1f deg%n",
         positionDrift, finalPose.getRotation().getDegrees());
 
     assertTrue(

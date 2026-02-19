@@ -46,7 +46,7 @@ public class VisionConstants {
               Units.degreesToRadians(-15.0), // Pitch (negative = tilted up for AprilTags)
               0.0)); // Yaw (facing forward)
 
-  // Back camera: same X magnitude behind center, 180° yaw (facing backward)
+  // Back camera: same X magnitude behind center, 180 deg yaw (facing backward)
   public static final Transform3d robotToBackCamera =
       new Transform3d(
           new Translation3d(
