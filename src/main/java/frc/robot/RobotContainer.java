@@ -22,12 +22,13 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.commands.AlignToTargetCommand;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IndexerCommands;
-import frc.robot.commands.TeleopDrive;
+import frc.robot.commands.TeleopDriveCommand;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants.Rebuilt_SwerveConstants;
 import frc.robot.subsystems.drive.GyroIO;
@@ -60,10 +61,10 @@ public class RobotContainer {
   private final Vision vision;
 
   // Controller
-  private final CommandXboxController controller =
+  private static final CommandXboxController controller =
       new CommandXboxController(ControllerConstants.DRIVERPORT);
   // Commands
-  private final TeleopDrive teleopDrive;
+  private final TeleopDriveCommand teleopDrive;
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -163,7 +164,7 @@ public class RobotContainer {
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
     // Set up commands
-    teleopDrive = new TeleopDrive(drive, controller);
+    teleopDrive = new TeleopDriveCommand(drive, controller);
 
     // Configure the button bindings
     configureButtonBindings();
@@ -211,6 +212,10 @@ public class RobotContainer {
     // Align to front camera's best AprilTag (POV-Up) or back camera's best (POV-Down)
     controller.povUp().whileTrue(AlignToTargetCommand.alignToFrontCamera(drive, vision));
     controller.povDown().whileTrue(AlignToTargetCommand.alignToBackCamera(drive, vision));
+  }
+
+  public static Trigger getHubAimTrigger() { // TODO: might need to change the button for this
+    return controller.x();
   }
 
   /** Configure named commands to be identified by autos and paths. */
