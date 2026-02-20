@@ -75,8 +75,18 @@ public class TeleopDriveCommand extends Command {
 
     inTrenchZoneTrigger.onTrue(updateDriveMode(DriveMode.TRENCH_LOCK));
     inBumpZoneTrigger.onTrue(updateDriveMode(DriveMode.BUMP_LOCK));
-    inTrenchZoneTrigger.or(inBumpZoneTrigger).onFalse(updateDriveMode(DriveMode.NORMAL));
-    hubAimTrigger.whileTrue(updateDriveMode(DriveMode.HUB_LOCK));
+    // inTrenchZoneTrigger.or(inBumpZoneTrigger).onFalse(updateDriveMode(DriveMode.NORMAL));
+    inTrenchZoneTrigger
+        .or(inBumpZoneTrigger)
+        .onFalse(
+            Commands.runOnce(
+                () ->
+                    currentDriveMode =
+                        (hubAimTrigger.getAsBoolean() ? DriveMode.HUB_LOCK : DriveMode.NORMAL)));
+
+    hubAimTrigger
+        .whileTrue(updateDriveMode(DriveMode.HUB_LOCK))
+        .onFalse(updateDriveMode(DriveMode.NORMAL));
 
     for (int i = 0; i < 4; i++) {
       Logger.recordOutput("Trench" + i, TeleopDriveConstants.TRENCH_ZONES[i]);
