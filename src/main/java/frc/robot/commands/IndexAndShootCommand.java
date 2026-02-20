@@ -1,5 +1,3 @@
-/** THIS COMMAND IS NOT COMPLETED YET */
-/** WILL BE UPDATED IN FUTURE COMMITS */
 package frc.robot.commands;
 
 import static edu.wpi.first.units.Units.*;
