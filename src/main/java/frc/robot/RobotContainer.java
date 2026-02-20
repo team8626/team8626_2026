@@ -13,18 +13,22 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.*;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.ControllerConstants;
+import frc.robot.Constants.Dimensions;
 import frc.robot.commands.AlignToTargetCommand;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IndexerCommands;
@@ -46,6 +50,8 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOSim;
+import frc.robot.util.FuelSim;
+import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -56,7 +62,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  */
 public class RobotContainer {
   // Subsystems
-  private final Drive drive;
+  public final Drive drive;
   private final Indexer index;
   private final Vision vision;
 
@@ -68,6 +74,9 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+
+  // Fuel Simulation
+  public FuelSim fuelSim;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -128,6 +137,8 @@ public class RobotContainer {
                     drive.addVisionMeasurement(
                         measurement.pose, measurement.timestamp, measurement.stdDevs));
         vision.setPoseSupplier(drive::getPose); // Provide current pose for simulation
+        configureFuelSim();
+        configureFuelSimRobot(() -> false, () -> {});
         break;
 
       default:
@@ -212,6 +223,44 @@ public class RobotContainer {
     // Align to front camera's best AprilTag (POV-Up) or back camera's best (POV-Down)
     controller.povUp().whileTrue(AlignToTargetCommand.alignToFrontCamera(drive, vision));
     controller.povDown().whileTrue(AlignToTargetCommand.alignToBackCamera(drive, vision));
+  }
+
+  private void configureFuelSim() {
+    fuelSim = new FuelSim();
+    fuelSim.spawnStartingFuel();
+
+    fuelSim.start();
+    SmartDashboard.putData(
+        Commands.runOnce(
+                () -> {
+                  fuelSim.clearFuel();
+                  fuelSim.spawnStartingFuel();
+                })
+            .withName("Reset Fuel")
+            .ignoringDisable(true));
+  }
+
+  private void configureFuelSimRobot(BooleanSupplier ableToIntake, Runnable intakeCallback) {
+    fuelSim.registerRobot(
+        Dimensions.FULL_WIDTH.in(Meters),
+        Dimensions.FULL_LENGTH.in(Meters),
+        Dimensions.BUMPER_HEIGHT.in(Meters),
+        drive::getPose,
+        drive::getFieldSpeeds);
+    // fuelSim.registerIntake(
+    //         -Dimensions.FULL_LENGTH.div(2).in(Meters),
+    //         Dimensions.FULL_LENGTH.div(2).in(Meters),
+    //         -Dimensions.FULL_WIDTH.div(2).plus(Inches.of(7)).in(Meters),
+    //         -Dimensions.FULL_WIDTH.div(2).in(Meters),
+    //         intakes.right.deployedTrigger.and(ableToIntake),
+    //         intakeCallback);
+    // fuelSim.registerIntake(
+    //         -Dimensions.FULL_LENGTH.div(2).in(Meters),
+    //         Dimensions.FULL_LENGTH.div(2).in(Meters),
+    //         Dimensions.FULL_WIDTH.div(2).in(Meters),
+    //         Dimensions.FULL_WIDTH.div(2).plus(Inches.of(7)).in(Meters),
+    //         intakes.left.deployedTrigger.and(ableToIntake),
+    //         intakeCallback);
   }
 
   public static Trigger getHubAimTrigger() { // TODO: might need to change the button for this
