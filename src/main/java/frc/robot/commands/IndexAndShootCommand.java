@@ -1,6 +1,9 @@
 package frc.robot.commands;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Foot;
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.RPM;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -9,7 +12,8 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.*;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.indexer.Indexer;
@@ -92,15 +96,16 @@ public class IndexAndShootCommand extends Command {
             .plus(shootertoRobotCenter); // TODO: verify this transformation is correct
     double xs = Units.metersToFeet(shooterPose3d.getTranslation().getX());
     double ys = Units.metersToFeet(shooterPose3d.getTranslation().getY());
-    double ThetaS = shooterAngle; // TODO: find actual shooter angle
+    double ThetaS = Math.toRadians(shooterAngle); // TODO: find actual shooter angle
     double xT = 0;
-    double yT = hubHeight.in(Foot) / 12; // TODO: Double check the units here w/ Mr. Dumet
+    double yT = hubHeight.in(Inches) / 12; // TODO: Double check the units here w/ Mr. Dumet
     double Dx = xT - xs;
     double Dy = yT - ys;
-    double v0 =
-        Math.sqrt(
-            (g * Math.pow(Dx, 2))
-                / ((2 * Math.pow(Math.cos(ThetaS), 2)) * ((Dx) * Math.tan(ThetaS) - (Dy))));
+    double denom = (Dx * Math.tan(ThetaS) - Dy);
+    if (denom <= 0)
+      throw new IllegalArgumentException(
+          "Invalid shot geometry: check shooter angle and target position");
+    double v0 = Math.sqrt((g * Math.pow(Dx, 2)) / ((2 * Math.pow(Math.cos(ThetaS), 2)) * denom));
     double vRPM = (v0 * 60 * 12) / (2 * Math.PI * flywheelRadiousInInches);
     return RPM.of(vRPM);
   }
