@@ -22,9 +22,10 @@ public class IndexAndShootCommand extends Command {
   private final Indexer indexer;
   private final Drive drive;
 
+  private final double g = 32.174; // ft/s^2
   private final double h = 0;
   private final double flywheelRadiousInInches = 2.0; // TODO: find actual value
-  // private final Angle shooterAngle = Degrees.of(68.0);//TODO: TAKE ANGLE INTO ACCOUNT IN
+  private final double shooterAngle = 68.0; // TODO: TAKE ANGLE INTO ACCOUNT IN
   // CALCULATIONS
   private final Distance hubHeight = Inches.of(80.0);
   private final Translation2d hubPosition =
@@ -45,7 +46,7 @@ public class IndexAndShootCommand extends Command {
 
   @Override
   public void initialize() {
-    shooter.runVelocity(getShooterVelocity(drive.getPose()));
+    shooter.runVelocity(getShooterVelocityWithAngle(drive.getPose()));
   }
 
   @Override
@@ -54,7 +55,7 @@ public class IndexAndShootCommand extends Command {
     if (shooter.isAtGoal()) {
       indexer.runVelocity(RPM.of(300)); // TODO: find actual value for indexer velocity
     }
-    shooter.runVelocity(getShooterVelocity(drive.getPose()));
+    shooter.runVelocity(getShooterVelocityWithAngle(drive.getPose()));
   }
 
   @Override
@@ -68,7 +69,8 @@ public class IndexAndShootCommand extends Command {
     return false; // TODO: implement actual logic to determine when finished
   }
 
-  private AngularVelocity getShooterVelocity(Pose2d robotPosition) {
+  private AngularVelocity getShooterVelocity(
+      Pose2d robotPosition) { // TODO: Remove old method if no longer needed
     /** ALL UNITS IN THIS METHOD ARE IN FEET */
     Pose3d shooterPose3d =
         new Pose3d(robotPosition)
@@ -83,6 +85,25 @@ public class IndexAndShootCommand extends Command {
     double Vx = Xs / tm;
     double v = Math.sqrt((Vy * Vy) + (Vx * Vx));
     double vRPM = (v * 12) / (Math.PI * flywheelRadiousInInches) * 60;
+    return RPM.of(vRPM);
+  }
+
+  private AngularVelocity getShooterVelocityWithAngle(Pose2d robotPosition) {
+    Pose3d shooterPose3d =
+        new Pose3d(robotPosition)
+            .plus(shootertoRobotCenter); // TODO: verify this transformation is correct
+    double xs = Units.metersToFeet(shooterPose3d.getTranslation().getX());
+    double ys = Units.metersToFeet(shooterPose3d.getTranslation().getY());
+    double ThetaS = shooterAngle; // TODO: find actual shooter angle
+    double xT = 0;
+    double yT = hubHeight.in(Foot) / 12; // TODO: Double check the units here w/ Mr. Dumet
+    double Dx = xT - xs;
+    double Dy = yT - ys;
+    double v0 =
+        Math.sqrt(
+            (g * Math.pow(Dx, 2))
+                / ((2 * Math.pow(Math.cos(ThetaS), 2)) * ((Dx) * Math.tan(ThetaS) - (Dy))));
+    double vRPM = (v0 * 60 * 12) / (2 * Math.PI * flywheelRadiousInInches);
     return RPM.of(vRPM);
   }
 }
