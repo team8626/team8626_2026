@@ -1,0 +1,108 @@
+{
+  "name": "8626-Blue",
+  "sourceUrl": "",
+  "disableSimplification": true,
+  "rotations": [
+    {
+      "axis": "x",
+      "degrees": 90
+    },
+    {
+      "axis": "y",
+      "degrees": 0
+    },
+    {
+      "axis": "z",
+      "degrees": 90
+    }
+  ],
+  "position": [
+    0,
+    0,
+    0
+  ],
+  "cameras": [
+    {
+      "name": "FL",
+      "rotations": [
+        {
+          "axis": "x",
+          "degrees": -3.195
+        },
+        {
+          "axis": "y",
+          "degrees": -19.688
+        },
+        {
+          "axis": "z",
+          "degrees": 9.981
+        }
+      ],
+      "position": [
+        0.332,
+        0.3175,
+        0.545
+      ],
+      "resolution": [
+        640,
+        480
+      ],
+      "fov": 70
+    },
+    {
+      "name": "RL",
+      "rotations": [
+        {
+          "axis": "x",
+          "degrees": 3.195
+        },
+        {
+          "axis": "y",
+          "degrees": -19.688
+        },
+        {
+          "axis": "z",
+          "degrees": 170.019
+        }
+      ],
+      "position": [
+        -0.332,
+        0.3175,
+        0.367
+      ],
+      "resolution": [
+        640,
+        480
+      ],
+      "fov": 70
+    },
+    {
+      "name": "RR",
+      "rotations": [
+        {
+          "axis": "x",
+          "degrees": -3.195
+        },
+        {
+          "axis": "y",
+          "degrees": -19.688
+        },
+        {
+          "axis": "z",
+          "degrees": -170.019
+        }
+      ],
+      "position": [
+        -0.332,
+        -0.3175,
+        0.367
+      ],
+      "resolution": [
+        640,
+        480
+      ],
+      "fov": 70
+    }
+  ]
+}
+

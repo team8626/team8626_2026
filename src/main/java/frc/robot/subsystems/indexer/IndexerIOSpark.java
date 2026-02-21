@@ -75,7 +75,8 @@ public class IndexerIOSpark implements IndexerIO {
     config
         .closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .pid(IndexerConstants.velocityKp, 0.0, IndexerConstants.velocityKd, ClosedLoopSlot.kSlot0);
+        .pid(IndexerConstants.velocityKp, 0.0, IndexerConstants.velocityKd, ClosedLoopSlot.kSlot0)
+        .outputRange(-1, 1);
 
     // Logging: encoder and output at 20 ms
     config
