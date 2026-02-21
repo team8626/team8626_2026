@@ -23,9 +23,17 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
 /** Physics sim implementation of module IO. */
-public class ModuleIOSim implements ModuleIO {
+public class ModuleIOSimSpark implements ModuleIO {
   private final DCMotorSim driveSim;
   private final DCMotorSim turnSim;
+
+  public static final double driveSimP = 0.05;
+  public static final double driveSimD = 0.0;
+  public static final double driveSimKs = 0.0;
+  public static final double driveSimKv = 0.0789;
+
+  public static final double turnSimP = 8.0;
+  public static final double turnSimD = 0.0;
 
   private boolean driveClosedLoop = false;
   private boolean turnClosedLoop = false;
@@ -35,16 +43,16 @@ public class ModuleIOSim implements ModuleIO {
   private double driveAppliedVolts = 0.0;
   private double turnAppliedVolts = 0.0;
 
-  public ModuleIOSim() {
+  public ModuleIOSimSpark() {
     // Create drive and turn sim models
     driveSim =
         new DCMotorSim(
-            LinearSystemId.createDCMotorSystem(driveGearbox, 0.025, driveMotorReduction),
-            driveGearbox);
+            LinearSystemId.createDCMotorSystem(DRIVE_GEARBOX, 0.025, DRIVE_GEAR_RATIO),
+            DRIVE_GEARBOX);
     turnSim =
         new DCMotorSim(
-            LinearSystemId.createDCMotorSystem(turnGearbox, 0.004, turnMotorReduction),
-            turnGearbox);
+            LinearSystemId.createDCMotorSystem(STEER_GEARBOX, 0.004, STEER_GEAR_RATIO),
+            STEER_GEARBOX);
 
     // Enable wrapping for turn PID
     turnController.enableContinuousInput(-Math.PI, Math.PI);

@@ -13,6 +13,7 @@
 
 package frc.robot.subsystems.drive;
 
+import static edu.wpi.first.units.Units.Meters;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -61,7 +62,7 @@ public class ModuleTest {
     module.periodic();
 
     // Expected: position in radians * wheel radius
-    double expectedMeters = drivePositionRad * DriveConstants.wheelRadiusMeters;
+    double expectedMeters = drivePositionRad * DriveConstants.WHEEL_RADIUS.in(Meters);
     assertEquals(expectedMeters, module.getPositionMeters(), DELTA);
   }
 
@@ -73,7 +74,7 @@ public class ModuleTest {
     module.periodic();
 
     // Expected: velocity in rad/sec * wheel radius
-    double expectedVelocity = driveVelocityRadPerSec * DriveConstants.wheelRadiusMeters;
+    double expectedVelocity = driveVelocityRadPerSec * DriveConstants.WHEEL_RADIUS.in(Meters);
     assertEquals(expectedVelocity, module.getVelocityMetersPerSec(), DELTA);
   }
 
@@ -88,7 +89,7 @@ public class ModuleTest {
 
     SwerveModulePosition position = module.getPosition();
 
-    assertEquals(8.0 * DriveConstants.wheelRadiusMeters, position.distanceMeters, DELTA);
+    assertEquals(8.0 * DriveConstants.WHEEL_RADIUS.in(Meters), position.distanceMeters, DELTA);
     assertEquals(90.0, position.angle.getDegrees(), DELTA);
   }
 
@@ -101,7 +102,7 @@ public class ModuleTest {
 
     SwerveModuleState state = module.getState();
 
-    assertEquals(3.0 * DriveConstants.wheelRadiusMeters, state.speedMetersPerSecond, DELTA);
+    assertEquals(3.0 * DriveConstants.WHEEL_RADIUS.in(Meters), state.speedMetersPerSecond, DELTA);
     assertEquals(180.0, state.angle.getDegrees(), DELTA);
   }
 
@@ -117,7 +118,7 @@ public class ModuleTest {
 
     // Verify velocity command was sent (converted from m/s to rad/s)
     double expectedVelocityRadPerSec =
-        setpoint.speedMetersPerSecond / DriveConstants.wheelRadiusMeters;
+        setpoint.speedMetersPerSecond / DriveConstants.WHEEL_RADIUS.in(Meters);
     assertEquals(expectedVelocityRadPerSec, mockIO.lastDriveVelocitySetpoint, DELTA);
 
     // Verify turn position was set
@@ -183,9 +184,9 @@ public class ModuleTest {
     SwerveModulePosition[] positions = module.getOdometryPositions();
 
     assertEquals(3, positions.length);
-    assertEquals(0.0 * DriveConstants.wheelRadiusMeters, positions[0].distanceMeters, DELTA);
-    assertEquals(1.0 * DriveConstants.wheelRadiusMeters, positions[1].distanceMeters, DELTA);
-    assertEquals(2.0 * DriveConstants.wheelRadiusMeters, positions[2].distanceMeters, DELTA);
+    assertEquals(0.0 * DriveConstants.WHEEL_RADIUS.in(Meters), positions[0].distanceMeters, DELTA);
+    assertEquals(1.0 * DriveConstants.WHEEL_RADIUS.in(Meters), positions[1].distanceMeters, DELTA);
+    assertEquals(2.0 * DriveConstants.WHEEL_RADIUS.in(Meters), positions[2].distanceMeters, DELTA);
     assertEquals(0.0, positions[0].angle.getDegrees(), DELTA);
     assertEquals(10.0, positions[1].angle.getDegrees(), DELTA);
     assertEquals(20.0, positions[2].angle.getDegrees(), DELTA);

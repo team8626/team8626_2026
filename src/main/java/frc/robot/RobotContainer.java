@@ -13,27 +13,35 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.*;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants.ControllerConstants;
+import frc.robot.Constants.Dimensions;
 import frc.robot.commands.AlignToTargetCommand;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IndexerCommands;
+import frc.robot.commands.TeleopDriveCommand;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.DriveConstants.Rebuilt_SwerveConstants;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOADIS16470;
+import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
-import frc.robot.subsystems.drive.ModuleIOSim;
+import frc.robot.subsystems.drive.ModuleIOSimTalonFX;
 import frc.robot.subsystems.drive.ModuleIOSpark;
+import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
@@ -42,6 +50,8 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOSim;
+import frc.robot.util.FuelSim;
+import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -52,20 +62,26 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  */
 public class RobotContainer {
   // Subsystems
-  private final Drive drive;
+  public final Drive drive;
   private final Indexer index;
   private final Vision vision;
 
   // Controller
-  private final CommandXboxController controller = new CommandXboxController(0);
+  private static final CommandXboxController controller =
+      new CommandXboxController(ControllerConstants.DRIVERPORT);
+  // Commands
+  private final TeleopDriveCommand teleopDrive;
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
+  // Fuel Simulation
+  public FuelSim fuelSim;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    switch (Constants.currentMode) {
-      case SPARK:
+    switch (Constants.robot) {
+      case TSUNAMI:
         // DEV bot on Spark, instantiate hardware IO implementations
         drive =
             new Drive(
@@ -82,15 +98,15 @@ public class RobotContainer {
                     drive.addVisionMeasurement(
                         measurement.pose, measurement.timestamp, measurement.stdDevs));
         break;
-      case CTRE:
+      case REBUILT_COMPBOT:
         // Real robot, instantiate hardware IO implementations
         drive =
             new Drive(
-                new GyroIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {});
+                new GyroIOPigeon2(),
+                new ModuleIOTalonFX(Rebuilt_SwerveConstants.FrontLeft.MODULE_CONSTANTS),
+                new ModuleIOTalonFX(Rebuilt_SwerveConstants.FrontRight.MODULE_CONSTANTS),
+                new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackLeft.MODULE_CONSTANTS),
+                new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackRight.MODULE_CONSTANTS));
         index = new Indexer(new IndexerIO() {});
         vision =
             new Vision(
@@ -100,15 +116,19 @@ public class RobotContainer {
                         measurement.pose, measurement.timestamp, measurement.stdDevs));
         break;
 
-      case SIM:
+      case SIMBOT:
         // Sim robot, instantiate physics sim IO implementations
         drive =
             new Drive(
                 new GyroIO() {},
-                new ModuleIOSim(),
-                new ModuleIOSim(),
-                new ModuleIOSim(),
-                new ModuleIOSim());
+                // new ModuleIOSimSpark() {},
+                // new ModuleIOSimSpark() {},
+                // new ModuleIOSimSpark() {},
+                // new ModuleIOSimSpark() {});
+                new ModuleIOSimTalonFX(Rebuilt_SwerveConstants.FrontLeft.MODULE_CONSTANTS),
+                new ModuleIOSimTalonFX(Rebuilt_SwerveConstants.FrontRight.MODULE_CONSTANTS),
+                new ModuleIOSimTalonFX(Rebuilt_SwerveConstants.BackLeft.MODULE_CONSTANTS),
+                new ModuleIOSimTalonFX(Rebuilt_SwerveConstants.BackRight.MODULE_CONSTANTS));
         index = new Indexer(new IndexerIOSim());
         vision =
             new Vision(
@@ -117,6 +137,8 @@ public class RobotContainer {
                     drive.addVisionMeasurement(
                         measurement.pose, measurement.timestamp, measurement.stdDevs));
         vision.setPoseSupplier(drive::getPose); // Provide current pose for simulation
+        configureFuelSim();
+        configureFuelSimRobot(() -> false, () -> {});
         break;
 
       default:
@@ -152,6 +174,9 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
+    // Set up commands
+    teleopDrive = new TeleopDriveCommand(drive, controller);
+
     // Configure the button bindings
     configureButtonBindings();
 
@@ -167,23 +192,7 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     // Default command, normal field-relative drive
-    // Left stick for field navigation, triggers for rotation (right - left)
-    drive.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            drive,
-            () -> controller.getLeftY(),
-            () -> controller.getLeftX(),
-            () -> controller.getRightTriggerAxis() - controller.getLeftTriggerAxis(),
-            () -> {
-              // Blue alliance: flip 180° to match field orientation from driver's perspective
-              boolean isBlue =
-                  DriverStation.getAlliance().isPresent()
-                      && DriverStation.getAlliance().get() == Alliance.Blue;
-              return isBlue
-                  ? drive.getRotation()
-                  : drive.getRotation().plus(new Rotation2d(Math.PI));
-            }));
-
+    drive.setDefaultCommand(teleopDrive);
     // Lock to 0° when A button is held
     controller
         .a()
@@ -214,6 +223,48 @@ public class RobotContainer {
     // Align to front camera's best AprilTag (POV-Up) or back camera's best (POV-Down)
     controller.povUp().whileTrue(AlignToTargetCommand.alignToFrontCamera(drive, vision));
     controller.povDown().whileTrue(AlignToTargetCommand.alignToBackCamera(drive, vision));
+  }
+
+  private void configureFuelSim() {
+    fuelSim = new FuelSim();
+    fuelSim.spawnStartingFuel();
+
+    fuelSim.start();
+    SmartDashboard.putData(
+        Commands.runOnce(
+                () -> {
+                  fuelSim.clearFuel();
+                  fuelSim.spawnStartingFuel();
+                })
+            .withName("Reset Fuel")
+            .ignoringDisable(true));
+  }
+
+  private void configureFuelSimRobot(BooleanSupplier ableToIntake, Runnable intakeCallback) {
+    fuelSim.registerRobot(
+        Dimensions.FULL_WIDTH.in(Meters),
+        Dimensions.FULL_LENGTH.in(Meters),
+        Dimensions.BUMPER_HEIGHT.in(Meters),
+        drive::getPose,
+        drive::getFieldSpeeds);
+    // fuelSim.registerIntake(
+    //         -Dimensions.FULL_LENGTH.div(2).in(Meters),
+    //         Dimensions.FULL_LENGTH.div(2).in(Meters),
+    //         -Dimensions.FULL_WIDTH.div(2).plus(Inches.of(7)).in(Meters),
+    //         -Dimensions.FULL_WIDTH.div(2).in(Meters),
+    //         intakes.right.deployedTrigger.and(ableToIntake),
+    //         intakeCallback);
+    // fuelSim.registerIntake(
+    //         -Dimensions.FULL_LENGTH.div(2).in(Meters),
+    //         Dimensions.FULL_LENGTH.div(2).in(Meters),
+    //         Dimensions.FULL_WIDTH.div(2).in(Meters),
+    //         Dimensions.FULL_WIDTH.div(2).plus(Inches.of(7)).in(Meters),
+    //         intakes.left.deployedTrigger.and(ableToIntake),
+    //         intakeCallback);
+  }
+
+  public static Trigger getHubAimTrigger() { // TODO: might need to change the button for this
+    return controller.x();
   }
 
   /** Configure named commands to be identified by autos and paths. */
