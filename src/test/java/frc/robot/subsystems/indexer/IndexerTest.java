@@ -13,14 +13,11 @@
 
 package frc.robot.subsystems.indexer;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Volts;
+import static edu.wpi.first.units.Units.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import edu.wpi.first.hal.HAL;
+import edu.wpi.first.units.measure.AngularVelocity;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -45,20 +42,13 @@ public class IndexerTest {
   }
 
   @Test
-  void testInitialPosition() {
-    indexer.periodic();
-    assertEquals(0.0, indexer.getPosition().in(Radians), DELTA);
-    assertEquals(0.0, indexer.getAngle().getRadians(), DELTA);
-  }
-
-  @Test
   void testRunVelocity() {
     indexer.periodic();
 
-    double targetVelocityRPM = 5.0;
-    indexer.runVelocity(RPM.of(targetVelocityRPM));
+    AngularVelocity targetVelocityRPM = RPM.of(500);
+    indexer.runVelocity(targetVelocityRPM);
 
-    assertEquals(targetVelocityRPM, io.lastVelocitySetpoint.in(RPM), DELTA);
+    assertEquals(targetVelocityRPM.in(RPM), io.lastVelocitySetpoint.in(RPM), DELTA);
   }
 
   @Test
@@ -82,28 +72,12 @@ public class IndexerTest {
   }
 
   @Test
-  void testGetPositionRad() {
-    io.position = Radians.of(1.5);
-    indexer.periodic();
-
-    assertEquals(1.5, indexer.getPosition().in(Radians), DELTA);
-  }
-
-  @Test
-  void testGetAngle() {
-    io.position = Radians.of(Math.PI / 4);
-    indexer.periodic();
-
-    assertEquals(Math.PI / 4, indexer.getAngle().getRadians(), DELTA);
-    assertEquals(45.0, indexer.getAngle().getDegrees(), DELTA);
-  }
-
-  @Test
   void testGetVelocity() {
-    io.velocity = RadiansPerSecond.of(8.0);
+    AngularVelocity velocityRPM = RPM.of(500);
+    io.actualWheelVelocity = velocityRPM;
     indexer.periodic();
 
-    assertEquals(8.0, indexer.getVelocity().in(RadiansPerSecond), DELTA);
+    assertEquals(velocityRPM.in(RPM), indexer.getVelocity().in(RPM), DELTA);
   }
 
   @Test
@@ -119,7 +93,7 @@ public class IndexerTest {
 
   @Test
   void testGetAppliedVolts() {
-    io.appliedVolts = Volts.of(3.5);
+    io.appliedVoltage = Volts.of(3.5);
     indexer.periodic();
 
     assertEquals(3.5, indexer.getAppliedVoltage().in(Volts), DELTA);
@@ -127,7 +101,7 @@ public class IndexerTest {
 
   @Test
   void testGetCurrentAmps() {
-    io.currentAmps = Amps.of(15.0);
+    io.current = Amps.of(15.0);
     indexer.periodic();
 
     assertEquals(15.0, indexer.getCurrent().in(Amps), DELTA);
@@ -135,10 +109,37 @@ public class IndexerTest {
 
   @Test
   void testNegativeVelocity() {
+    AngularVelocity velocityRPM = RPM.of(-500);
+    io.actualWheelVelocity = velocityRPM;
+
     indexer.periodic();
 
-    indexer.runVelocity(RPM.of(-200));
+    indexer.runVelocity(velocityRPM);
 
-    assertEquals(-200, io.lastVelocitySetpoint.in(RPM), DELTA);
+    assertEquals(velocityRPM.in(RPM), io.lastVelocitySetpoint.in(RPM), DELTA);
+  }
+
+  @Test
+  void testMaxVelocity() {
+    // Test Positive value out of bounds
+    AngularVelocity velocity = RPM.of(10000); // Exceeds max velocity
+    io.desiredWheelVelocity = velocity;
+
+    indexer.periodic();
+    indexer.runVelocity(velocity);
+
+    assertEquals(IndexerConstants.MAX_VELOCITY.in(RPM), io.lastVelocitySetpoint.in(RPM), DELTA);
+
+    // Test Negative value out of bounds
+    velocity = RPM.of(-10000); // Exceeds max velocity
+    io.desiredWheelVelocity = velocity;
+
+    indexer.periodic();
+    indexer.runVelocity(velocity);
+
+    assertEquals(
+        IndexerConstants.MAX_VELOCITY.copySign(velocity, RPM),
+        io.lastVelocitySetpoint.in(RPM),
+        DELTA);
   }
 }

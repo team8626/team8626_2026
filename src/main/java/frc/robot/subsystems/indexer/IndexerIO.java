@@ -13,25 +13,20 @@
 
 package frc.robot.subsystems.indexer;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Volts;
+import static edu.wpi.first.units.Units.*;
 
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.units.measure.*;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface IndexerIO {
   @AutoLog
   public static class IndexIOInputs {
     public boolean connected = false;
-    public Angle position = Radians.of(0.0);
-    public AngularVelocity velocity = RadiansPerSecond.of(0.0);
+    public AngularVelocity actualWheelVelocity = RPM.of(0.0);
+    public AngularVelocity desiredWheelVelocity = RPM.of(0.0);
     public Voltage appliedVoltage = Volts.of(0.0);
     public Current current = Amps.of(0.0);
+    public boolean atGoal = true;
   }
 
   /** Updates the set of loggable inputs. */
@@ -40,9 +35,12 @@ public interface IndexerIO {
   /** Run the motor at the specified open loop voltage. */
   public default void setOpenLoop(Voltage output) {}
 
-  /** Run the motor at the specified velocity in rad/sec. */
+  /** Run the motor at the specified --WHEEL-- velocity */
   public default void setVelocity(AngularVelocity velocity) {}
 
   /** Stop the motor. */
   public default void stop() {}
+
+  /** Set the PID constants for the motor controller. */
+  public default void setPID(double kP, double kD, double kV, double kS) {}
 }

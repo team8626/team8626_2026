@@ -13,19 +13,7 @@
 
 package frc.robot.subsystems.indexer;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Volts;
-import static frc.robot.subsystems.indexer.IndexerConstants.encoderPositionFactor;
-import static frc.robot.subsystems.indexer.IndexerConstants.encoderVelocityFactor;
-import static frc.robot.subsystems.indexer.IndexerConstants.indexCanId;
-import static frc.robot.subsystems.indexer.IndexerConstants.motorCurrentLimit;
-import static frc.robot.subsystems.indexer.IndexerConstants.motorInverted;
-import static frc.robot.subsystems.indexer.IndexerConstants.velocityKd;
-import static frc.robot.subsystems.indexer.IndexerConstants.velocityKp;
-import static frc.robot.subsystems.indexer.IndexerConstants.velocityKs;
-import static frc.robot.subsystems.indexer.IndexerConstants.velocityKv;
+import static edu.wpi.first.units.Units.*;
 import static frc.robot.util.SparkUtil.ifOk;
 import static frc.robot.util.SparkUtil.sparkStickyFault;
 import static frc.robot.util.SparkUtil.tryUntilOk;
@@ -43,8 +31,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.units.measure.*;
 import java.util.function.DoubleSupplier;
 
 /** Hardware IO for indexer using a SPARK Flex. Velocity control only. */
@@ -52,35 +39,43 @@ public class IndexerIOSpark implements IndexerIO {
   private final SparkFlex spark;
   private final RelativeEncoder encoder;
   private final SparkClosedLoopController controller;
+  private final SparkFlexConfig config;
   private final Debouncer connectedDebounce = new Debouncer(0.5);
 
+  /** Target WHEEL velocity for closed-loop control. */
+  private AngularVelocity desiredWheelVelocity = RPM.of(0.0);
+
+  /** Feedforward gains for velocity control. */
+  private double kV = IndexerConstants.velocityKv;
+
+  private double kS = IndexerConstants.velocityKs;
+
   public IndexerIOSpark() {
-    spark = new SparkFlex(indexCanId, MotorType.kBrushless);
+    spark = new SparkFlex(IndexerConstants.indexCanId, MotorType.kBrushless);
     encoder = spark.getEncoder();
     controller = spark.getClosedLoopController();
-
-    SparkFlexConfig config = new SparkFlexConfig();
+    config = new SparkFlexConfig();
 
     // Motor: inversion, brake, current limit, voltage comp
     config
-        .inverted(motorInverted)
+        .inverted(IndexerConstants.motorInverted)
         .idleMode(IdleMode.kBrake)
-        .smartCurrentLimit(motorCurrentLimit)
+        .smartCurrentLimit(IndexerConstants.motorCurrentLimit)
         .voltageCompensation(12.0);
 
     // Encoder: mechanism radians and rad/s
     config
         .encoder
-        .positionConversionFactor(encoderPositionFactor)
-        .velocityConversionFactor(encoderVelocityFactor)
+        .positionConversionFactor(IndexerConstants.encoderPositionFactor)
+        .velocityConversionFactor(IndexerConstants.encoderVelocityFactor)
         .uvwMeasurementPeriod(10)
-        .uvwAverageDepth(2);
+        .uvwAverageDepth(2); // TODO: Why 2? Is this necessary?
 
     // Velocity PID + feedforward (only slot we use)
     config
         .closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .pid(velocityKp, 0.0, velocityKd, ClosedLoopSlot.kSlot0)
+        .pid(IndexerConstants.velocityKp, 0.0, IndexerConstants.velocityKd, ClosedLoopSlot.kSlot0)
         .outputRange(-1, 1);
 
     // Logging: encoder and output at 20 ms
@@ -108,8 +103,10 @@ public class IndexerIOSpark implements IndexerIO {
   public void updateInputs(IndexIOInputs inputs) {
     sparkStickyFault = false;
 
-    ifOk(spark, encoder::getPosition, (value) -> inputs.position = Radians.of(value));
-    ifOk(spark, encoder::getVelocity, (value) -> inputs.velocity = RadiansPerSecond.of(value));
+    ifOk(
+        spark,
+        encoder::getVelocity,
+        (value) -> inputs.actualWheelVelocity = RadiansPerSecond.of(value));
     ifOk(
         spark,
         new DoubleSupplier[] {spark::getAppliedOutput, spark::getBusVoltage},
@@ -117,6 +114,10 @@ public class IndexerIOSpark implements IndexerIO {
     ifOk(spark, spark::getOutputCurrent, (value) -> inputs.current = Amps.of(value));
 
     inputs.connected = connectedDebounce.calculate(!sparkStickyFault);
+    inputs.desiredWheelVelocity = desiredWheelVelocity;
+    inputs.atGoal =
+        Math.abs(inputs.actualWheelVelocity.in(RPM) - inputs.desiredWheelVelocity.in(RPM))
+            < IndexerConstants.VELOCITY_TOLERANCE.in(RPM);
   }
 
   @Override
@@ -125,12 +126,18 @@ public class IndexerIOSpark implements IndexerIO {
   }
 
   @Override
-  public void setVelocity(AngularVelocity velocity) {
+  public void setVelocity(AngularVelocity new_velocity) {
+    desiredWheelVelocity = new_velocity;
+
+    AngularVelocity motorAngularVelocity =
+        desiredWheelVelocity.times(IndexerConstants.GEAR_REDUCTION);
+
     double ffVolts =
-        velocityKs * Math.signum(velocity.in(RadiansPerSecond))
-            + velocityKv * velocity.in(RadiansPerSecond);
+        kS * Math.signum(motorAngularVelocity.in(RadiansPerSecond))
+            + kV * motorAngularVelocity.in(RadiansPerSecond);
+
     controller.setSetpoint(
-        velocity.in(RadiansPerSecond),
+        motorAngularVelocity.in(RadiansPerSecond),
         ControlType.kVelocity,
         ClosedLoopSlot.kSlot0,
         ffVolts,
@@ -138,6 +145,22 @@ public class IndexerIOSpark implements IndexerIO {
   }
 
   public void stop() {
-    spark.setVoltage(Volts.of(0.0));
+    desiredWheelVelocity = RPM.of(0.0);
+    controller.setSetpoint(0.0, ControlType.kDutyCycle);
+  }
+
+  @Override
+  public void setPID(double new_kP, double new_kD, double new_kV, double new_kS) {
+
+    config.closedLoop.pid(new_kP, 0.0, new_kD, ClosedLoopSlot.kSlot0);
+    kV = new_kV;
+    kS = new_kS;
+
+    tryUntilOk(
+        spark,
+        5,
+        () ->
+            spark.configure(
+                config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
   }
 }

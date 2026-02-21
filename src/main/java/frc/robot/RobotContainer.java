@@ -32,6 +32,7 @@ import frc.robot.Constants.Dimensions;
 import frc.robot.commands.AlignToTargetCommand;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IndexerCommands;
+import frc.robot.commands.IndexerStartCommand;
 import frc.robot.commands.TeleopDriveCommand;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants.Rebuilt_SwerveConstants;
@@ -71,6 +72,9 @@ public class RobotContainer {
       new CommandXboxController(ControllerConstants.DRIVERPORT);
   // Commands
   private final TeleopDriveCommand teleopDrive;
+
+  // Bindings
+  private final Trigger indexTrigger = controller.x();
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -223,6 +227,8 @@ public class RobotContainer {
     // Align to front camera's best AprilTag (POV-Up) or back camera's best (POV-Down)
     controller.povUp().whileTrue(AlignToTargetCommand.alignToFrontCamera(drive, vision));
     controller.povDown().whileTrue(AlignToTargetCommand.alignToBackCamera(drive, vision));
+
+    indexTrigger.toggleOnTrue(new IndexerStartCommand(this.index));
   }
 
   private void configureFuelSim() {
