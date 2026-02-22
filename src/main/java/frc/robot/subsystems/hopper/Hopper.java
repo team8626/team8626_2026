@@ -44,11 +44,15 @@ public class Hopper extends SubsystemBase {
     return inputs.ableToIntake;
   }
 
+  public boolean isEmpty() {
+    return inputs.numFuel <= 0;
+  }
+
   public void pushFuel() {
     io.pushFuel();
   }
 
-  public void popFuel() {
-    io.popFuel();
+  public boolean popFuel() {
+    return io.popFuel();
   }
 }

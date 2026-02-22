@@ -15,14 +15,20 @@ package frc.robot.subsystems.hopper;
 
 import static edu.wpi.first.units.Units.*;
 
+import edu.wpi.first.wpilibj.Timer;
+
 /**
  * Simulation IO for the hopper subsystem. No real implementation may ever exist. This class is
  * purely for simulation purposes.
  */
 public class HopperIOSim implements HopperIO {
   private int numFuel = 0;
+  private Timer releaseTimer = new Timer();
 
-  public HopperIOSim() {}
+  public HopperIOSim() {
+    releaseTimer.reset();
+    releaseTimer.start();
+  }
 
   @Override
   public void updateInputs(HopperIOInputs inputs) {
@@ -46,7 +52,14 @@ public class HopperIOSim implements HopperIO {
   }
 
   @Override
-  public void popFuel() {
-    numFuel--;
+  public boolean popFuel() {
+    boolean retVal = false;
+    if (numFuel > 0 && releaseTimer.hasElapsed(HopperConstants.POP_FUEL_TIME.in(Seconds))) {
+      retVal = true;
+      numFuel--;
+      releaseTimer.reset();
+      releaseTimer.start();
+    }
+    return retVal;
   }
 }

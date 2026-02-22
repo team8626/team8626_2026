@@ -31,5 +31,7 @@ public interface HopperIO {
 
   public default void pushFuel() {}
 
-  public default void popFuel() {}
+  public default boolean popFuel() {
+    return false;
+  }
 }
