@@ -17,6 +17,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.shooter.Shooter;
 
@@ -24,6 +25,7 @@ public class IndexAndShootCommand extends Command {
   private final Shooter shooter;
   private final Indexer indexer;
   private final Drive drive;
+  private final Hopper hopper;
 
   private final double MAX_RPM = 5000; // TODO: find actual max RPM for shooter
   private final double g = 32.174; // ft/s^2 //gravity constant
@@ -41,11 +43,12 @@ public class IndexAndShootCommand extends Command {
           Inches.of(16.25),
           new Rotation3d(new Rotation2d(Degrees.of(0))));
 
-  public IndexAndShootCommand(Shooter shooter, Indexer indexer, Drive drive) {
+  public IndexAndShootCommand(Shooter shooter, Hopper hopper, Indexer indexer, Drive drive) {
     this.shooter = shooter;
+    this.hopper = hopper;
     this.indexer = indexer;
     this.drive = drive;
-    addRequirements(shooter, indexer, drive);
+    addRequirements(shooter, hopper, indexer);
   }
 
   @Override
