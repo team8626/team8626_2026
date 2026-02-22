@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Foot;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.RPM;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -24,10 +25,11 @@ public class IndexAndShootCommand extends Command {
   private final Indexer indexer;
   private final Drive drive;
 
-  private final double g = 32.174; // ft/s^2
-  private final double h = 0;
+  private final double MAX_RPM = 5000; // TODO: find actual max RPM for shooter
+  private final double g = 32.174; // ft/s^2 //gravity constant
+  private final double h = 0; // oomf factor
   private final double flywheelRadiousInInches = 2.0; // TODO: find actual value
-  private final double shooterAngle = 68.0; // TODO: TAKE ANGLE INTO ACCOUNT IN
+  private final double shooterAngle = 68.0;
   // CALCULATIONS
   private final Distance hubHeight = Inches.of(80.0);
   private final Translation2d hubPosition =
@@ -73,7 +75,7 @@ public class IndexAndShootCommand extends Command {
 
   private AngularVelocity getShooterVelocity(
       Pose2d robotPosition) { // TODO: Remove old method if no longer needed
-    /** ALL UNITS IN THIS METHOD ARE IN FEET */
+    /* ALL UNITS IN THIS METHOD ARE IN FEET */
     Pose3d shooterPose3d =
         new Pose3d(robotPosition)
             .plus(shootertoRobotCenter); // TODO: verify this transformation is correct
@@ -91,10 +93,13 @@ public class IndexAndShootCommand extends Command {
   }
 
   private AngularVelocity getShooterVelocityWithAngle(Pose2d robotPosition) {
+    /* ALL UNITS IN THIS METHOD ARE IN FEET */
     Pose3d shooterPose3d =
         new Pose3d(robotPosition)
             .plus(shootertoRobotCenter); // TODO: verify this transformation is correct
-    double xs = Units.metersToFeet(shooterPose3d.getTranslation().getX());
+    double xs =
+        Units.metersToFeet(
+            shooterPose3d.getTranslation().toTranslation2d().getDistance(hubPosition));
     double ys = Units.metersToFeet(shooterPose3d.getTranslation().getY());
     double ThetaS = Math.toRadians(shooterAngle); // TODO: find actual shooter angle
     double xT = 0;
@@ -103,10 +108,10 @@ public class IndexAndShootCommand extends Command {
     double Dy = yT - ys;
     double denom = (Dx * Math.tan(ThetaS) - Dy);
     if (denom <= 0)
-      throw new IllegalArgumentException(
-          "Invalid shot geometry: check shooter angle and target position");
+      return RPM.of(0); // Cannot shoot if target is too close or at the same height as shooter
     double v0 = Math.sqrt((g * Math.pow(Dx, 2)) / ((2 * Math.pow(Math.cos(ThetaS), 2)) * denom));
     double vRPM = (v0 * 60 * 12) / (2 * Math.PI * flywheelRadiousInInches);
+    vRPM = MathUtil.clamp(vRPM, 0, MAX_RPM); // TODO: find actual max RPM for shooter
     return RPM.of(vRPM);
   }
 }
