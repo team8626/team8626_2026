@@ -254,7 +254,7 @@ public class TeleopDriveCommand extends Command {
             .toTranslation2d();
     Rotation2d angleToHub =
         new Rotation2d(Math.atan2(hubTranslation.getY(), hubTranslation.getX()))
-            .plus(Rotation2d.k180deg);
+            .plus(Rotation2d.kZero);
     return angleToHub;
   }
 
