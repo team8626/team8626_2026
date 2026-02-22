@@ -15,7 +15,12 @@ package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.*;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Distance;
 
 public class ShooterConstants {
   // Hardware configuration
@@ -28,6 +33,16 @@ public class ShooterConstants {
   public static final double gearReduction = 1;
   public static final AngularVelocity MAX_VELOCITY = RPM.of(5676.0 / gearReduction);
   public static final double flywheelMOI = 0.00568;
+
+  public static final Distance flywheelRadius = Inches.of(2.0);
+  public static final Angle shooterAngle = Degrees.of(55);
+  public static final Transform3d shootertoRobotCenter =
+      new Transform3d(
+          Inches.of(-8),
+          Inches.of(4.5),
+          Inches.of(16.25),
+          new Rotation3d(new Rotation2d(Degrees.of(0))));
+
   // Encoder conversion factors
   // Convert motor rotations to mechanism radians
   public static final double encoderPositionFactor =
