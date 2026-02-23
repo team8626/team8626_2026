@@ -34,8 +34,6 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveModuleConstantsFactory;
-import com.pathplanner.lib.config.ModuleConfig;
-import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -72,7 +70,7 @@ public class DriveConstants {
   public static final DCMotor DRIVE_GEARBOX;
   public static final LinearVelocity SPEED_AT_12V; // theoretical free speed
   public static final Distance WHEEL_RADIUS;
-  private static final double WHEEL_COF; // coefficient of friction for wheel-ground interaction
+  public static final double WHEEL_COF; // coefficient of friction for wheel-ground interaction
 
   public static final double STEER_GEAR_RATIO;
   public static final DCMotor STEER_GEARBOX;
@@ -428,26 +426,6 @@ public class DriveConstants {
     public static final AngularVelocity FF_WHEEL_RADIUS_MAX_VELOCITY = RadiansPerSecond.of(0.25);
     public static final AngularAcceleration FF_WHEEL_RADIUS_RAMP_RATE =
         RadiansPerSecondPerSecond.of(0.05);
-  }
-
-  public static final class AutoConstants {
-    // --------------------------------------------------------------------------
-    // PathPlanner configuration
-    public static final double robotMassKg = 74.088;
-    public static final double robotMOI = 6.883;
-    public static final RobotConfig PP_CONFIG =
-        new RobotConfig(
-            robotMassKg,
-            robotMOI,
-            new ModuleConfig(
-                WHEEL_RADIUS,
-                SPEED_AT_12V,
-                WHEEL_COF,
-                DRIVE_GEARBOX,
-                DRIVE_GEAR_RATIO,
-                DRIVE_MOTOR_CURRENT_LIMIT,
-                1),
-            MODULE_TRANSLATIONS.get());
   }
 
   // --------------------------------------------------------------------------

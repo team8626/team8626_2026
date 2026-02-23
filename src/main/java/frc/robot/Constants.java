@@ -16,8 +16,12 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.CANBus;
+import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.RobotConfig;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.RobotBase;
+import frc.robot.subsystems.drive.DriveConstants;
 
 /**
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
@@ -80,6 +84,8 @@ public final class Constants {
 
     public static final CANBus CAN_FD_BUS = new CANBus("Bobby");
     public static final CANBus CAN_RIO_BUS = new CANBus("rio");
+
+    public static final NetworkTableInstance INST = NetworkTableInstance.getDefault();
   }
 
   public static class Dimensions {
@@ -115,5 +121,25 @@ public final class Constants {
     public static final int OPERATORPORT = 1;
 
     public static final double DEADBAND = 0.1;
+  }
+
+  public static class AutoConstants {
+    // --------------------------------------------------------------------------
+    // PathPlanner configuration
+    public static final double robotMassKg = 60;
+    public static final double robotMOI = 13.4;
+    public static final RobotConfig PP_CONFIG =
+        new RobotConfig(
+            robotMassKg,
+            robotMOI,
+            new ModuleConfig(
+                DriveConstants.WHEEL_RADIUS,
+                DriveConstants.SPEED_AT_12V,
+                DriveConstants.WHEEL_COF,
+                DriveConstants.DRIVE_GEARBOX,
+                DriveConstants.DRIVE_GEAR_RATIO,
+                DriveConstants.DRIVE_MOTOR_CURRENT_LIMIT,
+                1),
+            DriveConstants.MODULE_TRANSLATIONS.get());
   }
 }
