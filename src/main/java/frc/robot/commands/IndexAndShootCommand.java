@@ -31,7 +31,7 @@ public class IndexAndShootCommand extends Command {
   private final double g = 32.174; // ft/s^2 //gravity constant
   private final double h = 0; // oomf factor
   private final double flywheelRadiousInInches = 2.0; // TODO: find actual value
-  private final double shooterAngle = 68.0;
+  private final double shooterAngle = 55.0;
   // CALCULATIONS
   private final Distance hubHeight = Inches.of(80.0);
   private final Translation2d hubPosition =
