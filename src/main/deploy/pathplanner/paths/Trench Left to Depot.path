@@ -76,7 +76,12 @@
       "linkedName": "Depot"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1.0,
+      "rotationDegrees": -90.0
+    }
+  ],
   "constraintZones": [
     {
       "name": "Constraints Zone",

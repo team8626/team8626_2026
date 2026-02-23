@@ -76,7 +76,16 @@
       "linkedName": "Trench Exit Right"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.6685032894736842,
+      "rotationDegrees": 0.0
+    },
+    {
+      "waypointRelativePos": 3.2433799342105285,
+      "rotationDegrees": 0.0
+    }
+  ],
   "constraintZones": [
     {
       "name": "Constraints Zone",
