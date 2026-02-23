@@ -1,21 +1,11 @@
 package frc.robot.commands;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Foot;
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.*;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
+import frc.robot.Constants.RobotType;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.indexer.Indexer;
@@ -27,22 +17,6 @@ public class IndexAndShootCommand extends Command {
   private final Drive drive;
   private final Hopper hopper;
 
-  private final double MAX_RPM = 5000; // TODO: find actual max RPM for shooter
-  private final double g = 32.174; // ft/s^2 //gravity constant
-  private final double h = 0; // oomf factor
-  private final double flywheelRadiousInInches = 2.0; // TODO: find actual value
-  private final double shooterAngle = 55.0;
-  // CALCULATIONS
-  private final Distance hubHeight = Inches.of(80.0);
-  private final Translation2d hubPosition =
-      new Translation2d(Inches.of(181.56), Inches.of(316.64 / 2));
-  private final Transform3d shootertoRobotCenter =
-      new Transform3d(
-          Inches.of(-8),
-          Inches.of(4.5),
-          Inches.of(16.25),
-          new Rotation3d(new Rotation2d(Degrees.of(0))));
-
   public IndexAndShootCommand(Shooter shooter, Hopper hopper, Indexer indexer, Drive drive) {
     this.shooter = shooter;
     this.hopper = hopper;
@@ -53,7 +27,7 @@ public class IndexAndShootCommand extends Command {
 
   @Override
   public void initialize() {
-    shooter.runVelocity(getShooterVelocityWithAngle(drive.getPose()));
+    shooter.runVelocity(ShooterCommandsUtil.getShooterVelocitytoHub(drive.getPose()));
   }
 
   @Override
@@ -62,7 +36,13 @@ public class IndexAndShootCommand extends Command {
     if (shooter.isAtGoal()) {
       indexer.runVelocity(RPM.of(300)); // TODO: find actual value for indexer velocity
     }
-    shooter.runVelocity(getShooterVelocityWithAngle(drive.getPose()));
+    if (Constants.robot == RobotType.SIMBOT) {
+      // In simulation, we can just pop fuel immediately when the indexer is running
+      if (hopper.popFuel()) {
+        RobotContainer.launchFuel(ShooterCommandsUtil.getShooterVelocitytoHub(drive.getPose()));
+      }
+    }
+    shooter.runVelocity(ShooterCommandsUtil.getShooterVelocitytoHub(drive.getPose()));
   }
 
   @Override
@@ -73,48 +53,10 @@ public class IndexAndShootCommand extends Command {
 
   @Override
   public boolean isFinished() {
+    if (Constants.robot == RobotType.SIMBOT) {
+      // In simulation, we can end the command once we've popped all the fuel
+      return hopper.isEmpty();
+    }
     return false; // TODO: implement actual logic to determine when finished
-  }
-
-  private AngularVelocity getShooterVelocity(
-      Pose2d robotPosition) { // TODO: Remove old method if no longer needed
-    /* ALL UNITS IN THIS METHOD ARE IN FEET */
-    Pose3d shooterPose3d =
-        new Pose3d(robotPosition)
-            .plus(shootertoRobotCenter); // TODO: verify this transformation is correct
-    double Xs =
-        Units.metersToFeet(
-            shooterPose3d.getTranslation().toTranslation2d().getDistance(hubPosition));
-    double Y0 = 0;
-    double Ys = Y0 + Units.metersToFeet(shootertoRobotCenter.getZ());
-    double Vy = Math.sqrt((h * h) + ((hubHeight.in(Foot) / 12) - Ys) * 32 * 2);
-    double tm = (Vy - h) / 32;
-    double Vx = Xs / tm;
-    double v = Math.sqrt((Vy * Vy) + (Vx * Vx));
-    double vRPM = (v * 12) / (Math.PI * flywheelRadiousInInches) * 60;
-    return RPM.of(vRPM);
-  }
-
-  private AngularVelocity getShooterVelocityWithAngle(Pose2d robotPosition) {
-    /* ALL UNITS IN THIS METHOD ARE IN FEET */
-    Pose3d shooterPose3d =
-        new Pose3d(robotPosition)
-            .plus(shootertoRobotCenter); // TODO: verify this transformation is correct
-    double xs =
-        Units.metersToFeet(
-            shooterPose3d.getTranslation().toTranslation2d().getDistance(hubPosition));
-    double ys = Units.metersToFeet(shooterPose3d.getTranslation().getY());
-    double ThetaS = Math.toRadians(shooterAngle); // TODO: find actual shooter angle
-    double xT = 0;
-    double yT = hubHeight.in(Inches) / 12; // TODO: Double check the units here w/ Mr. Dumet
-    double Dx = xT - xs;
-    double Dy = yT - ys;
-    double denom = (Dx * Math.tan(ThetaS) - Dy);
-    if (denom <= 0)
-      return RPM.of(0); // Cannot shoot if target is too close or at the same height as shooter
-    double v0 = Math.sqrt((g * Math.pow(Dx, 2)) / ((2 * Math.pow(Math.cos(ThetaS), 2)) * denom));
-    double vRPM = (v0 * 60 * 12) / (2 * Math.PI * flywheelRadiousInInches);
-    vRPM = MathUtil.clamp(vRPM, 0, MAX_RPM); // TODO: find actual max RPM for shooter
-    return RPM.of(vRPM);
   }
 }
