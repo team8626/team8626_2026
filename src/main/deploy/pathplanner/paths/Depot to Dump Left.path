@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.2150222222222222,
-        "y": 5.9497833333333325
+        "x": 0.8,
+        "y": 5.95
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.8289222222222223,
-        "y": 5.983888888888889
+        "x": 1.8778091434872464,
+        "y": 6.341412994020971
       },
       "isLocked": false,
       "linkedName": "Depot"
@@ -20,8 +20,8 @@
         "y": 7.441
       },
       "prevControl": {
-        "x": 2.8717992424242422,
-        "y": 7.0091439393939385
+        "x": 2.6385060253126627,
+        "y": 7.019003970699847
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,7 +31,20 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "CollectDone",
+      "waypointRelativePos": 0.21004204734219412,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "RampUp",
+      "waypointRelativePos": 0.42877425098231836,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
