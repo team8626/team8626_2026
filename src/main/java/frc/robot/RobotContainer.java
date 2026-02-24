@@ -17,6 +17,7 @@ import static edu.wpi.first.units.Units.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.events.EventTrigger;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -27,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.Constants.Dimensions;
 import frc.robot.commands.AlignToTargetCommand;
@@ -52,6 +54,7 @@ import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.util.FuelSim;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -80,7 +83,7 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> autoChooser;
 
   // Fuel Simulation
-  public FuelSim fuelSim;
+  public static FuelSim fuelSim;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -160,23 +163,12 @@ public class RobotContainer {
     }
 
     // Set up auto routines
+    configurePPNamedCommands();
+    configurePPEventTriggers();
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     // Set up SysId routines
-    autoChooser.addOption(
-        "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
-    autoChooser.addOption(
-        "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Forward)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Reverse)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    configureSysIdRoutines();
 
     // Set up commands
     teleopDrive = new TeleopDriveCommand(drive, controller);
@@ -185,7 +177,8 @@ public class RobotContainer {
     configureButtonBindings();
 
     // Configure named commands
-    configureNamedCommands();
+    // configureNamedCommands();
+
   }
 
   /**
@@ -253,34 +246,70 @@ public class RobotContainer {
         Dimensions.BUMPER_HEIGHT.in(Meters),
         drive::getPose,
         drive::getFieldSpeeds);
-    // fuelSim.registerIntake(
-    //         -Dimensions.FULL_LENGTH.div(2).in(Meters),
-    //         Dimensions.FULL_LENGTH.div(2).in(Meters),
-    //         -Dimensions.FULL_WIDTH.div(2).plus(Inches.of(7)).in(Meters),
-    //         -Dimensions.FULL_WIDTH.div(2).in(Meters),
-    //         intakes.right.deployedTrigger.and(ableToIntake),
-    //         intakeCallback);
-    // fuelSim.registerIntake(
-    //         -Dimensions.FULL_LENGTH.div(2).in(Meters),
-    //         Dimensions.FULL_LENGTH.div(2).in(Meters),
-    //         Dimensions.FULL_WIDTH.div(2).in(Meters),
-    //         Dimensions.FULL_WIDTH.div(2).plus(Inches.of(7)).in(Meters),
-    //         intakes.left.deployedTrigger.and(ableToIntake),
-    //         intakeCallback);
   }
 
   public static Trigger getHubAimTrigger() { // TODO: might need to change the button for this
     return controller.x();
   }
 
-  /** Configure named commands to be identified by autos and paths. */
-  private void configureNamedCommands() {
+  /**
+   * Configure named commands to be identified by autos and paths. These are for instant commands
+   * that can be triggered by auto builders and path planners.
+   */
+  private void configurePPNamedCommands() {
+
     NamedCommands.registerCommand(
-        "RunIndexerFor8Seconds", IndexerCommands.runForDuration(index, 8.0));
+        "AimAndDumpShort",
+        Commands.defer(() -> new IndexerStartCommand(index), Set.of(index, /* shooter, */ drive))
+            .withTimeout(AutoConstants.DUMP_DURATION_SHORT.in(Seconds)));
     NamedCommands.registerCommand(
-        "AlignToFrontCamera", AlignToTargetCommand.alignToFrontCamera(drive, vision));
+        "AimAndDumpMedium",
+        Commands.defer(() -> new IndexerStartCommand(index), Set.of(index, /* shooter, */ drive))
+            .withTimeout(AutoConstants.DUMP_DURATION_MEDIUM.in(Seconds)));
     NamedCommands.registerCommand(
-        "AlignToBackCamera", AlignToTargetCommand.alignToBackCamera(drive, vision));
+        "AimAndDumpLong",
+        Commands.defer(() -> new IndexerStartCommand(index), Set.of(index, /* shooter, */ drive))
+            .withTimeout(AutoConstants.DUMP_DURATION_LONG.in(Seconds)));
+  }
+
+  /**
+   * Configure event triggers to be identified by autos and paths. These are for non-instant
+   * commands that need to be triggered by events in the middle of paths.
+   */
+  private void configurePPEventTriggers() {
+    new EventTrigger("CollectStart")
+        .whileTrue(Commands.print("--- PP Event Trigger - CollectStart"));
+    new EventTrigger("CollectDone").whileTrue(Commands.print("--- PP Event Trigger - CollectDone"));
+    new EventTrigger("RampUp").whileTrue(Commands.print("--- PP Event Trigger - RampUp"));
+  }
+
+  /**
+   * Configure SysId routines to be identified by autos and paths. These will show up on the
+   * dashboard and can be run to collect data for system identification.
+   */
+  private void configureSysIdRoutines() {
+    SmartDashboard.putData(
+        DriveCommands.wheelRadiusCharacterization(drive)
+            .withName("Characterization/Drive Wheel Radius"));
+    SmartDashboard.putData(
+        DriveCommands.feedforwardCharacterization(drive)
+            .withName("Characterization/Drive Simple FF"));
+    SmartDashboard.putData(
+        drive
+            .sysIdQuasistatic(SysIdRoutine.Direction.kForward)
+            .withName("Characterization/Drive Quasistatic Forward"));
+    SmartDashboard.putData(
+        drive
+            .sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
+            .withName("Characterization/Drive Quasistatic Reverse"));
+    SmartDashboard.putData(
+        drive
+            .sysIdDynamic(SysIdRoutine.Direction.kForward)
+            .withName("Characterization/Drive Dynamic Forward"));
+    SmartDashboard.putData(
+        drive
+            .sysIdDynamic(SysIdRoutine.Direction.kReverse)
+            .withName("Characterization/Drive Dynamic Reverse"));
   }
 
   /**
