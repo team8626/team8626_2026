@@ -20,6 +20,7 @@ import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.subsystems.drive.DriveConstants;
 
@@ -141,5 +142,11 @@ public final class Constants {
                 DriveConstants.DRIVE_MOTOR_CURRENT_LIMIT,
                 1),
             DriveConstants.MODULE_TRANSLATIONS.get());
+
+    // --------------------------------------------------------------------------
+    // Dump duration for Autos
+    public static final Time DUMP_DURATION_SHORT = Seconds.of(1.0);
+    public static final Time DUMP_DURATION_MEDIUM = Seconds.of(2.0);
+    public static final Time DUMP_DURATION_LONG = Seconds.of(3.0);
   }
 }
