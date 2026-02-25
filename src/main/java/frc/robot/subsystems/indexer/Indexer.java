@@ -13,7 +13,7 @@
 
 package frc.robot.subsystems.indexer;
 
-import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -50,7 +50,8 @@ public class Indexer extends SubsystemBase {
   private final LoggedTunableNumber flywheelKS =
       new LoggedTunableNumber("Spindexer/Flywheel/kS", IndexerConstants.velocityKs);
   private final LoggedTunableNumber flywheelRPM =
-      new LoggedTunableNumber("Spindexer/Flywheel/WheelRPM", 0);
+      new LoggedTunableNumber(
+          "Spindexer/Flywheel/WheelRPM", IndexerConstants.DEFAULT_VELOCITY.in(RPM));
 
   public Indexer(IndexerIO io) {
     this.io = io;
@@ -102,6 +103,10 @@ public class Indexer extends SubsystemBase {
     return inputs.actualWheelVelocity;
   }
 
+  public AngularVelocity getDesiredVelocity() {
+    return inputs.desiredWheelVelocity;
+  }
+
   public boolean isConnected() {
     return inputs.connected;
   }
@@ -122,8 +127,9 @@ public class Indexer extends SubsystemBase {
       io.setPID(flywheelKP.get(), flywheelKD.get(), flywheelKV.get(), flywheelKS.get());
     }
 
-    if (flywheelRPM.hasChanged(hashCode())) {
-      io.setVelocity(RPM.of(flywheelRPM.get()));
-    }
+    // TODO: Update velocity on the fly
+    // if (flywheelRPM.hasChanged(hashCode())) {
+    //   io.setVelocity(RPM.of(flywheelRPM.get()));
+    // }
   }
 }

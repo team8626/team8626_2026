@@ -13,14 +13,14 @@
 
 package frc.robot.subsystems.indexer;
 
-import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.units.measure.AngularVelocity;
 
 public class IndexerConstants {
   // Default values
-  public static final AngularVelocity DEFAULT_VELOCITY = RPM.of(1500.0);
-  public static final AngularVelocity VELOCITY_TOLERANCE = RPM.of(100.0);
+  public static final AngularVelocity DEFAULT_VELOCITY = RotationsPerSecond.of(10.0);
+  public static final AngularVelocity VELOCITY_TOLERANCE = RotationsPerSecond.of(1);
 
   // Mechanical configuration
   public static final double GEAR_REDUCTION = 3.0;
