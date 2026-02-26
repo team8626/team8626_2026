@@ -1,19 +1,11 @@
-// Copyright 2021-2025 FRC 6328
+// Copyright (c) 2021-2026 Littleton Robotics
 // http://github.com/Mechanical-Advantage
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// version 3 as published by the Free Software Foundation or
-// available in the root directory of this project.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// Use of this source code is governed by a BSD
+// license that can be found in the LICENSE file
+// at the root directory of this project.
 
 package frc.robot.subsystems.drive;
-
-import static frc.robot.subsystems.drive.DriveConstants.*;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
@@ -24,24 +16,32 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import frc.robot.Constants.RobotConstants;
+import frc.robot.subsystems.drive.DriveConstants.Rebuilt_SwerveConstants;
 import java.util.Queue;
 
 /** IO implementation for Pigeon 2. */
 public class GyroIOPigeon2 implements GyroIO {
-  private final Pigeon2 pigeon = new Pigeon2(pigeonCanId);
+  private final Pigeon2 pigeon =
+      new Pigeon2(Rebuilt_SwerveConstants.PIGEON_ID, RobotConstants.CAN_FD_BUS);
   private final StatusSignal<Angle> yaw = pigeon.getYaw();
   private final Queue<Double> yawPositionQueue;
   private final Queue<Double> yawTimestampQueue;
   private final StatusSignal<AngularVelocity> yawVelocity = pigeon.getAngularVelocityZWorld();
 
   public GyroIOPigeon2() {
-    pigeon.getConfigurator().apply(new Pigeon2Configuration());
+    if (Rebuilt_SwerveConstants.PIGEON_CONFIGS != null) {
+      pigeon.getConfigurator().apply(Rebuilt_SwerveConstants.PIGEON_CONFIGS);
+    } else {
+      pigeon.getConfigurator().apply(new Pigeon2Configuration());
+    }
+
     pigeon.getConfigurator().setYaw(0.0);
-    yaw.setUpdateFrequency(odometryFrequency);
+    yaw.setUpdateFrequency(DriveConstants.ODOMETRY_UPDATE_FREQ);
     yawVelocity.setUpdateFrequency(50.0);
     pigeon.optimizeBusUtilization();
-    yawTimestampQueue = SparkOdometryThread.getInstance().makeTimestampQueue();
-    yawPositionQueue = SparkOdometryThread.getInstance().registerSignal(yaw::getValueAsDouble);
+    yawTimestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
+    yawPositionQueue = PhoenixOdometryThread.getInstance().registerSignal(yaw.clone());
   }
 
   @Override

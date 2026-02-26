@@ -13,7 +13,16 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.*;
+
+import com.ctre.phoenix6.CANBus;
+import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.RobotConfig;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.RobotBase;
+import frc.robot.subsystems.drive.DriveConstants;
 
 /**
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
@@ -21,21 +30,123 @@ import edu.wpi.first.wpilibj.RobotBase;
  * (log replay from a file).
  */
 public final class Constants {
+  public static final RobotType robot = RobotType.SIMBOT;
+
+  public static final boolean tuningMode = false;
+
   public static final Mode simMode = Mode.SIM;
-  public static final Mode realMode = Mode.SPARK;
+  public static final Mode realMode = Mode.REAL;
   public static final Mode currentMode = RobotBase.isReal() ? realMode : simMode;
 
   public static enum Mode {
     /** Running on a real robot. */
-    CTRE,
-
-    /** DEV bot on spark */
-    SPARK,
+    REAL,
 
     /** Running a physics simulator. */
     SIM,
 
     /** Replaying from a log file. */
     REPLAY
+  }
+
+  public static enum RobotType {
+    REBUILT_COMPBOT,
+    TSUNAMI,
+    SIMBOT
+  }
+
+  public static boolean disableHAL = false;
+
+  public static void disableHAL() {
+    disableHAL = true;
+  }
+
+  /** Checks whether the correct robot is selected when deploying. */
+  public static class CheckDeploy {
+    public static void main(String... args) {
+      if (robot == RobotType.SIMBOT) {
+        System.err.println("Cannot deploy, invalid robot selected: " + robot);
+        System.exit(1);
+      }
+    }
+  }
+
+  /** Checks that the default robot is selected and tuning mode is disabled. */
+  public static class CheckPullRequest {
+    public static void main(String... args) {
+      if (robot != RobotType.REBUILT_COMPBOT || tuningMode) {
+        System.err.println("Do not merge, non-default constants are configured.");
+        System.exit(1);
+      }
+    }
+  }
+
+  public static class RobotConstants {
+
+    public static final CANBus CAN_FD_BUS = new CANBus("Bobby");
+    public static final CANBus CAN_RIO_BUS = new CANBus("rio");
+
+    public static final NetworkTableInstance INST = NetworkTableInstance.getDefault();
+  }
+
+  public static class Dimensions {
+    public static final Distance BUMPER_THICKNESS; // frame to edge of bumper
+    public static final Distance BUMPER_HEIGHT; // height from floor to top of bumper
+    public static final Distance FRAME_SIZE_Y; // left to right (y-axis)
+    public static final Distance FRAME_SIZE_X; // front to back (x-axis)
+
+    static {
+      switch (robot) {
+        case REBUILT_COMPBOT, SIMBOT -> {
+          BUMPER_THICKNESS = Inches.of(3.625);
+          BUMPER_HEIGHT = Inches.of(7);
+          FRAME_SIZE_Y = Inches.of(27.5);
+          FRAME_SIZE_X = Inches.of(27);
+        }
+        case TSUNAMI -> {
+          BUMPER_THICKNESS = Inches.of(4);
+          BUMPER_HEIGHT = Inches.of(7);
+          FRAME_SIZE_Y = Inches.of(27);
+          FRAME_SIZE_X = Inches.of(27);
+        }
+        default -> throw new IllegalStateException("Unexpected robot: " + robot);
+      }
+    }
+
+    public static final Distance FULL_WIDTH = FRAME_SIZE_Y.plus(BUMPER_THICKNESS.times(2));
+    public static final Distance FULL_LENGTH = FRAME_SIZE_X.plus(BUMPER_THICKNESS.times(2));
+  }
+
+  public static class ControllerConstants {
+    public static final int DRIVERPORT = 0;
+    public static final int OPERATORPORT = 1;
+
+    public static final double DEADBAND = 0.1;
+  }
+
+  public static class AutoConstants {
+    // --------------------------------------------------------------------------
+    // PathPlanner configuration
+    public static final double robotMassKg = 60;
+    public static final double robotMOI = 13.4;
+    public static final RobotConfig PP_CONFIG =
+        new RobotConfig(
+            robotMassKg,
+            robotMOI,
+            new ModuleConfig(
+                DriveConstants.WHEEL_RADIUS,
+                DriveConstants.SPEED_AT_12V,
+                DriveConstants.WHEEL_COF,
+                DriveConstants.DRIVE_GEARBOX,
+                DriveConstants.DRIVE_GEAR_RATIO,
+                DriveConstants.DRIVE_MOTOR_CURRENT_LIMIT,
+                1),
+            DriveConstants.MODULE_TRANSLATIONS.get());
+
+    // --------------------------------------------------------------------------
+    // Dump duration for Autos
+    public static final Time DUMP_DURATION_SHORT = Seconds.of(1.0);
+    public static final Time DUMP_DURATION_MEDIUM = Seconds.of(2.0);
+    public static final Time DUMP_DURATION_LONG = Seconds.of(3.0);
   }
 }

@@ -1,0 +1,61 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "AimAndDumpShort"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Dump Left to Depot"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Depot to Dump Left"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AimAndDumpMedium"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Dump Left to Trench Left"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Collect Forward 1 Left"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Trench Left to Dump Left"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AimAndDumpLong"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": false,
+  "folder": null,
+  "choreoAuto": false
+}

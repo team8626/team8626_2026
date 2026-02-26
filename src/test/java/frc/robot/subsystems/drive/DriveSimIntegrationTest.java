@@ -13,6 +13,7 @@
 
 package frc.robot.subsystems.drive;
 
+import static edu.wpi.first.units.Units.Meters;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -36,10 +37,10 @@ public class DriveSimIntegrationTest {
   private static final double POSITION_TOLERANCE_METERS = 0.1;
 
   private GyroIOSim gyroIO;
-  private ModuleIOSim flModuleIO;
-  private ModuleIOSim frModuleIO;
-  private ModuleIOSim blModuleIO;
-  private ModuleIOSim brModuleIO;
+  private ModuleIOSimSpark flModuleIO;
+  private ModuleIOSimSpark frModuleIO;
+  private ModuleIOSimSpark blModuleIO;
+  private ModuleIOSimSpark brModuleIO;
   private Drive drive;
 
   @BeforeAll
@@ -50,10 +51,14 @@ public class DriveSimIntegrationTest {
   @BeforeEach
   void setUp() {
     gyroIO = new GyroIOSim();
-    flModuleIO = new ModuleIOSim();
-    frModuleIO = new ModuleIOSim();
-    blModuleIO = new ModuleIOSim();
-    brModuleIO = new ModuleIOSim();
+    // flModuleIO = new ModuleIOSim(Rebuilt_SwerveConstants.FrontLeft.MODULE_CONSTANTS);
+    // frModuleIO = new ModuleIOSim(Rebuilt_SwerveConstants.FrontRight.MODULE_CONSTANTS);
+    // blModuleIO = new ModuleIOSim(Rebuilt_SwerveConstants.BackLeft.MODULE_CONSTANTS);
+    // brModuleIO = new ModuleIOSim(Rebuilt_SwerveConstants.BackRight.MODULE_CONSTANTS);
+    flModuleIO = new ModuleIOSimSpark();
+    frModuleIO = new ModuleIOSimSpark();
+    blModuleIO = new ModuleIOSimSpark();
+    brModuleIO = new ModuleIOSimSpark();
 
     drive = new Drive(gyroIO, flModuleIO, frModuleIO, blModuleIO, brModuleIO);
     drive.periodic();
@@ -256,7 +261,7 @@ public class DriveSimIntegrationTest {
 
     // Verify modules don't exceed max speed (in rad/s at the wheel)
     double maxModuleSpeed =
-        drive.getMaxLinearSpeedMetersPerSec() / DriveConstants.wheelRadiusMeters;
+        drive.getMaxLinearSpeedMetersPerSec() / DriveConstants.WHEEL_RADIUS.in(Meters);
 
     double[] positions1 = drive.getWheelRadiusCharacterizationPositions();
     updateDrive();

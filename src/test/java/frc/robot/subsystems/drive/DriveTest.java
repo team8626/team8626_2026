@@ -13,6 +13,9 @@
 
 package frc.robot.subsystems.drive;
 
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -195,13 +198,18 @@ public class DriveTest {
 
   @Test
   void testGetMaxLinearSpeed() {
-    assertEquals(DriveConstants.maxSpeedMetersPerSec, drive.getMaxLinearSpeedMetersPerSec(), DELTA);
+    assertEquals(
+        DriveConstants.SPEED_AT_12V.in(MetersPerSecond),
+        drive.getMaxLinearSpeedMetersPerSec(),
+        DELTA);
   }
 
   @Test
   void testGetMaxAngularSpeed() {
     double expectedAngularSpeed =
-        DriveConstants.maxSpeedMetersPerSec / DriveConstants.driveBaseRadius;
+        DriveConstants.DEFAULT_ROT_SPEED.in(RadiansPerSecond)
+            / DriveConstants.DRIVE_BASE_RADIUS.in(Meters);
+
     assertEquals(expectedAngularSpeed, drive.getMaxAngularSpeedRadPerSec(), DELTA);
   }
 
@@ -299,14 +307,15 @@ public class DriveTest {
     drive.periodic();
 
     // Command velocities that exceed max speed
-    double excessiveSpeed = DriveConstants.maxSpeedMetersPerSec * 2.0;
+    double excessiveSpeed = DriveConstants.SPEED_AT_12V.in(MetersPerSecond) * 2.0;
     ChassisSpeeds speeds = new ChassisSpeeds(excessiveSpeed, excessiveSpeed, 0.0);
     drive.runVelocity(speeds);
 
     // Module velocities should be desaturated (scaled down)
     // All modules should have non-zero but limited velocities
     // The exact values depend on kinematics, but none should exceed max
-    double maxModuleSpeed = DriveConstants.maxSpeedMetersPerSec / DriveConstants.wheelRadiusMeters;
+    double maxModuleSpeed =
+        DriveConstants.SPEED_AT_12V.in(MetersPerSecond) / DriveConstants.WHEEL_RADIUS.in(Meters);
 
     assertTrue(Math.abs(flModuleIO.lastDriveVelocitySetpoint) <= maxModuleSpeed + DELTA);
     assertTrue(Math.abs(frModuleIO.lastDriveVelocitySetpoint) <= maxModuleSpeed + DELTA);
