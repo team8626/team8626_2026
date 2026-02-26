@@ -13,8 +13,15 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import org.littletonrobotics.frc2026.util.geometry.AllianceFlipUtil;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -32,6 +39,7 @@ import org.littletonrobotics.urcl.URCL;
 public class Robot extends LoggedRobot {
   private Command autonomousCommand;
   private RobotContainer robotContainer;
+  private final Field2d m_field = new Field2d();
 
   public Robot() {
     // Record metadata
@@ -85,6 +93,9 @@ public class Robot extends LoggedRobot {
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
     robotContainer = new RobotContainer();
+
+    // In robotInit() or teleopInit()
+    SmartDashboard.putData("Field", m_field);
   }
 
   /** This function is called periodically during all modes. */
@@ -103,6 +114,9 @@ public class Robot extends LoggedRobot {
 
     // Return to non-RT thread priority (do not modify the first argument)
     // Threads.setCurrentThreadPriority(false, 10);
+
+    // Update the field in the dashboard
+    m_field.setRobotPose(robotContainer.drive.getPose());
   }
 
   /** This function is called once when the robot is disabled. */
@@ -122,6 +136,12 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       CommandScheduler.getInstance().schedule(autonomousCommand);
     }
+    if (Constants.robot == Constants.RobotType.SIMBOT) {
+      robotContainer.drive.setPose(
+          AllianceFlipUtil.apply(new Pose2d(3.6, 0.64, new Rotation2d(Degrees.of(72)))));
+      RobotContainer.fuelSim.clearFuel();
+      RobotContainer.fuelSim.spawnStartingFuel();
+    }
   }
 
   /** This function is called periodically during autonomous. */
@@ -137,6 +157,12 @@ public class Robot extends LoggedRobot {
     // this line or comment it out.
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
+    }
+    if (Constants.robot == Constants.RobotType.SIMBOT) {
+      robotContainer.drive.setPose(
+          AllianceFlipUtil.apply(new Pose2d(0.5, 0.5, new Rotation2d(Degrees.of(0)))));
+      RobotContainer.fuelSim.clearFuel();
+      RobotContainer.fuelSim.spawnStartingFuel();
     }
   }
 
@@ -162,6 +188,8 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {
-    robotContainer.fuelSim.updateSim();
+    if (Constants.robot == Constants.RobotType.SIMBOT) {
+      RobotContainer.fuelSim.updateSim();
+    }
   }
 }
