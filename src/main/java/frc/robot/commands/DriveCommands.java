@@ -13,6 +13,8 @@
 
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.*;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -266,7 +268,7 @@ public class DriveCommands {
                         wheelDelta += Math.abs(positions[i] - state.positions[i]) / 4.0;
                       }
                       double wheelRadius =
-                          (state.gyroDelta * DriveConstants.driveBaseRadius) / wheelDelta;
+                          (state.gyroDelta * DriveConstants.WHEEL_RADIUS.in(Meters)) / wheelDelta;
 
                       NumberFormat formatter = new DecimalFormat("#0.000");
                       System.out.println(

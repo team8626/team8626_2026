@@ -13,35 +13,53 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.*;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.events.EventTrigger;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants.AutoConstants;
+import frc.robot.Constants.ControllerConstants;
+import frc.robot.Constants.Dimensions;
 import frc.robot.commands.AlignToTargetCommand;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IndexerCommands;
+import frc.robot.commands.IndexerStartCommand;
+import frc.robot.commands.TeleopDriveCommand;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.DriveConstants.Rebuilt_SwerveConstants;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOADIS16470;
+import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
-import frc.robot.subsystems.drive.ModuleIOSim;
+import frc.robot.subsystems.drive.ModuleIOSimTalonFX;
 import frc.robot.subsystems.drive.ModuleIOSpark;
+import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
 import frc.robot.subsystems.indexer.IndexerIOSpark;
+import frc.robot.subsystems.intakeLinkage.IntakeLinkage;
+import frc.robot.subsystems.intakeLinkage.IntakeLinkageIO;
+import frc.robot.subsystems.intakeLinkage.IntakeLinkageIOSim;
+import frc.robot.subsystems.intakeLinkage.IntakeLinkageIOSpark;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOSim;
+import frc.robot.util.FuelSim;
+import java.util.Set;
+import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -52,20 +70,30 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  */
 public class RobotContainer {
   // Subsystems
-  private final Drive drive;
+  public final Drive drive;
   private final Indexer index;
+  private final IntakeLinkage intakeLinkage;
   private final Vision vision;
 
   // Controller
-  private final CommandXboxController controller = new CommandXboxController(0);
+  private static final CommandXboxController controller =
+      new CommandXboxController(ControllerConstants.DRIVERPORT);
+  // Commands
+  private final TeleopDriveCommand teleopDrive;
+
+  // Bindings
+  private final Trigger indexTrigger = controller.x();
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
+  // Fuel Simulation
+  public static FuelSim fuelSim;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    switch (Constants.currentMode) {
-      case SPARK:
+    switch (Constants.robot) {
+      case TSUNAMI:
         // DEV bot on Spark, instantiate hardware IO implementations
         drive =
             new Drive(
@@ -75,6 +103,7 @@ public class RobotContainer {
                 new ModuleIOSpark(2),
                 new ModuleIOSpark(3));
         index = new Indexer(new IndexerIOSpark());
+        intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSpark());
         vision =
             new Vision(
                 new VisionIOPhotonVision(),
@@ -82,16 +111,17 @@ public class RobotContainer {
                     drive.addVisionMeasurement(
                         measurement.pose, measurement.timestamp, measurement.stdDevs));
         break;
-      case CTRE:
+      case REBUILT_COMPBOT:
         // Real robot, instantiate hardware IO implementations
         drive =
             new Drive(
-                new GyroIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {});
+                new GyroIOPigeon2(),
+                new ModuleIOTalonFX(Rebuilt_SwerveConstants.FrontLeft.MODULE_CONSTANTS),
+                new ModuleIOTalonFX(Rebuilt_SwerveConstants.FrontRight.MODULE_CONSTANTS),
+                new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackLeft.MODULE_CONSTANTS),
+                new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackRight.MODULE_CONSTANTS));
         index = new Indexer(new IndexerIO() {});
+        intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSpark());
         vision =
             new Vision(
                 new VisionIOPhotonVision(),
@@ -100,16 +130,22 @@ public class RobotContainer {
                         measurement.pose, measurement.timestamp, measurement.stdDevs));
         break;
 
-      case SIM:
+      case SIMBOT:
         // Sim robot, instantiate physics sim IO implementations
         drive =
             new Drive(
                 new GyroIO() {},
-                new ModuleIOSim(),
-                new ModuleIOSim(),
-                new ModuleIOSim(),
-                new ModuleIOSim());
+                // new ModuleIOSimSpark() {},
+                // new ModuleIOSimSpark() {},
+                // new ModuleIOSimSpark() {},
+                // new ModuleIOSimSpark() {});
+                new ModuleIOSimTalonFX(Rebuilt_SwerveConstants.FrontLeft.MODULE_CONSTANTS),
+                new ModuleIOSimTalonFX(Rebuilt_SwerveConstants.FrontRight.MODULE_CONSTANTS),
+                new ModuleIOSimTalonFX(Rebuilt_SwerveConstants.BackLeft.MODULE_CONSTANTS),
+                new ModuleIOSimTalonFX(Rebuilt_SwerveConstants.BackRight.MODULE_CONSTANTS));
         index = new Indexer(new IndexerIOSim());
+        intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSim());
+
         vision =
             new Vision(
                 new VisionIOSim(),
@@ -117,6 +153,8 @@ public class RobotContainer {
                     drive.addVisionMeasurement(
                         measurement.pose, measurement.timestamp, measurement.stdDevs));
         vision.setPoseSupplier(drive::getPose); // Provide current pose for simulation
+        configureFuelSim();
+        configureFuelSimRobot(() -> false, () -> {});
         break;
 
       default:
@@ -129,34 +167,28 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {});
         index = new Indexer(new IndexerIO() {});
+        intakeLinkage = new IntakeLinkage(new IntakeLinkageIO() {});
         vision = new Vision(new VisionIO() {}, (measurement) -> {});
         break;
     }
 
     // Set up auto routines
+    configurePPNamedCommands();
+    configurePPEventTriggers();
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     // Set up SysId routines
-    autoChooser.addOption(
-        "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
-    autoChooser.addOption(
-        "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Forward)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Reverse)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    configureSysIdRoutines();
+
+    // Set up commands
+    teleopDrive = new TeleopDriveCommand(drive, controller);
 
     // Configure the button bindings
     configureButtonBindings();
 
     // Configure named commands
-    configureNamedCommands();
+    // configureNamedCommands();
+
   }
 
   /**
@@ -167,23 +199,7 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     // Default command, normal field-relative drive
-    // Left stick for field navigation, triggers for rotation (right - left)
-    drive.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            drive,
-            () -> controller.getLeftY(),
-            () -> controller.getLeftX(),
-            () -> controller.getRightTriggerAxis() - controller.getLeftTriggerAxis(),
-            () -> {
-              // Blue alliance: flip 180° to match field orientation from driver's perspective
-              boolean isBlue =
-                  DriverStation.getAlliance().isPresent()
-                      && DriverStation.getAlliance().get() == Alliance.Blue;
-              return isBlue
-                  ? drive.getRotation()
-                  : drive.getRotation().plus(new Rotation2d(Math.PI));
-            }));
-
+    drive.setDefaultCommand(teleopDrive);
     // Lock to 0° when A button is held
     controller
         .a()
@@ -214,16 +230,96 @@ public class RobotContainer {
     // Align to front camera's best AprilTag (POV-Up) or back camera's best (POV-Down)
     controller.povUp().whileTrue(AlignToTargetCommand.alignToFrontCamera(drive, vision));
     controller.povDown().whileTrue(AlignToTargetCommand.alignToBackCamera(drive, vision));
+
+    indexTrigger.toggleOnTrue(new IndexerStartCommand(this.index));
   }
 
-  /** Configure named commands to be identified by autos and paths. */
-  private void configureNamedCommands() {
+  private void configureFuelSim() {
+    fuelSim = new FuelSim();
+    fuelSim.spawnStartingFuel();
+
+    fuelSim.start();
+    SmartDashboard.putData(
+        Commands.runOnce(
+                () -> {
+                  fuelSim.clearFuel();
+                  fuelSim.spawnStartingFuel();
+                })
+            .withName("Reset Fuel")
+            .ignoringDisable(true));
+  }
+
+  private void configureFuelSimRobot(BooleanSupplier ableToIntake, Runnable intakeCallback) {
+    fuelSim.registerRobot(
+        Dimensions.FULL_WIDTH.in(Meters),
+        Dimensions.FULL_LENGTH.in(Meters),
+        Dimensions.BUMPER_HEIGHT.in(Meters),
+        drive::getPose,
+        drive::getFieldSpeeds);
+  }
+
+  public static Trigger getHubAimTrigger() { // TODO: might need to change the button for this
+    return controller.x();
+  }
+
+  /**
+   * Configure named commands to be identified by autos and paths. These are for instant commands
+   * that can be triggered by auto builders and path planners.
+   */
+  private void configurePPNamedCommands() {
+
     NamedCommands.registerCommand(
-        "RunIndexerFor8Seconds", IndexerCommands.runForDuration(index, 8.0));
+        "AimAndDumpShort",
+        Commands.defer(() -> new IndexerStartCommand(index), Set.of(index, /* shooter, */ drive))
+            .withTimeout(AutoConstants.DUMP_DURATION_SHORT.in(Seconds)));
     NamedCommands.registerCommand(
-        "AlignToFrontCamera", AlignToTargetCommand.alignToFrontCamera(drive, vision));
+        "AimAndDumpMedium",
+        Commands.defer(() -> new IndexerStartCommand(index), Set.of(index, /* shooter, */ drive))
+            .withTimeout(AutoConstants.DUMP_DURATION_MEDIUM.in(Seconds)));
     NamedCommands.registerCommand(
-        "AlignToBackCamera", AlignToTargetCommand.alignToBackCamera(drive, vision));
+        "AimAndDumpLong",
+        Commands.defer(() -> new IndexerStartCommand(index), Set.of(index, /* shooter, */ drive))
+            .withTimeout(AutoConstants.DUMP_DURATION_LONG.in(Seconds)));
+  }
+
+  /**
+   * Configure event triggers to be identified by autos and paths. These are for non-instant
+   * commands that need to be triggered by events in the middle of paths.
+   */
+  private void configurePPEventTriggers() {
+    new EventTrigger("CollectStart")
+        .whileTrue(Commands.print("--- PP Event Trigger - CollectStart"));
+    new EventTrigger("CollectDone").whileTrue(Commands.print("--- PP Event Trigger - CollectDone"));
+    new EventTrigger("RampUp").whileTrue(Commands.print("--- PP Event Trigger - RampUp"));
+  }
+
+  /**
+   * Configure SysId routines to be identified by autos and paths. These will show up on the
+   * dashboard and can be run to collect data for system identification.
+   */
+  private void configureSysIdRoutines() {
+    SmartDashboard.putData(
+        DriveCommands.wheelRadiusCharacterization(drive)
+            .withName("Characterization/Drive Wheel Radius"));
+    SmartDashboard.putData(
+        DriveCommands.feedforwardCharacterization(drive)
+            .withName("Characterization/Drive Simple FF"));
+    SmartDashboard.putData(
+        drive
+            .sysIdQuasistatic(SysIdRoutine.Direction.kForward)
+            .withName("Characterization/Drive Quasistatic Forward"));
+    SmartDashboard.putData(
+        drive
+            .sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
+            .withName("Characterization/Drive Quasistatic Reverse"));
+    SmartDashboard.putData(
+        drive
+            .sysIdDynamic(SysIdRoutine.Direction.kForward)
+            .withName("Characterization/Drive Dynamic Forward"));
+    SmartDashboard.putData(
+        drive
+            .sysIdDynamic(SysIdRoutine.Direction.kReverse)
+            .withName("Characterization/Drive Dynamic Reverse"));
   }
 
   /**
