@@ -49,6 +49,10 @@ import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
 import frc.robot.subsystems.indexer.IndexerIOSpark;
+import frc.robot.subsystems.intakeLinkage.IntakeLinkage;
+import frc.robot.subsystems.intakeLinkage.IntakeLinkageIO;
+import frc.robot.subsystems.intakeLinkage.IntakeLinkageIOSim;
+import frc.robot.subsystems.intakeLinkage.IntakeLinkageIOSpark;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -68,6 +72,7 @@ public class RobotContainer {
   // Subsystems
   public final Drive drive;
   private final Indexer index;
+  private final IntakeLinkage intakeLinkage;
   private final Vision vision;
 
   // Controller
@@ -98,6 +103,7 @@ public class RobotContainer {
                 new ModuleIOSpark(2),
                 new ModuleIOSpark(3));
         index = new Indexer(new IndexerIOSpark());
+        intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSpark());
         vision =
             new Vision(
                 new VisionIOPhotonVision(),
@@ -115,6 +121,7 @@ public class RobotContainer {
                 new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackLeft.MODULE_CONSTANTS),
                 new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackRight.MODULE_CONSTANTS));
         index = new Indexer(new IndexerIO() {});
+        intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSpark());
         vision =
             new Vision(
                 new VisionIOPhotonVision(),
@@ -137,6 +144,8 @@ public class RobotContainer {
                 new ModuleIOSimTalonFX(Rebuilt_SwerveConstants.BackLeft.MODULE_CONSTANTS),
                 new ModuleIOSimTalonFX(Rebuilt_SwerveConstants.BackRight.MODULE_CONSTANTS));
         index = new Indexer(new IndexerIOSim());
+        intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSim());
+
         vision =
             new Vision(
                 new VisionIOSim(),
@@ -158,6 +167,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {});
         index = new Indexer(new IndexerIO() {});
+        intakeLinkage = new IntakeLinkage(new IntakeLinkageIO() {});
         vision = new Vision(new VisionIO() {}, (measurement) -> {});
         break;
     }
