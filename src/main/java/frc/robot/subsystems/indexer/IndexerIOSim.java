@@ -51,6 +51,9 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 public class IndexerIOSim implements IndexerIO {
   /** Simulates indexer motor dynamics (Neo Vortex + gearbox) for physics-accurate behavior. */
   private final DCMotorSim motorSim;
+
+  private boolean connected = true;
+
   /** PID used to correct velocity error when in velocity closed-loop mode. */
   private final PIDController velocityController =
       new PIDController(IndexerConstants.velocityKp, 0, IndexerConstants.velocityKd);
@@ -91,7 +94,7 @@ public class IndexerIOSim implements IndexerIO {
     motorSim.setInputVoltage(MathUtil.clamp(appliedVolts, -12.0, 12.0));
     motorSim.update(0.02);
 
-    inputs.connected = true;
+    inputs.connected = connected;
     inputs.actualWheelVelocity =
         motorSim.getAngularVelocity().divide(IndexerConstants.GEAR_REDUCTION);
     inputs.desiredWheelVelocity = desiredWheelVelocity;
@@ -135,5 +138,11 @@ public class IndexerIOSim implements IndexerIO {
     velocityController.setPID(new_kP, 0, new_kD);
     kV = new_kV;
     kS = new_kS;
+  }
+
+  // Use for unit testing purpose only
+  @Deprecated
+  public void disconnect() {
+    connected = false;
   }
 }
