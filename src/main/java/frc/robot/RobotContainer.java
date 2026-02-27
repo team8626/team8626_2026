@@ -20,6 +20,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.EventTrigger;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -33,7 +34,7 @@ import frc.robot.Constants.ControllerConstants;
 import frc.robot.Constants.Dimensions;
 import frc.robot.commands.AlignToTargetCommand;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.IndexerCommands;
+import frc.robot.commands.IndexAndShootCommand;
 import frc.robot.commands.IndexerStartCommand;
 import frc.robot.commands.TeleopDriveCommand;
 import frc.robot.subsystems.drive.Drive;
@@ -45,6 +46,8 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSimTalonFX;
 import frc.robot.subsystems.drive.ModuleIOSpark;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.hopper.Hopper;
+import frc.robot.subsystems.hopper.HopperIOSim;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
@@ -53,6 +56,9 @@ import frc.robot.subsystems.intakeLinkage.IntakeLinkage;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkageIO;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkageIOSim;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkageIOSpark;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterConstants;
+import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -74,6 +80,8 @@ public class RobotContainer {
   private final Indexer index;
   private final IntakeLinkage intakeLinkage;
   private final Vision vision;
+  private final Hopper hopper;
+  private final Shooter shooter;
 
   // Controller
   private static final CommandXboxController controller =
@@ -83,6 +91,7 @@ public class RobotContainer {
 
   // Bindings
   private final Trigger indexTrigger = controller.x();
+  private final Trigger shootTrigger = controller.y();
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -110,6 +119,9 @@ public class RobotContainer {
                 (measurement) ->
                     drive.addVisionMeasurement(
                         measurement.pose, measurement.timestamp, measurement.stdDevs));
+        hopper = new Hopper(new HopperIOSim());
+        shooter = new Shooter(new ShooterIOSim());
+
         break;
       case REBUILT_COMPBOT:
         // Real robot, instantiate hardware IO implementations
@@ -128,6 +140,9 @@ public class RobotContainer {
                 (measurement) ->
                     drive.addVisionMeasurement(
                         measurement.pose, measurement.timestamp, measurement.stdDevs));
+        hopper = new Hopper(new HopperIOSim());
+        shooter = new Shooter(new ShooterIOSim());
+
         break;
 
       case SIMBOT:
@@ -153,8 +168,11 @@ public class RobotContainer {
                     drive.addVisionMeasurement(
                         measurement.pose, measurement.timestamp, measurement.stdDevs));
         vision.setPoseSupplier(drive::getPose); // Provide current pose for simulation
+        shooter = new Shooter(new ShooterIOSim());
+
+        hopper = new Hopper(new HopperIOSim());
         configureFuelSim();
-        configureFuelSimRobot(() -> false, () -> {});
+        configureFuelSimRobot(hopper::ableToIntake, hopper::pushFuel);
         break;
 
       default:
@@ -169,6 +187,9 @@ public class RobotContainer {
         index = new Indexer(new IndexerIO() {});
         intakeLinkage = new IntakeLinkage(new IntakeLinkageIO() {});
         vision = new Vision(new VisionIO() {}, (measurement) -> {});
+        hopper = new Hopper(new HopperIOSim());
+        shooter = new Shooter(new ShooterIOSim());
+
         break;
     }
 
@@ -224,14 +245,13 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    // Run the indexer for 8 seconds at default velocity
-    controller.y().onTrue(IndexerCommands.runForDuration(index, 8.0));
-
     // Align to front camera's best AprilTag (POV-Up) or back camera's best (POV-Down)
     controller.povUp().whileTrue(AlignToTargetCommand.alignToFrontCamera(drive, vision));
     controller.povDown().whileTrue(AlignToTargetCommand.alignToBackCamera(drive, vision));
 
     indexTrigger.toggleOnTrue(new IndexerStartCommand(this.index));
+    shootTrigger.toggleOnTrue(
+        new IndexAndShootCommand(this.shooter, this.hopper, this.index, this.drive));
   }
 
   private void configureFuelSim() {
@@ -256,6 +276,23 @@ public class RobotContainer {
         Dimensions.BUMPER_HEIGHT.in(Meters),
         drive::getPose,
         drive::getFieldSpeeds);
+
+    fuelSim.registerIntake(
+        Dimensions.FULL_LENGTH.div(2).in(Meters),
+        Dimensions.FULL_LENGTH.div(2).plus(Inches.of(7)).in(Meters),
+        -Dimensions.FULL_WIDTH.div(2).in(Meters),
+        Dimensions.FULL_WIDTH.div(2).in(Meters),
+        ableToIntake,
+        intakeCallback);
+  }
+
+  public static void launchFuel(AngularVelocity flywheelVelocity) {
+    fuelSim.launchFuel(
+        MetersPerSecond.of(
+            flywheelVelocity.in(RadiansPerSecond) * ShooterConstants.flywheelRadius.in(Meters)),
+        ShooterConstants.shooterAngle,
+        Degrees.of(ShooterConstants.shootertoRobotCenter.getRotation().getAngle()),
+        Meters.of(ShooterConstants.shootertoRobotCenter.getZ()));
   }
 
   public static Trigger getHubAimTrigger() { // TODO: might need to change the button for this
