@@ -11,9 +11,16 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 
-package frc.robot.subsystems.indexer;
+package frc.robot.subsystems.intakeRoller;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+import static frc.robot.subsystems.intakeRoller.IntakeRollerConstants.gearReduction;
+import static frc.robot.subsystems.intakeRoller.IntakeRollerConstants.velocityKd;
+import static frc.robot.subsystems.intakeRoller.IntakeRollerConstants.velocityKp;
+import static frc.robot.subsystems.intakeRoller.IntakeRollerConstants.velocityKs;
+import static frc.robot.subsystems.intakeRoller.IntakeRollerConstants.velocityKv;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -24,7 +31,7 @@ import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
 /**
- * Simulation IO for the indexer subsystem.
+ * Simulation IO for the Intake Roller subsystem.
  *
  * <p><b>Open-loop mode:</b> The motor is driven by a commanded voltage (or duty cycle) with no
  * feedback. Speed depends on load and battery voltage; useful for simple on/off or manual control
@@ -45,21 +52,16 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
  *       smooth the response.
  * </ul>
  *
- * Tuning (velocityKp, velocityKd in {@link IndexerConstants}) balances response speed and
+ * Tuning (velocityKp, velocityKd in {@link IntakeRollerConstants}) balances response speed and
  * stability.
  */
-public class IndexerIOSim implements IndexerIO {
-  /** Simulates indexer motor dynamics (Neo Vortex + gearbox) for physics-accurate behavior. */
+public class IntakeRollerIOSim implements IntakeRollerIO {
+  /**
+   * Simulates Intake Roller motor dynamics (Neo Vortex + gearbox) for physics-accurate behavior.
+   */
   private final DCMotorSim motorSim;
-
-  private boolean connected = true;
-
   /** PID used to correct velocity error when in velocity closed-loop mode. */
-  private final PIDController velocityController =
-      new PIDController(IndexerConstants.velocityKp, 0, IndexerConstants.velocityKd);
-
-  private double kV = IndexerConstants.velocityKv;
-  private double kS = IndexerConstants.velocityKs;
+  private final PIDController velocityController = new PIDController(velocityKp, 0, velocityKd);
 
   /** True when setVelocity() is active; false for open-loop (setOpenLoop/stop). */
   private boolean velocityClosedLoop = false;
@@ -71,19 +73,15 @@ public class IndexerIOSim implements IndexerIO {
    */
   private double appliedVolts = 0.0;
 
-  /** Target velocity for closed-loop control. */
-  private AngularVelocity desiredWheelVelocity = RPM.of(0.0);
-
-  public IndexerIOSim() {
+  public IntakeRollerIOSim() {
     motorSim =
         new DCMotorSim(
-            LinearSystemId.createDCMotorSystem(
-                DCMotor.getNeoVortex(1), 0.0012, 1 /*IndexerConstants.gearReduction*/),
+            LinearSystemId.createDCMotorSystem(DCMotor.getNeoVortex(1), 0.01, gearReduction),
             DCMotor.getNeoVortex(1));
   }
 
   @Override
-  public void updateInputs(IndexIOInputs inputs) {
+  public void updateInputs(IntakeRollerIOInputs inputs) {
     if (velocityClosedLoop) {
       appliedVolts =
           velocityFFVolts + velocityController.calculate(motorSim.getAngularVelocityRadPerSec());
@@ -94,16 +92,10 @@ public class IndexerIOSim implements IndexerIO {
     motorSim.setInputVoltage(MathUtil.clamp(appliedVolts, -12.0, 12.0));
     motorSim.update(0.02);
 
-    inputs.connected = connected;
-    inputs.actualWheelVelocity =
-        motorSim.getAngularVelocity().divide(IndexerConstants.GEAR_REDUCTION);
-    inputs.desiredWheelVelocity = desiredWheelVelocity;
+    inputs.connected = true;
+    inputs.velocity = RadiansPerSecond.of(motorSim.getAngularVelocityRadPerSec());
     inputs.appliedVoltage = Volts.of(appliedVolts);
     inputs.current = Amps.of(Math.abs(motorSim.getCurrentDrawAmps()));
-    inputs.atGoal =
-        velocityClosedLoop
-            || Math.abs(inputs.desiredWheelVelocity.in(RPM) - inputs.actualWheelVelocity.in(RPM))
-                < IndexerConstants.VELOCITY_TOLERANCE.in(RPM);
   }
 
   @Override
@@ -113,36 +105,17 @@ public class IndexerIOSim implements IndexerIO {
   }
 
   @Override
-  public void setVelocity(AngularVelocity new_velocity) {
+  public void setVelocity(AngularVelocity velocity) {
     velocityClosedLoop = true;
-    desiredWheelVelocity = new_velocity;
-
-    AngularVelocity motorAngularVelocity =
-        desiredWheelVelocity.times(IndexerConstants.GEAR_REDUCTION);
-
     velocityFFVolts =
-        kS * Math.signum(motorAngularVelocity.in(RadiansPerSecond))
-            + kV * motorAngularVelocity.in(RadiansPerSecond);
-    velocityController.setSetpoint(motorAngularVelocity.in(RadiansPerSecond));
+        velocityKs * Math.signum(velocity.in(RadiansPerSecond))
+            + velocityKv * velocity.in(RadiansPerSecond);
+    velocityController.setSetpoint(velocity.in(RadiansPerSecond));
   }
 
   @Override
   public void stop() {
     velocityClosedLoop = false;
-    desiredWheelVelocity = RPM.of(0.0);
     appliedVolts = 0.0;
-  }
-
-  @Override
-  public void setPID(double new_kP, double new_kD, double new_kV, double new_kS) {
-    velocityController.setPID(new_kP, 0, new_kD);
-    kV = new_kV;
-    kS = new_kS;
-  }
-
-  // Use for unit testing purpose only
-  @Deprecated
-  public void disconnect() {
-    connected = false;
   }
 }

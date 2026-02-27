@@ -11,46 +11,46 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 
-package frc.robot.subsystems.indexer;
+package frc.robot.subsystems.intakeRoller;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 
 /**
- * Mock IndexerIO for unit tests. Exposes inputs for injection and records outputs (setpoints,
+ * Mock IntakeRollerIO for unit tests. Exposes inputs for injection and records outputs (setpoints,
  * stop).
  */
-public class MockIndexerIO implements IndexerIO {
+public class MockIntakeRollerIO implements IntakeRollerIO {
   public boolean connected = true;
-  public AngularVelocity actualWheelVelocity = RPM.of(0.0);
-  public AngularVelocity desiredWheelVelocity = RPM.of(0.0);
-  public Voltage appliedVoltage = Volts.of(0.0);
-  public Current current = Amps.of(0.0);
-  public boolean atGoal = true;
+  public Angle position = Radians.of(0.0);
+  public AngularVelocity velocity = RadiansPerSecond.of(0.0);
+  public Voltage appliedVolts = Volts.of(0.0);
+  public Current currentAmps = Amps.of(0.0);
 
   public Voltage lastOpenLoopOutput = Volts.of(0.0);
   public AngularVelocity lastVelocitySetpoint = RPM.of(0.0);
   public boolean stopCalled = false;
 
   @Override
-  public void updateInputs(IndexIOInputs inputs) {
+  public void updateInputs(IntakeRollerIOInputs inputs) {
     inputs.connected = connected;
-    inputs.actualWheelVelocity = actualWheelVelocity;
-    inputs.desiredWheelVelocity = desiredWheelVelocity;
-    inputs.appliedVoltage = appliedVoltage;
-    inputs.current = current;
-    inputs.atGoal = atGoal;
+    inputs.velocity = velocity;
+    inputs.appliedVoltage = appliedVolts;
+    inputs.current = currentAmps;
   }
 
   @Override
   public void setOpenLoop(Voltage output) {
     lastOpenLoopOutput = output;
-    appliedVoltage = output;
+    appliedVolts = output;
   }
 
   @Override
@@ -61,17 +61,15 @@ public class MockIndexerIO implements IndexerIO {
   @Override
   public void stop() {
     stopCalled = true;
-    appliedVoltage = Volts.of(0.0);
+    appliedVolts = Volts.of(0.0);
   }
 
   public void reset() {
     connected = true;
-    actualWheelVelocity = RPM.of(0.0);
-    desiredWheelVelocity = RPM.of(0.0);
-    appliedVoltage = Volts.of(0.0);
-    current = Amps.of(0.0);
-    atGoal = true;
-
+    position = Radians.of(0.0);
+    velocity = RadiansPerSecond.of(0.0);
+    appliedVolts = Volts.of(0.0);
+    currentAmps = Amps.of(0.0);
     lastOpenLoopOutput = Volts.of(0.0);
     lastVelocitySetpoint = RPM.of(0.0);
     stopCalled = false;
