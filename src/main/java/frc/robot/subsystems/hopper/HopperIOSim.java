@@ -42,11 +42,6 @@ public class HopperIOSim implements HopperIO {
   }
 
   @Override
-  public boolean isFull() {
-    return !ableToIntake();
-  }
-
-  @Override
   public void pushFuel() {
     numFuel++;
   }

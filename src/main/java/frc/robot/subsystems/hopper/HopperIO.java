@@ -29,10 +29,6 @@ public interface HopperIO {
     return true;
   }
 
-  public default boolean isFull() {
-    return false;
-  }
-
   public default void pushFuel() {}
 
   public default boolean popFuel() {

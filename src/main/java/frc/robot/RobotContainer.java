@@ -37,6 +37,8 @@ import frc.robot.commands.IndexerStartCommand;
 import frc.robot.commands.TeleopDriveCommand;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberIO;
+import frc.robot.subsystems.climber.ClimberIOSim;
+import frc.robot.subsystems.climber.ClimberIOSpark;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants.Rebuilt_SwerveConstants;
 import frc.robot.subsystems.drive.GyroIO;
@@ -52,6 +54,7 @@ import frc.robot.subsystems.hopper.HopperIOSim;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
+import frc.robot.subsystems.indexer.IndexerIOSpark;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkage;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkageIO;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkageIOSim;
@@ -64,6 +67,7 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOSim;
+import frc.robot.subsystems.shooter.ShooterIOSpark;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -153,12 +157,12 @@ public class RobotContainer {
                 new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackLeft.MODULE_CONSTANTS),
                 new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackRight.MODULE_CONSTANTS));
 
-        index = new Indexer(new IndexerIO() {});
+        index = new Indexer(new IndexerIOSpark() {});
         intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSpark());
         intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
-        hopper = new Hopper(new HopperIOSim());
-        shooter = new Shooter(new ShooterIOSim());
-        climber = new Climber(new ClimberIO() {});
+        hopper = new Hopper(new HopperIO() {});
+        shooter = new Shooter(new ShooterIOSpark());
+        climber = new Climber(new ClimberIOSpark() {});
 
         vision =
             new Vision(
@@ -187,7 +191,7 @@ public class RobotContainer {
         intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
         hopper = new Hopper(new HopperIOSim());
         shooter = new Shooter(new ShooterIOSim());
-        climber = new Climber(new ClimberIO() {});
+        climber = new Climber(new ClimberIOSim() {});
 
         vision =
             new Vision(
