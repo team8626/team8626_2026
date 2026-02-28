@@ -66,6 +66,10 @@ public class IntakeLinkage extends SubsystemBase {
     return new Rotation2d(inputs.position.in(Radians));
   }
 
+  public void setPosition(Angle position) {
+    io.setPosition(position);
+  }
+
   public boolean isConnected() {
     return inputs.connected;
   }

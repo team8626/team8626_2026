@@ -18,8 +18,6 @@ import static edu.wpi.first.units.Units.*;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.EventTrigger;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -37,6 +35,10 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IndexAndShootCommand;
 import frc.robot.commands.IndexerStartCommand;
 import frc.robot.commands.TeleopDriveCommand;
+import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberIO;
+import frc.robot.subsystems.climber.ClimberIOSim;
+import frc.robot.subsystems.climber.ClimberIOSpark;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants.Rebuilt_SwerveConstants;
 import frc.robot.subsystems.drive.GyroIO;
@@ -47,6 +49,7 @@ import frc.robot.subsystems.drive.ModuleIOSimTalonFX;
 import frc.robot.subsystems.drive.ModuleIOSpark;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.hopper.Hopper;
+import frc.robot.subsystems.hopper.HopperIO;
 import frc.robot.subsystems.hopper.HopperIOSim;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
@@ -56,9 +59,15 @@ import frc.robot.subsystems.intakeLinkage.IntakeLinkage;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkageIO;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkageIOSim;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkageIOSpark;
+import frc.robot.subsystems.intakeRoller.IntakeRoller;
+import frc.robot.subsystems.intakeRoller.IntakeRollerIO;
+import frc.robot.subsystems.intakeRoller.IntakeRollerIOSim;
+import frc.robot.subsystems.intakeRoller.IntakeRollerIOSpark;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
+import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOSim;
+import frc.robot.subsystems.shooter.ShooterIOSpark;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -79,9 +88,12 @@ public class RobotContainer {
   public final Drive drive;
   private final Indexer index;
   private final IntakeLinkage intakeLinkage;
-  private final Vision vision;
+  private final IntakeRoller intakeRoller;
   private final Hopper hopper;
   private final Shooter shooter;
+  private final Climber climber;
+
+  private final Vision vision;
 
   // Controller
   private static final CommandXboxController controller =
@@ -89,9 +101,17 @@ public class RobotContainer {
   // Commands
   private final TeleopDriveCommand teleopDrive;
 
-  // Bindings
-  private final Trigger indexTrigger = controller.x();
-  private final Trigger shootTrigger = controller.y();
+  // Triggers for Bindings
+  private static final Trigger indexTrigger = controller.a();
+  private static final Trigger intakeRollerTrigger = controller.b();
+
+  private static final Trigger shootTrigger = controller.leftTrigger();
+  private static final Trigger intakeDeployTrigger = controller.leftBumper();
+
+  private static final Trigger driverAimTrigger = controller.y();
+
+  private static final Trigger climberReleaseTrigger = controller.povUp();
+  private static final Trigger climberPullrigger = controller.povDown();
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -111,16 +131,20 @@ public class RobotContainer {
                 new ModuleIOSpark(1),
                 new ModuleIOSpark(2),
                 new ModuleIOSpark(3));
-        index = new Indexer(new IndexerIOSpark());
-        intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSpark());
+
+        index = new Indexer(new IndexerIOSim());
+        intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSim());
+        intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
+        hopper = new Hopper(new HopperIOSim());
+        shooter = new Shooter(new ShooterIOSim());
+
+        climber = new Climber(new ClimberIO() {});
         vision =
             new Vision(
                 new VisionIOPhotonVision(),
                 (measurement) ->
                     drive.addVisionMeasurement(
                         measurement.pose, measurement.timestamp, measurement.stdDevs));
-        hopper = new Hopper(new HopperIOSim());
-        shooter = new Shooter(new ShooterIOSim());
 
         break;
       case REBUILT_COMPBOT:
@@ -132,16 +156,20 @@ public class RobotContainer {
                 new ModuleIOTalonFX(Rebuilt_SwerveConstants.FrontRight.MODULE_CONSTANTS),
                 new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackLeft.MODULE_CONSTANTS),
                 new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackRight.MODULE_CONSTANTS));
-        index = new Indexer(new IndexerIO() {});
+
+        index = new Indexer(new IndexerIOSpark() {});
         intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSpark());
+        intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
+        hopper = new Hopper(new HopperIO() {});
+        shooter = new Shooter(new ShooterIOSpark());
+        climber = new Climber(new ClimberIOSpark() {});
+
         vision =
             new Vision(
                 new VisionIOPhotonVision(),
                 (measurement) ->
                     drive.addVisionMeasurement(
                         measurement.pose, measurement.timestamp, measurement.stdDevs));
-        hopper = new Hopper(new HopperIOSim());
-        shooter = new Shooter(new ShooterIOSim());
 
         break;
 
@@ -160,6 +188,10 @@ public class RobotContainer {
                 new ModuleIOSimTalonFX(Rebuilt_SwerveConstants.BackRight.MODULE_CONSTANTS));
         index = new Indexer(new IndexerIOSim());
         intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSim());
+        intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
+        hopper = new Hopper(new HopperIOSim());
+        shooter = new Shooter(new ShooterIOSim());
+        climber = new Climber(new ClimberIOSim() {});
 
         vision =
             new Vision(
@@ -168,9 +200,7 @@ public class RobotContainer {
                     drive.addVisionMeasurement(
                         measurement.pose, measurement.timestamp, measurement.stdDevs));
         vision.setPoseSupplier(drive::getPose); // Provide current pose for simulation
-        shooter = new Shooter(new ShooterIOSim());
 
-        hopper = new Hopper(new HopperIOSim());
         configureFuelSim();
         configureFuelSimRobot(hopper::ableToIntake, hopper::pushFuel);
         break;
@@ -184,11 +214,15 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
+
         index = new Indexer(new IndexerIO() {});
         intakeLinkage = new IntakeLinkage(new IntakeLinkageIO() {});
+        intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
+        hopper = new Hopper(new HopperIO() {});
+        shooter = new Shooter(new ShooterIO() {});
+        climber = new Climber(new ClimberIO() {});
+
         vision = new Vision(new VisionIO() {}, (measurement) -> {});
-        hopper = new Hopper(new HopperIOSim());
-        shooter = new Shooter(new ShooterIOSim());
 
         break;
     }
@@ -221,37 +255,41 @@ public class RobotContainer {
   private void configureButtonBindings() {
     // Default command, normal field-relative drive
     drive.setDefaultCommand(teleopDrive);
-    // Lock to 0° when A button is held
-    controller
-        .a()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                () -> new Rotation2d()));
 
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    // Reset gyro to 0° when B button is pressed
-    controller
-        .b()
-        .onTrue(
-            Commands.runOnce(
-                    () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
-                    drive)
-                .ignoringDisable(true));
-
     // Align to front camera's best AprilTag (POV-Up) or back camera's best (POV-Down)
-    controller.povUp().whileTrue(AlignToTargetCommand.alignToFrontCamera(drive, vision));
-    controller.povDown().whileTrue(AlignToTargetCommand.alignToBackCamera(drive, vision));
+    controller.povLeft().whileTrue(AlignToTargetCommand.alignToFrontCamera(drive, vision));
+    controller.povRight().whileTrue(AlignToTargetCommand.alignToBackCamera(drive, vision));
 
-    indexTrigger.toggleOnTrue(new IndexerStartCommand(this.index));
-    shootTrigger.toggleOnTrue(
-        new IndexAndShootCommand(this.shooter, this.hopper, this.index, this.drive));
+    // Run the intake roller at 500 RPM while the B button is held, stop when released
+    // TODO: Should be replace with a proper command ("Start/Stop CollectCommand"), this is just for
+    // testing
+    intakeRollerTrigger
+        .whileTrue(Commands.runOnce(() -> intakeRoller.runVelocity(RPM.of(500)), intakeRoller))
+        .onFalse(Commands.runOnce(intakeRoller::stop, intakeRoller));
+
+    // Toggle the intake linkage between deployed and stowed positions when the left bumper held
+    // back to stowed position when released
+    // TODO: Should be replace with a proper command ("Start/Stop CollectCommand"), this is just for
+    // testing
+    intakeDeployTrigger
+        .whileTrue(Commands.runOnce(() -> intakeLinkage.setPosition(Degrees.of(90)), intakeLinkage))
+        .onFalse(Commands.runOnce(() -> intakeLinkage.setPosition(Degrees.of(135)), intakeLinkage));
+
+    // Run the climber motors
+    // TODO: replace with proper commands once climber functionality is implemented, this is just
+    // for testing
+    climberReleaseTrigger.whileTrue(
+        Commands.runOnce(() -> climber.runOpenLoop(Volts.of(6.0)), climber));
+    climberPullrigger.whileTrue(
+        Commands.runOnce(() -> climber.runOpenLoop(Volts.of(-6.0)), climber));
+
+    // TODO: This is for testing only, replace with proper commands once shooter and indexer
+    // functionality are tested
+    indexTrigger.toggleOnTrue(new IndexerStartCommand(index));
+    shootTrigger.whileTrue(new IndexAndShootCommand(shooter, hopper, index, drive));
   }
 
   private void configureFuelSim() {
@@ -295,8 +333,8 @@ public class RobotContainer {
         Meters.of(ShooterConstants.shootertoRobotCenter.getZ()));
   }
 
-  public static Trigger getHubAimTrigger() { // TODO: might need to change the button for this
-    return controller.x();
+  public static Trigger getHubAimTrigger() {
+    return driverAimTrigger;
   }
 
   /**

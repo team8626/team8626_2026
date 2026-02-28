@@ -25,9 +25,9 @@ public interface HopperIO {
   /** Updates the set of loggable inputs. */
   public default void updateInputs(HopperIOInputs inputs) {}
 
-  public abstract boolean ableToIntake();
-
-  public abstract boolean isFull();
+  public default boolean ableToIntake() {
+    return true;
+  }
 
   public default void pushFuel() {}
 

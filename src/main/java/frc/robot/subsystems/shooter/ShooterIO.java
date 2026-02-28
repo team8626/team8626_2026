@@ -37,17 +37,17 @@ public interface ShooterIO {
   }
 
   /** Updates the set of loggable inputs. */
-  public void updateInputs(ShooterIOInputs inputs);
+  public default void updateInputs(ShooterIOInputs inputs) {}
 
   /** Run the motor at the specified open loop value. */
-  public void setOpenLoop(double output);
+  public default void setOpenLoop(double output) {}
 
   /** Run the motor at the specified velocity in rad/sec. */
-  public void setVelocity(AngularVelocity velocity);
+  public default void setVelocity(AngularVelocity velocity) {}
 
   /** Stop the motor. */
-  public void stop();
+  public default void stop() {}
 
   /** set the PID */
-  public void setPID(double new_kP, double new_kD, double new_kV, double new_kS);
+  public default void setPID(double new_kP, double new_kD, double new_kV, double new_kS) {}
 }
