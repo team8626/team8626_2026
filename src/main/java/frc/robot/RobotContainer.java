@@ -188,7 +188,7 @@ public class RobotContainer {
                 new ModuleIOSimTalonFX(Rebuilt_SwerveConstants.BackRight.MODULE_CONSTANTS));
         index = new Indexer(new IndexerIOSim());
         intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSim());
-        intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
+        intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
         hopper = new Hopper(new HopperIOSim());
         shooter = new Shooter(new ShooterIOSim());
         climber = new Climber(new ClimberIOSim() {});
