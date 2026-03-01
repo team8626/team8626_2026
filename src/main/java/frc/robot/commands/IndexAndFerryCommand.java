@@ -37,10 +37,16 @@ public class IndexAndFerryCommand extends Command {
 
   @Override
   public void initialize() {
-    if (drive.getPose().getY() > FieldConstants.fieldWidth / 2) {
-      FerryTarget = depotFerryTarget;
+    if (AllianceFlipUtil.shouldFlip()) {
+      FerryTarget =
+          (drive.getPose().getY() > FieldConstants.fieldWidth / 2)
+              ? outpostFerryTarget
+              : depotFerryTarget;
     } else {
-      FerryTarget = outpostFerryTarget;
+      FerryTarget =
+          (drive.getPose().getY() > FieldConstants.fieldWidth / 2)
+              ? depotFerryTarget
+              : outpostFerryTarget;
     }
     shooter.runVelocity(
         ShooterCommandsUtil.getShooterVelocityToTarget(drive.getPose(), FerryTarget));
