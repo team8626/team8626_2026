@@ -1,7 +1,5 @@
 package frc.robot.commands;
 
-import static edu.wpi.first.units.Units.*;
-
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
@@ -10,7 +8,10 @@ import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.indexer.Indexer;
+import frc.robot.subsystems.indexer.IndexerConstants;
 import frc.robot.subsystems.shooter.Shooter;
+import org.littletonrobotics.frc2026.FieldConstants;
+import org.littletonrobotics.frc2026.util.geometry.AllianceFlipUtil;
 
 public class IndexAndFerryCommand extends Command {
   private final Shooter shooter;
@@ -21,8 +22,10 @@ public class IndexAndFerryCommand extends Command {
   private Translation3d FerryTarget;
 
   // TODO: move these constants to field constances
-  private final Translation3d depotFerryTarget = new Translation3d(2.5, 6, 0);
-  private final Translation3d outpostFerryTarget = new Translation3d(2.5, 1.75, 0);
+  private final Translation3d depotFerryTarget =
+      AllianceFlipUtil.apply(new Translation3d(2.5, 6, 0));
+  private final Translation3d outpostFerryTarget =
+      AllianceFlipUtil.apply(new Translation3d(2.5, 1.75, 0));
 
   public IndexAndFerryCommand(Shooter shooter, Hopper hopper, Indexer indexer, Drive drive) {
     this.shooter = shooter;
@@ -34,7 +37,7 @@ public class IndexAndFerryCommand extends Command {
 
   @Override
   public void initialize() {
-    if (drive.getPose().getY() > 4) {
+    if (drive.getPose().getY() > FieldConstants.fieldWidth / 2) {
       FerryTarget = depotFerryTarget;
     } else {
       FerryTarget = outpostFerryTarget;
@@ -52,7 +55,7 @@ public class IndexAndFerryCommand extends Command {
       FerryTarget = outpostFerryTarget;
     }
     if (shooter.isAtGoal()) {
-      indexer.runVelocity(RPM.of(300)); // TODO: find actual value for indexer velocity
+      indexer.runVelocity(IndexerConstants.DEFAULT_VELOCITY);
     }
     if (Constants.robot == RobotType.SIMBOT) {
       // In simulation, we can just pop fuel immediately when the indexer is running
