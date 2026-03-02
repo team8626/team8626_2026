@@ -38,7 +38,7 @@ public class IntakeRollerConstants {
   //   velocity error is large. Tune up if response is sluggish or never reaches setpoint; tune down
   //   if the indexer overshoots (goes past the target speed then back), oscillates (keeps speeding
   //   up and slowing down around the target), or sounds rough.
-  public static final double velocityKp = 0.1;
+  public static final double velocityKp = 0.3;
   //
   // velocityKd — Derivative gain. Responds to rate of change of error; dampens overshoot (going
   // past
@@ -59,5 +59,5 @@ public class IntakeRollerConstants {
   //   voltage (e.g. 12V / 100 rad/s ≈ 0.12). Tune up if the indexer runs slow for a given setpoint;
   //   tune down if it runs too fast or the PID is fighting the feedforward (e.g. once settled, the
   //   controller keeps adding a big correction in the wrong direction).
-  public static final double velocityKv = 0.12;
+  public static final double velocityKv = 0.016;
 }

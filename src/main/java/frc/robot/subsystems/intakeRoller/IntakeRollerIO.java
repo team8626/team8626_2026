@@ -27,6 +27,7 @@ public interface IntakeRollerIO {
   public static class IntakeRollerIOInputs {
     public boolean connected = false;
     public AngularVelocity velocity = RadiansPerSecond.of(0.0);
+    public AngularVelocity desiredVelocity = RadiansPerSecond.of(0.0);
     public Voltage appliedVoltage = Volts.of(0.0);
     public Current current = Amps.of(0.0);
   }
@@ -42,4 +43,6 @@ public interface IntakeRollerIO {
 
   /** Stop the motor. */
   public default void stop() {}
+
+  public default void setPID(double kP, double kD, double kV, double kS) {}
 }

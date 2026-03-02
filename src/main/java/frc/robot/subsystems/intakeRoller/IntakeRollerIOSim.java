@@ -67,11 +67,17 @@ public class IntakeRollerIOSim implements IntakeRollerIO {
   private boolean velocityClosedLoop = false;
   /** Feedforward voltage (Ks * sign + Kv * setpoint) added to PID output in velocity mode. */
   private double velocityFFVolts = 0.0;
+
+  private double kV = velocityKv;
+  private double kS = velocityKs;
+
   /**
    * Voltage commanded to the motor; written by open-loop or by velocity closed-loop in
    * updateInputs.
    */
   private double appliedVolts = 0.0;
+
+  private AngularVelocity desiredVelocity = RadiansPerSecond.of(0.0);
 
   public IntakeRollerIOSim() {
     motorSim =
@@ -94,6 +100,7 @@ public class IntakeRollerIOSim implements IntakeRollerIO {
 
     inputs.connected = true;
     inputs.velocity = RadiansPerSecond.of(motorSim.getAngularVelocityRadPerSec());
+    inputs.desiredVelocity = desiredVelocity;
     inputs.appliedVoltage = Volts.of(appliedVolts);
     inputs.current = Amps.of(Math.abs(motorSim.getCurrentDrawAmps()));
   }
@@ -106,10 +113,10 @@ public class IntakeRollerIOSim implements IntakeRollerIO {
 
   @Override
   public void setVelocity(AngularVelocity velocity) {
+    desiredVelocity = velocity;
     velocityClosedLoop = true;
     velocityFFVolts =
-        velocityKs * Math.signum(velocity.in(RadiansPerSecond))
-            + velocityKv * velocity.in(RadiansPerSecond);
+        kS * Math.signum(velocity.in(RadiansPerSecond)) + kV * velocity.in(RadiansPerSecond);
     velocityController.setSetpoint(velocity.in(RadiansPerSecond));
   }
 
@@ -117,5 +124,12 @@ public class IntakeRollerIOSim implements IntakeRollerIO {
   public void stop() {
     velocityClosedLoop = false;
     appliedVolts = 0.0;
+  }
+
+  @Override
+  public void setPID(double new_kP, double new_kD, double new_kV, double new_kS) {
+    velocityController.setPID(new_kP, 0, new_kD);
+    kV = new_kV;
+    kS = new_kS;
   }
 }

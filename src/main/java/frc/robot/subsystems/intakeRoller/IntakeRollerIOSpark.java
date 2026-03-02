@@ -51,12 +51,22 @@ public class IntakeRollerIOSpark implements IntakeRollerIO {
   private final SparkFlex spark;
   private final RelativeEncoder encoder;
   private final SparkClosedLoopController controller;
+  private final SparkFlexConfig config;
   private final Debouncer connectedDebounce = new Debouncer(0.5);
+
+  /** Target WHEEL velocity for closed-loop control. */
+  private AngularVelocity desiredVelocity = RadiansPerSecond.of(0.0);
+
+  /** Feedforward gains for velocity control. */
+  private double kV = velocityKv;
+
+  private double kS = velocityKs;
 
   public IntakeRollerIOSpark() {
     spark = new SparkFlex(intakeRollerCanId, MotorType.kBrushless);
     encoder = spark.getEncoder();
     controller = spark.getClosedLoopController();
+    config = new SparkFlexConfig();
 
     SparkFlexConfig config = new SparkFlexConfig();
 
@@ -114,6 +124,7 @@ public class IntakeRollerIOSpark implements IntakeRollerIO {
     ifOk(spark, spark::getOutputCurrent, (value) -> inputs.current = Amps.of(value));
 
     inputs.connected = connectedDebounce.calculate(!sparkStickyFault);
+    inputs.desiredVelocity = desiredVelocity;
   }
 
   @Override
@@ -123,9 +134,9 @@ public class IntakeRollerIOSpark implements IntakeRollerIO {
 
   @Override
   public void setVelocity(AngularVelocity velocity) {
+    desiredVelocity = velocity;
     double ffVolts =
-        velocityKs * Math.signum(velocity.in(RadiansPerSecond))
-            + velocityKv * velocity.in(RadiansPerSecond);
+        kS * Math.signum(velocity.in(RadiansPerSecond)) + kV * velocity.in(RadiansPerSecond);
     controller.setSetpoint(
         velocity.in(RadiansPerSecond),
         ControlType.kVelocity,
@@ -136,5 +147,12 @@ public class IntakeRollerIOSpark implements IntakeRollerIO {
 
   public void stop() {
     spark.setVoltage(Volts.of(0.0));
+  }
+
+  @Override
+  public void setPID(double new_kP, double new_kD, double new_kV, double new_kS) {
+    config.closedLoop.pid(new_kP, 0.0, new_kD, ClosedLoopSlot.kSlot0);
+    kV = new_kV;
+    kS = new_kS;
   }
 }

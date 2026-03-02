@@ -19,6 +19,7 @@ import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.util.LoggedTunableNumber;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -38,6 +39,15 @@ public class IntakeRoller extends SubsystemBase {
   private final Alert motorDisconnectedAlert =
       new Alert("Intake Roller motor disconnected.", AlertType.kError);
 
+  private final LoggedTunableNumber rollerwheelKP =
+      new LoggedTunableNumber("IntakeRoller/Flywheel/kP", IntakeRollerConstants.velocityKp);
+  private final LoggedTunableNumber rollerwheelKD =
+      new LoggedTunableNumber("IntakeRoller/Flywheel/kD", IntakeRollerConstants.velocityKd);
+  private final LoggedTunableNumber rollerwheelKV =
+      new LoggedTunableNumber("IntakeRoller/Flywheel/kV", IntakeRollerConstants.velocityKv);
+  private final LoggedTunableNumber rollerwheelKS =
+      new LoggedTunableNumber("IntakeRoller/Flywheel/kS", IntakeRollerConstants.velocityKs);
+
   public IntakeRoller(IntakeRollerIO io) {
     this.io = io;
   }
@@ -45,6 +55,7 @@ public class IntakeRoller extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
+    updateTunables();
     Logger.processInputs("Intake Roller", inputs);
 
     // Show alert if the intake roller motor is not connected.
@@ -89,5 +100,14 @@ public class IntakeRoller extends SubsystemBase {
 
   public Current getCurrent() {
     return inputs.current;
+  }
+
+  private void updateTunables() {
+    if (rollerwheelKP.hasChanged(hashCode())
+        || rollerwheelKD.hasChanged(hashCode())
+        || rollerwheelKV.hasChanged(hashCode())
+        || rollerwheelKS.hasChanged(hashCode())) {
+      io.setPID(rollerwheelKP.get(), rollerwheelKD.get(), rollerwheelKV.get(), rollerwheelKS.get());
+    }
   }
 }
