@@ -136,7 +136,7 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       CommandScheduler.getInstance().schedule(autonomousCommand);
     }
-    if (Constants.robot == Constants.RobotType.SIMBOT) {
+    if (Constants.currentMode == Constants.Mode.SIM) {
       robotContainer.drive.setPose(
           AllianceFlipUtil.apply(new Pose2d(3.6, 0.64, new Rotation2d(Degrees.of(72)))));
       RobotContainer.fuelSim.clearFuel();
@@ -158,7 +158,7 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
-    if (Constants.robot == Constants.RobotType.SIMBOT) {
+    if (Constants.currentMode == Constants.Mode.SIM) {
       robotContainer.drive.setPose(
           AllianceFlipUtil.apply(new Pose2d(0.5, 0.5, new Rotation2d(Degrees.of(0)))));
       RobotContainer.fuelSim.clearFuel();
@@ -188,7 +188,7 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {
-    if (Constants.robot == Constants.RobotType.SIMBOT) {
+    if (Constants.currentMode == Constants.Mode.SIM) {
       RobotContainer.fuelSim.updateSim();
     }
   }

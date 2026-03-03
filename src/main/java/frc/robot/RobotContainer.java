@@ -31,7 +31,6 @@ import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.Constants.Dimensions;
 import frc.robot.Constants.Mode;
-import frc.robot.Constants.RobotType;
 import frc.robot.commands.AlignToTargetCommand;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IndexAndShootCommand;
@@ -124,133 +123,125 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
-    RobotType robotType = Constants.currentMode == Mode.SIM ? RobotType.SIMBOT : Constants.robot;
+    if (Constants.currentMode == Mode.SIM) {
+      // Simulation: use physics sim IO (automatically detected via RobotBase.isReal())
+      drive =
+          new Drive(
+              new GyroIO() {},
+              new ModuleIOSimTalonFX(Rebuilt_SwerveConstants.FrontLeft.MODULE_CONSTANTS),
+              new ModuleIOSimTalonFX(Rebuilt_SwerveConstants.FrontRight.MODULE_CONSTANTS),
+              new ModuleIOSimTalonFX(Rebuilt_SwerveConstants.BackLeft.MODULE_CONSTANTS),
+              new ModuleIOSimTalonFX(Rebuilt_SwerveConstants.BackRight.MODULE_CONSTANTS));
+      index = new Indexer(new IndexerIOSim());
+      intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSim());
+      intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
+      hopper = new Hopper(new HopperIOSim());
+      shooter = new Shooter(new ShooterIOSim());
+      climber = new Climber(new ClimberIOSim() {});
 
-    switch (robotType) {
-      case TSUNAMI:
-        // DEV bot on Spark, instantiate hardware IO implementations
-        drive =
-            new Drive(
-                new GyroIOADIS16470(),
-                new ModuleIOSpark(0),
-                new ModuleIOSpark(1),
-                new ModuleIOSpark(2),
-                new ModuleIOSpark(3));
+      vision =
+          new Vision(
+              new VisionIOSim(),
+              (measurement) ->
+                  drive.addVisionMeasurement(
+                      measurement.pose, measurement.timestamp, measurement.stdDevs));
+      vision.setPoseSupplier(drive::getPose);
+      configureFuelSim();
+      configureFuelSimRobot(hopper::ableToIntake, hopper::pushFuel);
+    } else if (Constants.currentMode == Mode.REPLAY) {
+      // Replay: no hardware IO
+      drive =
+          new Drive(
+              new GyroIO() {},
+              new ModuleIO() {},
+              new ModuleIO() {},
+              new ModuleIO() {},
+              new ModuleIO() {});
 
-        index = new Indexer(new IndexerIOSim());
-        intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSim());
-        intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
-        hopper = new Hopper(new HopperIOSim());
-        shooter = new Shooter(new ShooterIOSim());
+      index = new Indexer(new IndexerIO() {});
+      intakeLinkage = new IntakeLinkage(new IntakeLinkageIO() {});
+      intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
+      hopper = new Hopper(new HopperIO() {});
+      shooter = new Shooter(new ShooterIO() {});
+      climber = new Climber(new ClimberIO() {});
 
-        climber = new Climber(new ClimberIO() {});
-        vision =
-            new Vision(
-                new VisionIOPhotonVision(),
-                (measurement) ->
-                    drive.addVisionMeasurement(
-                        measurement.pose, measurement.timestamp, measurement.stdDevs));
+      vision = new Vision(new VisionIO() {}, (measurement) -> {});
+    } else {
+      switch (Constants.robot) {
+        case TSUNAMI:
+          // DEV bot on Spark
+          drive =
+              new Drive(
+                  new GyroIOADIS16470(),
+                  new ModuleIOSpark(0),
+                  new ModuleIOSpark(1),
+                  new ModuleIOSpark(2),
+                  new ModuleIOSpark(3));
 
-        break;
-      case REBUILT_COMPBOT:
-        // Real robot, instantiate hardware IO implementations
-        drive =
-            new Drive(
-                new GyroIOPigeon2(),
-                new ModuleIOTalonFX(Rebuilt_SwerveConstants.FrontLeft.MODULE_CONSTANTS),
-                new ModuleIOTalonFX(Rebuilt_SwerveConstants.FrontRight.MODULE_CONSTANTS),
-                new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackLeft.MODULE_CONSTANTS),
-                new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackRight.MODULE_CONSTANTS));
+          index = new Indexer(new IndexerIOSim());
+          intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSim());
+          intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
+          hopper = new Hopper(new HopperIOSim());
+          shooter = new Shooter(new ShooterIOSim());
 
-        index = new Indexer(new IndexerIOSpark() {});
-        intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSpark());
-        intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
-        hopper = new Hopper(new HopperIO() {});
-        shooter = new Shooter(new ShooterIOSpark());
-        climber = new Climber(new ClimberIOSpark() {});
+          climber = new Climber(new ClimberIO() {});
+          vision =
+              new Vision(
+                  new VisionIOPhotonVision(),
+                  (measurement) ->
+                      drive.addVisionMeasurement(
+                          measurement.pose, measurement.timestamp, measurement.stdDevs));
 
-        vision =
-            new Vision(
-                new VisionIOPhotonVision(),
-                (measurement) ->
-                    drive.addVisionMeasurement(
-                        measurement.pose, measurement.timestamp, measurement.stdDevs));
+          break;
+        case REBUILT_COMPBOT:
+          // Real robot, full hardware IO
+          drive =
+              new Drive(
+                  new GyroIOPigeon2(),
+                  new ModuleIOTalonFX(Rebuilt_SwerveConstants.FrontLeft.MODULE_CONSTANTS),
+                  new ModuleIOTalonFX(Rebuilt_SwerveConstants.FrontRight.MODULE_CONSTANTS),
+                  new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackLeft.MODULE_CONSTANTS),
+                  new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackRight.MODULE_CONSTANTS));
 
-        break;
+          index = new Indexer(new IndexerIOSpark() {});
+          intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSpark());
+          intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
+          hopper = new Hopper(new HopperIO() {});
+          shooter = new Shooter(new ShooterIOSpark());
+          climber = new Climber(new ClimberIOSpark() {});
 
-      case REBUILT_DRIVE_ONLY:
-        // Real robot, instantiate hardware IO implementations
-        drive =
-            new Drive(
-                new GyroIOPigeon2(),
-                new ModuleIOTalonFX(Rebuilt_SwerveConstants.FrontLeft.MODULE_CONSTANTS),
-                new ModuleIOTalonFX(Rebuilt_SwerveConstants.FrontRight.MODULE_CONSTANTS),
-                new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackLeft.MODULE_CONSTANTS),
-                new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackRight.MODULE_CONSTANTS));
+          vision =
+              new Vision(
+                  new VisionIOPhotonVision(),
+                  (measurement) ->
+                      drive.addVisionMeasurement(
+                          measurement.pose, measurement.timestamp, measurement.stdDevs));
 
-        index = new Indexer(new IndexerIO() {});
-        intakeLinkage = new IntakeLinkage(new IntakeLinkageIO() {});
-        intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
-        hopper = new Hopper(new HopperIO() {});
-        shooter = new Shooter(new ShooterIO() {});
-        climber = new Climber(new ClimberIO() {});
+          break;
 
-        vision = new Vision(new VisionIO() {}, (measurement) -> {});
+        case REBUILT_DRIVE_ONLY:
+          // Real robot, drive only
+          drive =
+              new Drive(
+                  new GyroIOPigeon2(),
+                  new ModuleIOTalonFX(Rebuilt_SwerveConstants.FrontLeft.MODULE_CONSTANTS),
+                  new ModuleIOTalonFX(Rebuilt_SwerveConstants.FrontRight.MODULE_CONSTANTS),
+                  new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackLeft.MODULE_CONSTANTS),
+                  new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackRight.MODULE_CONSTANTS));
 
-        break;
+          index = new Indexer(new IndexerIO() {});
+          intakeLinkage = new IntakeLinkage(new IntakeLinkageIO() {});
+          intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
+          hopper = new Hopper(new HopperIO() {});
+          shooter = new Shooter(new ShooterIO() {});
+          climber = new Climber(new ClimberIO() {});
 
-      case SIMBOT:
-        // Sim robot, instantiate physics sim IO implementations
-        drive =
-            new Drive(
-                new GyroIO() {},
-                // new ModuleIOSimSpark() {},
-                // new ModuleIOSimSpark() {},
-                // new ModuleIOSimSpark() {},
-                // new ModuleIOSimSpark() {});
-                new ModuleIOSimTalonFX(Rebuilt_SwerveConstants.FrontLeft.MODULE_CONSTANTS),
-                new ModuleIOSimTalonFX(Rebuilt_SwerveConstants.FrontRight.MODULE_CONSTANTS),
-                new ModuleIOSimTalonFX(Rebuilt_SwerveConstants.BackLeft.MODULE_CONSTANTS),
-                new ModuleIOSimTalonFX(Rebuilt_SwerveConstants.BackRight.MODULE_CONSTANTS));
-        index = new Indexer(new IndexerIOSim());
-        intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSim());
-        intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
-        hopper = new Hopper(new HopperIOSim());
-        shooter = new Shooter(new ShooterIOSim());
-        climber = new Climber(new ClimberIOSim() {});
+          vision = new Vision(new VisionIO() {}, (measurement) -> {});
 
-        vision =
-            new Vision(
-                new VisionIOSim(),
-                (measurement) ->
-                    drive.addVisionMeasurement(
-                        measurement.pose, measurement.timestamp, measurement.stdDevs));
-        vision.setPoseSupplier(drive::getPose); // Provide current pose for simulation
-
-        configureFuelSim();
-        configureFuelSimRobot(hopper::ableToIntake, hopper::pushFuel);
-        break;
-
-      default:
-        // Replayed robot, disable IO implementations
-        drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {});
-
-        index = new Indexer(new IndexerIO() {});
-        intakeLinkage = new IntakeLinkage(new IntakeLinkageIO() {});
-        intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
-        hopper = new Hopper(new HopperIO() {});
-        shooter = new Shooter(new ShooterIO() {});
-        climber = new Climber(new ClimberIO() {});
-
-        vision = new Vision(new VisionIO() {}, (measurement) -> {});
-
-        break;
+          break;
+        default:
+          throw new IllegalStateException("Unexpected robot: " + Constants.robot);
+      }
     }
 
     // Set up auto routines
