@@ -30,6 +30,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.Constants.Dimensions;
+import frc.robot.Constants.Mode;
+import frc.robot.Constants.RobotType;
 import frc.robot.commands.AlignToTargetCommand;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IndexAndShootCommand;
@@ -121,7 +123,10 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    switch (Constants.robot) {
+
+    RobotType robotType = Constants.currentMode == Mode.SIM ? RobotType.SIMBOT : Constants.robot;
+
+    switch (robotType) {
       case TSUNAMI:
         // DEV bot on Spark, instantiate hardware IO implementations
         drive =
@@ -170,6 +175,27 @@ public class RobotContainer {
                 (measurement) ->
                     drive.addVisionMeasurement(
                         measurement.pose, measurement.timestamp, measurement.stdDevs));
+
+        break;
+
+      case REBUILT_DRIVE_ONLY:
+        // Real robot, instantiate hardware IO implementations
+        drive =
+            new Drive(
+                new GyroIOPigeon2(),
+                new ModuleIOTalonFX(Rebuilt_SwerveConstants.FrontLeft.MODULE_CONSTANTS),
+                new ModuleIOTalonFX(Rebuilt_SwerveConstants.FrontRight.MODULE_CONSTANTS),
+                new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackLeft.MODULE_CONSTANTS),
+                new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackRight.MODULE_CONSTANTS));
+
+        index = new Indexer(new IndexerIO() {});
+        intakeLinkage = new IntakeLinkage(new IntakeLinkageIO() {});
+        intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
+        hopper = new Hopper(new HopperIO() {});
+        shooter = new Shooter(new ShooterIO() {});
+        climber = new Climber(new ClimberIO() {});
+
+        vision = new Vision(new VisionIO() {}, (measurement) -> {});
 
         break;
 
