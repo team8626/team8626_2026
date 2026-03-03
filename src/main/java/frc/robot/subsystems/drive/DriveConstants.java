@@ -79,7 +79,7 @@ public class DriveConstants {
 
   static {
     switch (Constants.robot) {
-      case REBUILT_COMPBOT, REBUILT_DRIVE_ONLY, SIMBOT -> {
+      case REBUILT_COMPBOT, REBUILT_DRIVE_ONLY -> {
         ODOMETRY_UPDATE_FREQ = Hertz.of(250);
         MODULE_DISTANCE_Y = Inches.of(22); // left to right
         MODULE_DISTANCE_X = Inches.of(22); // front to back

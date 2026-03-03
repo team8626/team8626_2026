@@ -54,11 +54,14 @@ public final class Constants {
     REPLAY
   }
 
+  /**
+   * Physical robot hardware types. Simulation is detected via {@link #currentMode} == {@link
+   * Mode#SIM}.
+   */
   public static enum RobotType {
     REBUILT_COMPBOT,
     REBUILT_DRIVE_ONLY,
-    TSUNAMI,
-    SIMBOT
+    TSUNAMI
   }
 
   public static boolean disableHAL = false;
@@ -70,10 +73,7 @@ public final class Constants {
   /** Checks whether the correct robot is selected when deploying. */
   public static class CheckDeploy {
     public static void main(String... args) {
-      if (robot == RobotType.SIMBOT) {
-        System.err.println("Cannot deploy, invalid robot selected: " + robot);
-        System.exit(1);
-      }
+      // No SIMBOT value—simulation is detected automatically via currentMode.
     }
   }
 
@@ -103,7 +103,7 @@ public final class Constants {
 
     static {
       switch (robot) {
-        case REBUILT_COMPBOT, REBUILT_DRIVE_ONLY, SIMBOT -> {
+        case REBUILT_COMPBOT, REBUILT_DRIVE_ONLY -> {
           BUMPER_THICKNESS = Inches.of(3.625);
           BUMPER_HEIGHT = Inches.of(7);
           FRAME_SIZE_Y = Inches.of(27.5);
