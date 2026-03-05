@@ -24,6 +24,7 @@ public interface ShooterIO {
     public boolean connected = false;
     public boolean isAtGoal = true;
 
+    public Angle positionMotorLeft = Radians.of(0);
     public AngularVelocity velocityMotorLeft = RPM.of(0);
     public AngularVelocity velocityMotorRight = RPM.of(0);
     public AngularVelocity velocityShooterWheel = RPM.of(0);
@@ -49,5 +50,8 @@ public interface ShooterIO {
   public default void stop() {}
 
   /** set the PID */
+  public default void setPID(
+      double new_kP, double new_kI, double new_kD, double new_kV, double new_kS) {}
+
   public default void setPID(double new_kP, double new_kD, double new_kV, double new_kS) {}
 }

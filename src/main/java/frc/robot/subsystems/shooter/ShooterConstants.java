@@ -20,23 +20,27 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 
 public class ShooterConstants {
   // Hardware configuration
-  public static final int shooterLeadCanId = 20; // TODO: Set actual CAN ID
-  public static final int shooterFollowCanId = 21; // TODO: Set actual CAN ID
-  public static final boolean motorInverted = false; // TODO: Verify direction
-  public static final int motorCurrentLimit = 40; // Amps
+  public static final int LEFT_CANID = 7;
+  public static final int RIGHT_CANID = 6;
+  public static final boolean SHOOTER_LEFT_INVERTED = false;
+  public static final Current CURRENT_LIMIT = Amps.of(40);
 
   // Mechanical configuration
-  public static final double gearReduction = 1;
-  public static final AngularVelocity MAX_VELOCITY = RPM.of(5676.0 / gearReduction);
+  public static final double GEAR_REDUCTION = 1;
+  public static final AngularVelocity MAX_VELOCITY = RPM.of(5676.0 / GEAR_REDUCTION);
+  public static final AngularVelocity DEFAULT_VELOCITY =
+      RPM.of(1500); // This is Flywheel RPM (not motor RPM)
+
   public static final double flywheelMOI = 0.00568;
 
-  public static final Distance flywheelRadius = Inches.of(2.0);
-  public static final Angle shooterAngle = Degrees.of(55);
-  public static final Transform3d shootertoRobotCenter =
+  public static final Distance FLYWHEEL_RADIUS = Inches.of(2.0);
+  public static final Angle SHOOTER_ANGLE = Degrees.of(55);
+  public static final Transform3d SHOOTER_OFFSET =
       new Transform3d(
           Inches.of(-8),
           Inches.of(4.5),
@@ -45,24 +49,16 @@ public class ShooterConstants {
 
   // Encoder conversion factors
   // Convert motor rotations to mechanism radians
-  public static final double encoderPositionFactor =
-      (2.0 * Math.PI) / gearReduction; // Motor rotations -> Mechanism radians
-  public static final double encoderVelocityFactor =
-      (2.0 * Math.PI) / 60.0 / gearReduction; // Motor RPM -> Mechanism rad/sec
+  //   public static final double ENCODER_POSITION_FACTOR =
+  //       (2.0 * Math.PI) / GEAR_REDUCTION; // Motor rotations -> Mechanism radians
+  //   public static final double encoderVelocityFactor =
+  //       (2.0 * Math.PI) / 60.0 / GEAR_REDUCTION; // Motor RPM -> Mechanism rad/sec
 
   // Velocity control PID (slot 0)
-  public static final double velocityKp = 0.1; // Start conservative, increase if response is slow
-  public static final double velocityKd = 0.0;
-  public static final double velocityKs = 0.05; // Small voltage to overcome static friction
-  public static final double velocityKv = 0.12; // Rough estimate: 12V / 100 rad/s = 0.12
+  public static final double SHOOTER_KP = 0.456; // Start conservative, increase if response is slow
+  public static final double SHOOTER_KI = 0.0;
+  public static final double SHOOTER_KD = 0.0;
 
-  // Position control PID (slot 1)
-  public static final double positionKp = 1.0; // TODO: Tune - start with 1.0 and adjust
-  public static final double positionKd = 0.0;
-
-  // Preset positions for 3-position shooting (120° apart)
-  public static final double position0Rad = 0.0; // Position 0
-  public static final double position1Rad = 2.0 * Math.PI / 3.0; // 120 degrees
-  public static final double position2Rad = 4.0 * Math.PI / 3.0; // 240 degrees
-  public static final double positionStepRad = 2.0 * Math.PI / 3.0; // Step size (120 degrees)
+  public static final double SHOOTER_KS = 0.05; // Small voltage to overcome static friction
+  public static final double SHOOTER_KV = 0.12; // Rough estimate: 12V / 100 rad/s = 0.12
 }

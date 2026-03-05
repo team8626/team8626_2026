@@ -32,33 +32,27 @@ import frc.robot.Constants.ControllerConstants;
 import frc.robot.Constants.Dimensions;
 import frc.robot.commands.AlignToTargetCommand;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.IndexAndShootCommand;
 import frc.robot.commands.IndexerStartCommand;
 import frc.robot.commands.TeleopDriveCommand;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberIOSim;
-import frc.robot.subsystems.climber.ClimberIOSpark;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants.Rebuilt_SwerveConstants;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOADIS16470;
-import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSimTalonFX;
 import frc.robot.subsystems.drive.ModuleIOSpark;
-import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.hopper.HopperIO;
 import frc.robot.subsystems.hopper.HopperIOSim;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
-import frc.robot.subsystems.indexer.IndexerIOSpark;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkage;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkageIO;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkageIOSim;
-import frc.robot.subsystems.intakeLinkage.IntakeLinkageIOSpark;
 import frc.robot.subsystems.intakeRoller.IntakeRoller;
 import frc.robot.subsystems.intakeRoller.IntakeRollerIO;
 import frc.robot.subsystems.intakeRoller.IntakeRollerIOSim;
@@ -106,6 +100,8 @@ public class RobotContainer {
   private static final Trigger intakeRollerTrigger = controller.b();
 
   private static final Trigger shootTrigger = controller.leftTrigger();
+  private static final Trigger shootUpdateVelocityTrigger =
+      controller.back().and(controller.start());
   private static final Trigger intakeDeployTrigger = controller.leftBumper();
 
   private static final Trigger driverAimTrigger = controller.y();
@@ -149,20 +145,24 @@ public class RobotContainer {
         break;
       case REBUILT_COMPBOT:
         // Real robot, instantiate hardware IO implementations
+        //
+        // DO NOT COMMIT THOSE CHANGES TO THE REPO, THEY ARE FOR TESTING PURPOSES ONLY.
+        //
         drive =
             new Drive(
-                new GyroIOPigeon2(),
-                new ModuleIOTalonFX(Rebuilt_SwerveConstants.FrontLeft.MODULE_CONSTANTS),
-                new ModuleIOTalonFX(Rebuilt_SwerveConstants.FrontRight.MODULE_CONSTANTS),
-                new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackLeft.MODULE_CONSTANTS),
-                new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackRight.MODULE_CONSTANTS));
+                new GyroIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {});
 
-        index = new Indexer(new IndexerIOSpark() {});
-        intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSpark());
-        intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
+        index = new Indexer(new IndexerIO() {});
+        intakeLinkage = new IntakeLinkage(new IntakeLinkageIO() {});
+        intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
         hopper = new Hopper(new HopperIO() {});
+        climber = new Climber(new ClimberIO() {});
+
         shooter = new Shooter(new ShooterIOSpark());
-        climber = new Climber(new ClimberIOSpark() {});
 
         vision =
             new Vision(
@@ -288,8 +288,13 @@ public class RobotContainer {
 
     // TODO: This is for testing only, replace with proper commands once shooter and indexer
     // functionality are tested
-    indexTrigger.toggleOnTrue(new IndexerStartCommand(index));
-    shootTrigger.whileTrue(new IndexAndShootCommand(shooter, hopper, index, drive));
+    // indexTrigger.toggleOnTrue(new IndexerStartCommand(index));
+    // shootTrigger.whileTrue(new IndexAndShootCommand(shooter, hopper, index, drive));
+    // shootUpdateVelocityTrigger.onTrue(shooter.updateVelocityCommand());
+
+    shootTrigger
+        .whileTrue(Commands.runOnce(() -> shooter.setVelocity(RPM.of(400)), shooter))
+        .onFalse(Commands.runOnce(() -> shooter.stop(), shooter));
   }
 
   private void configureFuelSim() {
@@ -327,10 +332,10 @@ public class RobotContainer {
   public static void launchFuel(AngularVelocity flywheelVelocity) {
     fuelSim.launchFuel(
         MetersPerSecond.of(
-            flywheelVelocity.in(RadiansPerSecond) * ShooterConstants.flywheelRadius.in(Meters)),
-        ShooterConstants.shooterAngle,
-        Degrees.of(ShooterConstants.shootertoRobotCenter.getRotation().getAngle()),
-        Meters.of(ShooterConstants.shootertoRobotCenter.getZ()));
+            flywheelVelocity.in(RadiansPerSecond) * ShooterConstants.FLYWHEEL_RADIUS.in(Meters)),
+        ShooterConstants.SHOOTER_ANGLE,
+        Degrees.of(ShooterConstants.SHOOTER_OFFSET.getRotation().getAngle()),
+        Meters.of(ShooterConstants.SHOOTER_OFFSET.getZ()));
   }
 
   public static Trigger getHubAimTrigger() {
@@ -395,6 +400,22 @@ public class RobotContainer {
         drive
             .sysIdDynamic(SysIdRoutine.Direction.kReverse)
             .withName("Characterization/Drive Dynamic Reverse"));
+    SmartDashboard.putData(
+        shooter
+            .sysIdQuasistatic(SysIdRoutine.Direction.kForward)
+            .withName("Characterization/Shooter Quasistatic Forward"));
+    SmartDashboard.putData(
+        shooter
+            .sysIdDynamic(SysIdRoutine.Direction.kForward)
+            .withName("Characterization/Shooter Dynamic Forward"));
+    SmartDashboard.putData(
+        shooter
+            .sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
+            .withName("Characterization/Shooter Quasistatic Reverse"));
+    SmartDashboard.putData(
+        shooter
+            .sysIdDynamic(SysIdRoutine.Direction.kReverse)
+            .withName("Characterization/Shooter Dynamic Reverse"));
   }
 
   /**
