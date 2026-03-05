@@ -78,7 +78,7 @@ public class Shooter extends SubsystemBase {
    *
    * @param velocityRadPerSec Velocity in radians per second
    */
-  public void setVelocity(AngularVelocity newVelocity) {
+  public void start(AngularVelocity newVelocity) {
     // AngularVelocity velocity = newVelocity;
     // if ((velocity.abs(RPM)) > ShooterConstants.MAX_VELOCITY.in(RPM)) {
     //   newVelocity = RPM.of(ShooterConstants.MAX_VELOCITY.copySign(velocity, RPM));

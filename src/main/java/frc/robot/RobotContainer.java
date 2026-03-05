@@ -293,7 +293,7 @@ public class RobotContainer {
     // shootUpdateVelocityTrigger.onTrue(shooter.updateVelocityCommand());
 
     shootTrigger
-        .whileTrue(Commands.runOnce(() -> shooter.setVelocity(RPM.of(400)), shooter))
+        .whileTrue(Commands.runOnce(() -> shooter.start(RPM.of(400)), shooter))
         .onFalse(Commands.runOnce(() -> shooter.stop(), shooter));
   }
 

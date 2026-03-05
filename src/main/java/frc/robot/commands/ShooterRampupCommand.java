@@ -25,7 +25,7 @@ public class ShooterRampupCommand extends Command {
 
   @Override
   public void initialize() {
-    shooter.setVelocity(velocitySupplier.get());
+    shooter.start(velocitySupplier.get());
   }
 
   @Override
