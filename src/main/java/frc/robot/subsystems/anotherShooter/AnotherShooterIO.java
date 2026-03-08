@@ -54,4 +54,6 @@ public interface AnotherShooterIO {
   public default void setPID(double kP, double kI, double kD, double kV, double kS) {}
 
   public default void updateInputs(AnotherShooterIOInputs inputs) {}
+
+  public default void setVoltage(double voltage) {}
 }

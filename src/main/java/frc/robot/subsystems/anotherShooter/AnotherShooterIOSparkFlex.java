@@ -13,7 +13,6 @@ import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -43,14 +42,16 @@ public class AnotherShooterIOSparkFlex implements AnotherShooterIO {
     // Setup configuration for the left motor
     leftConfig = new SparkFlexConfig();
     leftConfig
-        .inverted(true)
+        .inverted(false)
         .idleMode(IdleMode.kCoast)
         .smartCurrentLimit(AnotherShooterConstants.MAX_CURRENT);
 
     leftConfig
         .encoder
         .positionConversionFactor(1 / FLYWHEEL_CONFIG.REDUCTION())
-        .velocityConversionFactor(1 / FLYWHEEL_CONFIG.REDUCTION());
+        .velocityConversionFactor(1 / FLYWHEEL_CONFIG.REDUCTION())
+        .quadratureMeasurementPeriod(10)
+        .quadratureAverageDepth(6);
 
     leftConfig
         .closedLoop
@@ -74,6 +75,12 @@ public class AnotherShooterIOSparkFlex implements AnotherShooterIO {
     // This way we only have to do closed loop control on one motor, and the other motor will mirror
     // it.
     rightConfig = new SparkFlexConfig();
+    rightConfig
+        .encoder
+        .positionConversionFactor(1 / FLYWHEEL_CONFIG.REDUCTION())
+        .velocityConversionFactor(1 / FLYWHEEL_CONFIG.REDUCTION())
+        .quadratureMeasurementPeriod(10)
+        .quadratureAverageDepth(6);
 
     rightConfig.follow(leftMotor, true);
     rightMotor = new SparkFlex(FLYWHEEL_CONFIG.CANID_RIGHT(), MotorType.kBrushless);
@@ -103,12 +110,7 @@ public class AnotherShooterIOSparkFlex implements AnotherShooterIO {
 
   @Override
   public void start(AngularVelocity new_RPM) {
-    leftController.setSetpoint(
-        new_RPM.in(RPM),
-        ControlType.kVelocity,
-        ClosedLoopSlot.kSlot0,
-        shooterFFLeft.calculate(new_RPM.in(RPM)),
-        ArbFFUnits.kVoltage);
+    leftController.setSetpoint(new_RPM.in(RPM), ControlType.kVelocity, ClosedLoopSlot.kSlot0);
 
     shooterIsEnabled = true;
   }
@@ -122,12 +124,7 @@ public class AnotherShooterIOSparkFlex implements AnotherShooterIO {
   @Override
   public void setVelocity(AngularVelocity new_RPM) {
     if (shooterIsEnabled) {
-      leftController.setSetpoint(
-          new_RPM.in(RPM),
-          ControlType.kVelocity,
-          ClosedLoopSlot.kSlot0,
-          shooterFFLeft.calculate(new_RPM.in(RPM)),
-          ArbFFUnits.kVoltage);
+      leftController.setSetpoint(new_RPM.in(RPM), ControlType.kVelocity, ClosedLoopSlot.kSlot0);
     }
   }
 
@@ -146,7 +143,21 @@ public class AnotherShooterIOSparkFlex implements AnotherShooterIO {
   }
 
   @Override
+  public void setPID(double newkP, double newkI, double newkD, double newkV, double newkS) {
+    leftConfig.closedLoop.pid(newkP, newkI, newkD, ClosedLoopSlot.kSlot0);
+    leftConfig.closedLoop.feedForward.sv(newkS, newkV, ClosedLoopSlot.kSlot0);
+    System.out.printf("New PID: %f, %f, %f", newkP, newkI, newkD);
+    leftMotor.configure(
+        leftConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+  }
+
+  @Override
   public void runCharacterization(double input) {
     leftMotor.setVoltage(input);
+  }
+
+  @Override
+  public void setVoltage(double voltage) {
+    leftMotor.setVoltage(voltage);
   }
 }

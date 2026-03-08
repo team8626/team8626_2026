@@ -2,6 +2,9 @@ package frc.robot.subsystems.anotherShooter;
 
 import static edu.wpi.first.units.Units.*;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 import frc.robot.Constants;
@@ -12,6 +15,14 @@ public class AnotherShooterConstants {
   public static final int MAX_CURRENT = 50; // Amps
 
   public static final AngularVelocity VELOCITY_TOLERANCE = RPM.of(25);
+
+  public static final Angle ANOTHERSHOOTER_ANGLE = Degrees.of(55);
+  public static final Transform3d ANOTHERSHOOTER_OFFSET =
+      new Transform3d(
+          Inches.of(-8),
+          Inches.of(4.5),
+          Inches.of(16.25),
+          new Rotation3d(new Rotation2d(Degrees.of(0))));
 
   // AlgaeShooter Constants
   public static final Distance FLYWHEEL_RADIUS = Inches.of(2);
@@ -32,7 +43,7 @@ public class AnotherShooterConstants {
   // PID Constants
   public static final Gains GAINS =
       switch (Constants.robot) {
-        case REBUILT_COMPBOT -> new Gains(0.0004, 0.0, 0.0, 0.10395, 0.00296, 0);
+        case REBUILT_COMPBOT -> new Gains(0.001, 0.0, 0.0006, 0.10395, 0.0019, 0);
           // All other case use the same as simbot for now, but this should be changed when we have
           // another real to test on
         default -> new Gains(0.05, 0.0, 0.0, 0.10395, 0.00296, 0.0);

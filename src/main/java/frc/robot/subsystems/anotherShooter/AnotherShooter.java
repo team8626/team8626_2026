@@ -1,24 +1,40 @@
 package frc.robot.subsystems.anotherShooter;
 
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.util.LoggedTunableNumber;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class AnotherShooter extends SubsystemBase {
-  private AnotherShooterIO algaeShooterInterface;
+  private AnotherShooterIO anotherShooterInterface;
   private final AnotherShooterIO io;
   private final AnotherShooterIOInputsAutoLogged inputs = new AnotherShooterIOInputsAutoLogged();
 
-  private AngularVelocity DesiredRPM;
+  @AutoLogOutput(unit = "RadPerSec")
+  private AngularVelocity DesiredRPM = RPM.of(2500); //TODO: find actual value for desired RPM
 
   /** Shown on the dashboard when the index motor is not connected. */
   private final Alert motorDisconnectedAlert =
       new Alert("AnotherShooter motor disconnected.", AlertType.kError);
+
+  // Configure SysId
+  private SysIdRoutine sysId =
+      new SysIdRoutine(
+          new SysIdRoutine.Config(
+              null,
+              null,
+              null,
+              (state) -> Logger.recordOutput("Shooter/SysIdState", state.toString())),
+          new SysIdRoutine.Mechanism(
+              (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
 
   private final LoggedTunableNumber flywheelKP =
       new LoggedTunableNumber("AnotherShooter/Flywheel/kP", AnotherShooterConstants.GAINS.kP());
@@ -36,7 +52,8 @@ public class AnotherShooter extends SubsystemBase {
   }
 
   public void start(AngularVelocity newRPM) {
-    io.setVelocity(newRPM);
+    DesiredRPM = newRPM;
+    // io.setVelocity(newRPM);
     io.start(DesiredRPM);
   }
 
@@ -57,19 +74,19 @@ public class AnotherShooter extends SubsystemBase {
   }
 
   public void setPID(double newkP, double newkI, double newkD) {
-    algaeShooterInterface.setPID(newkP, newkI, newkD);
+    anotherShooterInterface.setPID(newkP, newkI, newkD);
   }
 
   public void setkP(double newkP) {
-    algaeShooterInterface.setPID(newkP, inputs.kI, inputs.kD);
+    anotherShooterInterface.setPID(newkP, inputs.kI, inputs.kD);
   }
 
   public void setkI(double newkI) {
-    algaeShooterInterface.setPID(inputs.kP, newkI, inputs.kD);
+    anotherShooterInterface.setPID(inputs.kP, newkI, inputs.kD);
   }
 
   public void setkD(double newkD) {
-    algaeShooterInterface.setPID(inputs.kP, inputs.kI, newkD);
+    anotherShooterInterface.setPID(inputs.kP, inputs.kI, newkD);
   }
 
   @Override
@@ -100,5 +117,21 @@ public class AnotherShooter extends SubsystemBase {
 
   public double getCharacterizationVelocity() {
     return inputs.currentVelocity.in(RPM);
+  }
+
+  /** Returns a command to run a quasistatic test in the specified direction. */
+  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    return run(() -> runCharacterization(0.0))
+        .withTimeout(1.0)
+        .andThen(sysId.quasistatic(direction));
+  }
+
+  /** Returns a command to run a dynamic test in the specified direction. */
+  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    return run(() -> runCharacterization(0.0)).withTimeout(1.0).andThen(sysId.dynamic(direction));
+  }
+
+  public void setVoltage(double voltage) {
+    anotherShooterInterface.setVoltage(voltage);
   }
 }
