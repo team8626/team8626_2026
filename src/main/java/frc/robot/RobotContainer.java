@@ -13,7 +13,14 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -285,9 +292,11 @@ public class RobotContainer {
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    // Align to front camera's best AprilTag (POV-Up) or back camera's best (POV-Down)
-    controller.povLeft().whileTrue(AlignToTargetCommand.alignToFrontCamera(drive, vision));
-    controller.povRight().whileTrue(AlignToTargetCommand.alignToBackCamera(drive, vision));
+    // Align to camera's best AprilTag: POV Left = front left, POV Up = front right, POV Right =
+    // rear right
+    controller.povLeft().whileTrue(AlignToTargetCommand.alignToFrontLeftCamera(drive, vision));
+    controller.povRight().whileTrue(AlignToTargetCommand.alignToFrontRightCamera(drive, vision));
+    controller.povDown().whileTrue(AlignToTargetCommand.alignToRearRightCamera(drive, vision));
 
     // Run the intake roller at 500 RPM while the B button is held, stop when released
     // TODO: Should be replace with a proper command ("Start/Stop CollectCommand"), this is just for

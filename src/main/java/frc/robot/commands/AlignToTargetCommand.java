@@ -41,19 +41,21 @@ import java.util.Optional;
 
 /**
  * Command that aligns the robot to a given camera's best AprilTag target: robot moves to a pose in
- * front of the tag at a configurable distance. For the front camera, the robot's front faces the
- * tag; for the rear camera, the robot's rear faces the tag (so the rear aligns to the tag). Usable
- * in both autonomous and teleop (e.g. while-held).
+ * front of the tag at a configurable distance. For front-left and front-right cameras, the robot's
+ * front faces the tag; for the rear-right camera, the robot's rear faces the tag. Usable in both
+ * autonomous and teleop (e.g. while-held).
  *
  * <p>When the command starts, that camera's best target is captured and the robot aligns to it
  * until the command ends. If the camera has no best target at start, the command does nothing and
  * ends immediately.
  */
 public class AlignToTargetCommand extends Command {
-  /** Camera index for front camera (0). */
-  public static final int FRONT_CAMERA = 0;
-  /** Camera index for back camera (1). */
-  public static final int BACK_CAMERA = 1;
+  /** Camera index for front left (0). */
+  public static final int FRONT_LEFT_CAMERA = 0;
+  /** Camera index for front right (1). */
+  public static final int FRONT_RIGHT_CAMERA = 1;
+  /** Camera index for rear right (2). */
+  public static final int REAR_RIGHT_CAMERA = 2;
 
   private final Drive drive;
   private final Vision vision;
@@ -80,25 +82,36 @@ public class AlignToTargetCommand extends Command {
   }
 
   /**
-   * Align to the front camera's best target using the default distance from VisionConstants.
+   * Align to the front-left camera's best target using the default distance from VisionConstants.
    *
    * @param drive Drive subsystem
    * @param vision Vision subsystem
-   * @return command; does nothing and ends immediately if the front camera has no best target
+   * @return command; does nothing and ends immediately if the front-left camera has no best target
    */
-  public static Command alignToFrontCamera(Drive drive, Vision vision) {
-    return alignToCameraBestTarget(drive, vision, FRONT_CAMERA);
+  public static Command alignToFrontLeftCamera(Drive drive, Vision vision) {
+    return alignToCameraBestTarget(drive, vision, FRONT_LEFT_CAMERA);
   }
 
   /**
-   * Align to the back camera's best target using the default distance from VisionConstants.
+   * Align to the front-right camera's best target using the default distance from VisionConstants.
    *
    * @param drive Drive subsystem
    * @param vision Vision subsystem
-   * @return command; does nothing and ends immediately if the back camera has no best target
+   * @return command; does nothing and ends immediately if the front-right camera has no best target
    */
-  public static Command alignToBackCamera(Drive drive, Vision vision) {
-    return alignToCameraBestTarget(drive, vision, BACK_CAMERA);
+  public static Command alignToFrontRightCamera(Drive drive, Vision vision) {
+    return alignToCameraBestTarget(drive, vision, FRONT_RIGHT_CAMERA);
+  }
+
+  /**
+   * Align to the rear-right camera's best target using the default distance from VisionConstants.
+   *
+   * @param drive Drive subsystem
+   * @param vision Vision subsystem
+   * @return command; does nothing and ends immediately if the rear-right camera has no best target
+   */
+  public static Command alignToRearRightCamera(Drive drive, Vision vision) {
+    return alignToCameraBestTarget(drive, vision, REAR_RIGHT_CAMERA);
   }
 
   /**
@@ -106,7 +119,7 @@ public class AlignToTargetCommand extends Command {
    *
    * @param drive Drive subsystem
    * @param vision Vision subsystem
-   * @param cameraIndex Camera index (0 = front, 1 = back)
+   * @param cameraIndex Camera index (0 = front left, 1 = front right, 2 = rear right)
    * @return command; does nothing and ends immediately if that camera has no best target
    */
   public static Command alignToCameraBestTarget(Drive drive, Vision vision, int cameraIndex) {
@@ -118,7 +131,7 @@ public class AlignToTargetCommand extends Command {
    *
    * @param drive Drive subsystem
    * @param vision Vision subsystem
-   * @param cameraIndex Camera index (0 = front, 1 = back)
+   * @param cameraIndex Camera index (0 = front left, 1 = front right, 2 = rear right)
    * @param distanceMeters Desired distance in meters from robot center to tag
    * @return command; does nothing and ends immediately if that camera has no best target
    */
@@ -216,7 +229,7 @@ public class AlignToTargetCommand extends Command {
       }
 
       if (tagOpt.isPresent()) {
-        boolean frontFacesTag = (cameraIndex == FRONT_CAMERA);
+        boolean frontFacesTag = (cameraIndex != REAR_RIGHT_CAMERA);
         desiredPoseAtStart = desiredPoseFromTag(tagOpt.get(), distanceMeters, frontFacesTag);
       }
     }
