@@ -14,16 +14,13 @@
 package frc.robot.subsystems.intakeLinkage;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.subsystems.intakeLinkage.IntakeLinkageConstants.gearReduction;
-import static frc.robot.subsystems.intakeLinkage.IntakeLinkageConstants.positionKd;
-import static frc.robot.subsystems.intakeLinkage.IntakeLinkageConstants.positionKp;
+import static frc.robot.subsystems.intakeLinkage.IntakeLinkageConstants.*;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
 /**
  * Simulation IO for the IntakeLinkage subsystem.
@@ -54,7 +51,7 @@ public class IntakeLinkageIOSim implements IntakeLinkageIO {
   /**
    * Simulates intakeLinkage motor dynamics (Neo Vortex + gearbox) for physics-accurate behavior.
    */
-  private final DCMotorSim motorSim;
+  private final SingleJointedArmSim motorSim;
   /** PID used to correct position error when in position closed-loop mode. */
   private final PIDController positionController = new PIDController(positionKp, 0, positionKd);
 
@@ -62,51 +59,75 @@ public class IntakeLinkageIOSim implements IntakeLinkageIO {
   private boolean positionClosedLoop = false;
 
   private double appliedVolts = 0.0;
-  private double positionGoalRad;
+  private Angle desiredAngle = IntakeLinkageConstants.STARTING_ANGLE;
 
   public IntakeLinkageIOSim() {
     motorSim =
-        new DCMotorSim(
-            LinearSystemId.createDCMotorSystem(DCMotor.getNeoVortex(1), 0.01, gearReduction),
-            DCMotor.getNeoVortex(1));
+        new SingleJointedArmSim(
+            DCMotor.getNeoVortex(1),
+            IntakeLinkageConstants.gearReduction,
+            IntakeLinkageConstants.armInertia.in(KilogramSquareMeters),
+            IntakeLinkageConstants.armLength.in(Meters),
+            IntakeLinkageConstants.MIN_ANGLE.in(Radians),
+            IntakeLinkageConstants.MAX_ANGLE.in(Radians),
+            true,
+            IntakeLinkageConstants.MIN_ANGLE.in(Radians),
+            new double[0]);
   }
 
   @Override
   public void updateInputs(IntakeLinkageIOInputs inputs) {
-
-    if (positionClosedLoop) {
-
-      double currentRad = motorSim.getAngularPositionRad();
-
-      appliedVolts = positionController.calculate(currentRad, positionGoalRad);
-
-    } else {
-
-      positionController.reset();
-    }
+    desiredAngle =
+        Degrees.of(
+            MathUtil.clamp(
+                desiredAngle.in(Degrees),
+                IntakeLinkageConstants.MIN_ANGLE.in(Degrees),
+                IntakeLinkageConstants.MAX_ANGLE.in(Degrees)));
 
     motorSim.update(0.02);
 
-    inputs.position = Radians.of(motorSim.getAngularPositionRad());
+    inputs.position = Degrees.of(motorSim.getAngleRads() * 180.0 / Math.PI);
 
     motorSim.setInputVoltage(MathUtil.clamp(appliedVolts, -12.0, 12.0));
 
     inputs.connected = true;
-    inputs.position = Radians.of(motorSim.getAngularPositionRad());
-    inputs.velocity = RadiansPerSecond.of(motorSim.getAngularVelocityRadPerSec());
+    inputs.position = Degrees.of(motorSim.getAngleRads() * 180.0 / Math.PI);
+    inputs.velocity = DegreesPerSecond.of(motorSim.getVelocityRadPerSec() * 180.0 / Math.PI);
     inputs.appliedVoltage = Volts.of(appliedVolts);
     inputs.current = Amps.of(Math.abs(motorSim.getCurrentDrawAmps()));
   }
 
   @Override
   public void setPosition(Angle position) {
-    positionGoalRad = position.in(Radians);
-    positionClosedLoop = true;
+    desiredAngle = position;
+  }
+
+  public void setPID(double new_kP, double new_kI, double new_kD) {
+    positionController.setPID(new_kP, new_kI, new_kD);
   }
 
   @Override
-  public void stop() {
-    positionClosedLoop = false;
-    appliedVolts = 0.0;
+  public void goUp(Angle offset) {
+    desiredAngle.minus(offset);
+  }
+
+  @Override
+  public void stow() {
+    desiredAngle = IntakeLinkageConstants.STOW_ANGLE;
+  }
+
+  @Override
+  public void deploy() {
+    desiredAngle = IntakeLinkageConstants.DEPLOY_ANGLE;
+  }
+
+  @Override
+  public void hopperOpen() {
+    desiredAngle = IntakeLinkageConstants.HOPPER_OPEN_ANGLE;
+  }
+
+  @Override
+  public void goDown(Angle offset) {
+    desiredAngle.plus(offset);
   }
 }

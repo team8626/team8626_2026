@@ -13,13 +13,10 @@
 
 package frc.robot.subsystems.intakeLinkage;
 
-import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Degrees;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.units.measure.Angle;
-// import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.units.measure.*;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -51,11 +48,6 @@ public class IntakeLinkage extends SubsystemBase {
     motorDisconnectedAlert.set(!inputs.connected);
   }
 
-  /** Stop the intake linkage motor. */
-  public void stop() {
-    io.stop();
-  }
-
   @AutoLogOutput
   public Angle getPosition() {
     return inputs.position;
@@ -63,7 +55,7 @@ public class IntakeLinkage extends SubsystemBase {
 
   @AutoLogOutput
   public Rotation2d getAngle() {
-    return new Rotation2d(inputs.position.in(Radians));
+    return new Rotation2d(inputs.position.in(Degrees));
   }
 
   public void setPosition(Angle position) {
