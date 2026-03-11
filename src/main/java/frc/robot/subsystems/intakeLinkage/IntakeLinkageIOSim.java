@@ -87,12 +87,13 @@ public class IntakeLinkageIOSim implements IntakeLinkageIO {
 
     motorSim.update(0.02);
 
-    inputs.position = Radians.of(motorSim.getAngularPositionRad());
+    inputs.position = Degrees.of(motorSim.getAngularPositionRad());
+    inputs.desiredAngle = Degrees.of(positionGoalRad);
 
     motorSim.setInputVoltage(MathUtil.clamp(appliedVolts, -12.0, 12.0));
 
     inputs.connected = true;
-    inputs.position = Radians.of(motorSim.getAngularPositionRad());
+    // inputs.position = Radians.of(motorSim.getAngularPositionRad());
     inputs.velocity = RadiansPerSecond.of(motorSim.getAngularVelocityRadPerSec());
     inputs.appliedVoltage = Volts.of(appliedVolts);
     inputs.current = Amps.of(Math.abs(motorSim.getCurrentDrawAmps()));
@@ -100,7 +101,7 @@ public class IntakeLinkageIOSim implements IntakeLinkageIO {
 
   @Override
   public void setPosition(Angle position) {
-    positionGoalRad = position.in(Radians);
+    positionGoalRad = position.in(Degrees);
     positionClosedLoop = true;
   }
 

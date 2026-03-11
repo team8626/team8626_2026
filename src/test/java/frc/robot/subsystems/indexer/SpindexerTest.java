@@ -18,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Voltage;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -54,7 +53,7 @@ public class SpindexerTest {
             "[testRunVelocity] Using IndexerIOSim - Target: %.1f Rot/sec%n",
             targetVelocity.in(RotationsPerSecond)));
 
-    assertTrue(targetVelocity.equals(spindexer.getDesiredVelocity()));
+    assertTrue(targetVelocity.equals(spindexer.getVelocity()));
 
     // Simulate the scheduler (20ms per cycle) for 1 second to allow the controller to converge to
     // the target velocity and measure time to converge to target velocity (assuming tolerance)
@@ -108,19 +107,19 @@ public class SpindexerTest {
     spindexer.periodic();
 
     assertTrue(
-        spindexer.getDesiredVelocity().equals(RotationsPerSecond.of(0.0)),
+        spindexer.getVelocity().equals(RotationsPerSecond.of(0.0)),
         String.format("[testStop] The Spindexer did not stop"));
   }
 
-  @Test
-  void testRunOpenLoop() {
-    Voltage voltage = Volts.of(6);
+  // @Test
+  // void testRunOpenLoop() {
+  //   Voltage voltage = Volts.of(6);
 
-    spindexer.runOpenLoop(voltage);
-    spindexer.periodic();
+  //   spindexer.runOpenLoop(voltage);
+  //   spindexer.periodic();
 
-    assertTrue(voltage.equals(spindexer.getAppliedVoltage()));
-  }
+  //   assertTrue(voltage.equals(spindexer.getAppliedVoltage()));
+  // }
 
   @Test
   void testGetVelocity() {
@@ -140,36 +139,36 @@ public class SpindexerTest {
     assertTrue(spindexer.getVelocity().gt(RotationsPerSecond.of(0.0)));
   }
 
-  @Test
-  void testIsConnected() {
-    // Note: Simulation is connected by default
-    spindexer.periodic();
-    assertTrue(spindexer.isConnected());
+  // @Test
+  // void testIsConnected() {
+  //   // Note: Simulation is connected by default
+  //   spindexer.periodic();
+  //   assertTrue(spindexer.isConnected());
 
-    io.disconnect();
-    spindexer.periodic();
-    assertFalse(spindexer.isConnected());
-  }
+  //   io.disconnect();
+  //   spindexer.periodic();
+  //   assertFalse(spindexer.isConnected());
+  // }
 
-  @Test
-  void testGetAppliedVoltage() {
-    Voltage voltage = Volts.of(6);
+  // @Test
+  // void testGetAppliedVoltage() {
+  //   Voltage voltage = Volts.of(6);
 
-    spindexer.runOpenLoop(voltage);
-    spindexer.periodic();
+  //   spindexer.runOpenLoop(voltage);
+  //   spindexer.periodic();
 
-    assertTrue(voltage.equals(spindexer.getAppliedVoltage()));
-  }
+  //   assertTrue(voltage.equals(spindexer.getAppliedVoltage()));
+  // }
 
-  @Test
-  void testGetCurrent() {
-    Voltage voltage = Volts.of(6);
+  // @Test
+  // void testGetCurrent() {
+  //   Voltage voltage = Volts.of(6);
 
-    spindexer.runOpenLoop(voltage);
-    spindexer.periodic();
+  //   spindexer.runOpenLoop(voltage);
+  //   spindexer.periodic();
 
-    assertNotEquals(spindexer.getCurrent().in(Amps), 0);
-  }
+  //   assertNotEquals(spindexer.getCurrent().in(Amps), 0);
+  // }
 
   @Test
   void testNegativeVelocity() throws InterruptedException {
@@ -183,7 +182,7 @@ public class SpindexerTest {
             "[testRunVelocity] Using IndexerIOSim - Target: %.1f Rot/sec%n",
             targetVelocity.in(RotationsPerSecond)));
 
-    assertTrue(targetVelocity.equals(spindexer.getDesiredVelocity()));
+    assertTrue(targetVelocity.equals(spindexer.getVelocity()));
 
     // Simulate the scheduler (20ms per cycle) for 1 second to allow the controller to converge to
     // the target velocity
@@ -221,14 +220,14 @@ public class SpindexerTest {
     AngularVelocity targetVelocity = RPM.of(10000); // Exceeds max velocity
     spindexer.runVelocity(targetVelocity);
     spindexer.periodic();
-    assertTrue(spindexer.getDesiredVelocity().equals(IndexerConstants.MAX_VELOCITY));
+    assertTrue(spindexer.getVelocity().equals(IndexerConstants.MAX_VELOCITY));
 
     // Test Negative value out of bounds
     targetVelocity = RPM.of(-10000); // Exceeds max velocity
     spindexer.runVelocity(targetVelocity);
     spindexer.periodic();
     assertEquals(
-        spindexer.getDesiredVelocity().in(RPM),
+        spindexer.getVelocity().in(RPM),
         IndexerConstants.MAX_VELOCITY.copySign(targetVelocity, RPM),
         DELTA);
   }

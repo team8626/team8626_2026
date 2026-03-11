@@ -39,17 +39,17 @@ public class SpindexerCommandsTest {
     // Check if the desired velocity is set correctly
     command.initialize();
     spindexer.periodic();
-    assertTrue(spindexer.getDesiredVelocity().equals(IndexerConstants.DEFAULT_VELOCITY));
+    assertTrue(spindexer.getVelocity().equals(IndexerConstants.DEFAULT_VELOCITY));
 
     // Check if the adjusting speed on the fly
     command.setTargetVelocity(() -> RPM.of(123.0));
     spindexer.periodic();
-    assertTrue(spindexer.getDesiredVelocity().equals(RPM.of(123.0)));
+    assertTrue(spindexer.getVelocity().equals(RPM.of(123.0)));
 
     // Check if the Spindexer is stopped on end()
     command.end(false);
     spindexer.periodic();
-    assertTrue(spindexer.getDesiredVelocity().equals(RPM.of(0.0)));
+    assertTrue(spindexer.getVelocity().equals(RPM.of(0.0)));
   }
 
   @Test
@@ -60,7 +60,7 @@ public class SpindexerCommandsTest {
     // Check if the desired velocity is set correctly
     command.initialize();
     spindexer.periodic();
-    assertTrue(spindexer.getDesiredVelocity().equals(targetVelocity));
+    assertTrue(spindexer.getVelocity().equals(targetVelocity));
   }
 
   @Test
@@ -71,11 +71,11 @@ public class SpindexerCommandsTest {
     // Check if the desired velocity is set correctly
     startCommand.initialize();
     spindexer.periodic();
-    assertTrue(spindexer.getDesiredVelocity().equals(IndexerConstants.DEFAULT_VELOCITY));
+    assertTrue(spindexer.getVelocity().equals(IndexerConstants.DEFAULT_VELOCITY));
 
     // Test the stop command, desiredVelocity should be 0
     stopCommand.initialize();
     spindexer.periodic();
-    assertTrue(spindexer.getDesiredVelocity().equals(RPM.of(0.0)));
+    assertTrue(spindexer.getVelocity().equals(RPM.of(0.0)));
   }
 }

@@ -14,6 +14,8 @@
 package frc.robot.subsystems.indexer;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.subsystems.indexer.IndexerConstants.FLYWHEEL_CONFIG;
+import static frc.robot.subsystems.indexer.IndexerConstants.GAINS;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -56,10 +58,10 @@ public class IndexerIOSim implements IndexerIO {
 
   /** PID used to correct velocity error when in velocity closed-loop mode. */
   private final PIDController velocityController =
-      new PIDController(IndexerConstants.velocityKp, 0, IndexerConstants.velocityKd);
+      new PIDController(GAINS.kP(), GAINS.kI(), GAINS.kD());
 
-  private double kV = IndexerConstants.velocityKv;
-  private double kS = IndexerConstants.velocityKs;
+  private double kV = GAINS.kV();
+  private double kS = GAINS.kS();
 
   /** True when setVelocity() is active; false for open-loop (setOpenLoop/stop). */
   private boolean velocityClosedLoop = false;
@@ -95,14 +97,13 @@ public class IndexerIOSim implements IndexerIO {
     motorSim.update(0.02);
 
     inputs.connected = connected;
-    inputs.actualWheelVelocity =
-        motorSim.getAngularVelocity().divide(IndexerConstants.GEAR_REDUCTION);
-    inputs.desiredWheelVelocity = desiredWheelVelocity;
+    inputs.currentVelocity = motorSim.getAngularVelocity().divide(FLYWHEEL_CONFIG.REDUCTION());
+    inputs.desiredVelocity = desiredWheelVelocity;
     inputs.appliedVoltage = Volts.of(appliedVolts);
     inputs.current = Amps.of(Math.abs(motorSim.getCurrentDrawAmps()));
     inputs.atGoal =
         velocityClosedLoop
-            || Math.abs(inputs.desiredWheelVelocity.in(RPM) - inputs.actualWheelVelocity.in(RPM))
+            || Math.abs(inputs.desiredVelocity.in(RPM) - inputs.currentVelocity.in(RPM))
                 < IndexerConstants.VELOCITY_TOLERANCE.in(RPM);
   }
 
@@ -117,8 +118,7 @@ public class IndexerIOSim implements IndexerIO {
     velocityClosedLoop = true;
     desiredWheelVelocity = new_velocity;
 
-    AngularVelocity motorAngularVelocity =
-        desiredWheelVelocity.times(IndexerConstants.GEAR_REDUCTION);
+    AngularVelocity motorAngularVelocity = desiredWheelVelocity.times(FLYWHEEL_CONFIG.REDUCTION());
 
     velocityFFVolts =
         kS * Math.signum(motorAngularVelocity.in(RadiansPerSecond))
@@ -134,8 +134,8 @@ public class IndexerIOSim implements IndexerIO {
   }
 
   @Override
-  public void setPID(double new_kP, double new_kD, double new_kV, double new_kS) {
-    velocityController.setPID(new_kP, 0, new_kD);
+  public void setPID(double new_kP, double new_kI, double new_kD, double new_kV, double new_kS) {
+    velocityController.setPID(new_kP, new_kI, new_kD);
     kV = new_kV;
     kS = new_kS;
   }
