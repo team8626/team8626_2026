@@ -61,6 +61,8 @@ public class Shooter extends SubsystemBase {
 
   public Shooter(ShooterIO io) {
     this.io = io;
+
+    SmartDashboard.putNumber("Shooter/Oomf Factor", oomfFactor);
   }
 
   @Override
@@ -68,6 +70,8 @@ public class Shooter extends SubsystemBase {
     updateTunables();
     io.updateInputs(inputs);
     Logger.processInputs("Shooter", inputs);
+
+    oomfFactor = SmartDashboard.getNumber("Shooter/Oomf Factor", oomfFactor);
 
     // Update alerts
     motorDisconnectedAlert.set(!inputs.connected);

@@ -39,7 +39,8 @@ public class IndexAndShootCommand extends Command {
     if (Constants.robot == RobotType.SIMBOT) {
       // In simulation, we can just pop fuel immediately when the indexer is running
       if (hopper.popFuel()) {
-        RobotContainer.launchFuel(ShooterCommandsUtil.getShooterVelocitytoHub(drive.getPose()));
+        RobotContainer.launchFuel(
+            ShooterCommandsUtil.getShooterVelocitytoHub(drive.getPose(), shooter));
       }
     }
     shooter.start(ShooterCommandsUtil.getShooterVelocitytoHub(drive.getPose()));
