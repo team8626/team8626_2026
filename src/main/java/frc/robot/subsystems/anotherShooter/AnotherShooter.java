@@ -19,7 +19,7 @@ public class AnotherShooter extends SubsystemBase {
   private final AnotherShooterIOInputsAutoLogged inputs = new AnotherShooterIOInputsAutoLogged();
 
   @AutoLogOutput(unit = "RadPerSec")
-  private AngularVelocity DesiredRPM = RPM.of(2500); //TODO: find actual value for desired RPM
+  private AngularVelocity DesiredRPM = RPM.of(2500); // TODO: find actual value for desired RPM
 
   /** Shown on the dashboard when the index motor is not connected. */
   private final Alert motorDisconnectedAlert =
