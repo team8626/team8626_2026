@@ -134,4 +134,8 @@ public class AnotherShooter extends SubsystemBase {
   public void setVoltage(double voltage) {
     anotherShooterInterface.setVoltage(voltage);
   }
+
+  public double getOomfFactor() {
+    return inputs.oomfFactor;
+  }
 }

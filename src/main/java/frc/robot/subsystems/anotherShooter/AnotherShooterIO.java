@@ -37,6 +37,8 @@ public interface AnotherShooterIO {
     public double kD = GAINS.kD();
     public double kS = GAINS.kS();
     public double kV = GAINS.kV();
+
+    public double oomfFactor = 0.0;
   }
 
   public void start(AngularVelocity new_RPM);
