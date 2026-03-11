@@ -16,12 +16,13 @@ package frc.robot.subsystems.intakeLinkage;
 import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.units.measure.*;
+import frc.robot.Constants;
 
 public class IntakeLinkageConstants {
   // Hardware configuration
-  public static final int intakeLinkageCanId = 20; // TODO: Set actual CAN ID
-  public static final boolean motorInverted = false; // TODO: Verify direction
-  public static final int motorCurrentLimit = 40; // Amps
+  public static final int INTAKE_LINKAGE_CAN_ID = 2;
+  public static final boolean MOTOR_INVERTED = false; // TODO: Verify direction
+  public static final Current MOTOR_CURRENT_LIMIT = Amps.of(40);
 
   public static final Angle MIN_ANGLE =
       Degrees.of(80); // TODO: Set actual min angle (fully retracted)
@@ -44,41 +45,34 @@ public class IntakeLinkageConstants {
 
   public static final Angle TOLERANCE = Degrees.of(4);
 
-  public static final Distance armLength =
+  public static final Distance ARM_LENGTH =
       Inches.of(14); // TODO: Set actual arm length (center of rotation to center of intake)
-  public static final Mass armMass = Pounds.of(5.595);
-  public static final MomentOfInertia armInertia = KilogramSquareMeters.of(0.16995);
+  public static final Mass ARM_MASS = Pounds.of(5.595);
+  public static final MomentOfInertia ARM_INERTIA = KilogramSquareMeters.of(0.16995);
   // Mechanical configuration
-  public static final double gearReduction = 80.0 / 1.0;
+  public static final double GEAR_REDUCTION = 80.0 / 1.0;
 
   // Encoder conversion factors (motor rotations/RPM -> mechanism deg/rad/sec)
-  public static final double encoderPositionFactor = 360.0 / gearReduction;
-  public static final double encoderVelocityFactor = 360.0 / 60.0 / gearReduction;
+  public static final double ENCODER_POSITION_FACTOR = 360.0 / GEAR_REDUCTION;
+  public static final double ENCODER_VELOCITY_FACTOR = 360.0 / 60.0 / GEAR_REDUCTION;
 
-  // Position control: PID + feedforward (used in closed-loop position mode)
-  // positionKp — Proportional gain. Output = Kp * (setpoint - actual). Drives the motor harder when
-  //   position error is large. Tune up if response is sluggish or never reaches setpoint; tune down
-  //   if the intakeLinkage overshoots (goes past the target position then back), oscillates (keeps
-  // moving back and forth around the target), or sounds rough.
-  public static final double positionKp = 0.1;
-  public static final double positionKi = 0.0;
-  //
-  // positionKd — Derivative gain. Responds to rate of change of error; dampens overshoot (going
-  // past
-  //   the target). Tune up if there is noticeable overshoot or oscillation after a step change
-  //   (position shoots past then wobbles); tune down (or to 0) if the response becomes noisy or
-  // twitchy
-  //   from derivative kick or encoder noise (small bumps in the feedback make the output jump).
+  public static final MotorConfig MOTOR_CONFIG =
+      switch (Constants.robot) {
+        case REBUILT_COMPBOT -> new MotorConfig(
+            2, false, Amps.of(50), 3.0 / 1.0, 2 * ARM_INERTIA.in(KilogramSquareMeters));
+        default -> new MotorConfig(
+            0, false, Amps.of(50), 3.0 / 1.0, 2 * ARM_INERTIA.in(KilogramSquareMeters));
+      };
 
-  public static final double positionKd = 0.0;
-  //
-  // positionKs — Feedforward: voltage to overcome static friction (same sign as velocity). Added so
-  //   the motor can start moving at low speeds. Tune up if the intakeLinkage barely moves or stalls
-  //   at
-  //   low speed; tune down if it creeps when it should be stopped or feels too aggressive at low
-  //   speed.
-  public static final double positionKs = 0.05;
-  //
-  // positionKv — Feedforward: volts per (rad/s). Approximate linear relationship between velocity
-  public static final double positionKv = 0.12;
+  // PID Constants
+  public static final Gains GAINS =
+      switch (Constants.robot) {
+        case REBUILT_COMPBOT -> new Gains(0.0001, 0.0, 0.0, 0.00015, 0.01, 0.0);
+        default -> new Gains(0.05, 0.0, 0.0, 0.10395, 0.00296, 0.0);
+      };
+
+  public record Gains(double kP, double kI, double kD, double kS, double kG, double kV) {}
+
+  public record MotorConfig(
+      int CANID, boolean INVERTED, Current MAX_CURRENT, double REDUCTION, double MOI) {}
 }

@@ -29,6 +29,8 @@ public interface IntakeLinkageIO {
     public Voltage appliedVoltage = Volts.of(0.0);
     public Current current = Amps.of(0.0);
     public Temperature temperature = Celsius.of(0.0);
+    public boolean atGoal = false;
+    public boolean isEnabled = false;
     public AngularVelocity velocity = AngularVelocity.ofBaseUnits(0.0, DegreesPerSecond);
   }
 
@@ -49,4 +51,6 @@ public interface IntakeLinkageIO {
   public default void hopperOpen() {}
 
   public default void setPID(double kP, double kI, double kD) {}
+
+  public default void setPID(double kP, double kI, double kD, double kV, double kS) {}
 }

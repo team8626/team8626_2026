@@ -14,6 +14,8 @@
 package frc.robot.subsystems.intakeLinkage;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.subsystems.intakeLinkage.IntakeLinkageConstants.GAINS;
+import static frc.robot.subsystems.intakeLinkage.IntakeLinkageConstants.MOTOR_CONFIG;
 import static frc.robot.util.SparkUtil.ifOk;
 import static frc.robot.util.SparkUtil.sparkStickyFault;
 import static frc.robot.util.SparkUtil.tryUntilOk;
@@ -25,13 +27,14 @@ import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.measure.Angle;
-import java.util.function.DoubleSupplier;
 
 /** Hardware IO for IntakeLinkage using a SPARK Flex. Position control (closed-loop). */
 public class IntakeLinkageIOSpark implements IntakeLinkageIO {
@@ -41,16 +44,18 @@ public class IntakeLinkageIOSpark implements IntakeLinkageIO {
   private final Debouncer connectedDebounce = new Debouncer(0.5);
   private Angle desiredAngle;
   private SparkFlexConfig config;
+  private ArmFeedforward armFF = new ArmFeedforward(GAINS.kS(), GAINS.kG(), GAINS.kV());
 
   // private boolean isEnabled = false;
   // For AbsoluteEncoder: store a software offset (in rotations) captured at startup
   // so readings can be reported relative to that startup 'zero'. Absolute encoders
   // are read-only so we cannot call setPosition on them.
   private double absoluteOffsetRotations = 0.0;
+  private boolean isEnabled = false;
 
   public IntakeLinkageIOSpark() {
 
-    motor = new SparkFlex(IntakeLinkageConstants.intakeLinkageCanId, MotorType.kBrushless);
+    motor = new SparkFlex(IntakeLinkageConstants.INTAKE_LINKAGE_CAN_ID, MotorType.kBrushless);
     encoder = motor.getAbsoluteEncoder();
     controller = motor.getClosedLoopController();
 
@@ -58,31 +63,23 @@ public class IntakeLinkageIOSpark implements IntakeLinkageIO {
 
     // Motor: inversion, brake, current limit, voltage comp
     config
-        .inverted(IntakeLinkageConstants.motorInverted)
+        .inverted(MOTOR_CONFIG.INVERTED())
         .idleMode(IdleMode.kBrake)
-        .smartCurrentLimit(IntakeLinkageConstants.motorCurrentLimit)
+        .smartCurrentLimit((int) MOTOR_CONFIG.MAX_CURRENT().in(Amps))
         .voltageCompensation(12.0); // TODO:add 12V voltage compensation to constants and config
 
     // Encoder: mechanism  deg and deg/s (via conversion factors)
     config
         .encoder
-        .positionConversionFactor(IntakeLinkageConstants.encoderPositionFactor)
-        .velocityConversionFactor(IntakeLinkageConstants.encoderVelocityFactor)
+        .positionConversionFactor(IntakeLinkageConstants.ENCODER_POSITION_FACTOR)
+        .velocityConversionFactor(IntakeLinkageConstants.ENCODER_VELOCITY_FACTOR)
         .uvwMeasurementPeriod(10)
         .uvwAverageDepth(2);
 
-    // Closed-loop: Position PID in Slot 0
-    // NOTE: Add these constants in IntakeLinkageConstants:
-    //   public static final double positionKp = ...;
-    //   public static final double positionKd = ...;
     config
         .closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .pid(
-            IntakeLinkageConstants.positionKp,
-            IntakeLinkageConstants.positionKi,
-            IntakeLinkageConstants.positionKd,
-            ClosedLoopSlot.kSlot0)
+        .pid(GAINS.kP(), GAINS.kI(), GAINS.kD(), ClosedLoopSlot.kSlot0)
         .feedForward
         .kCosRatio(0.0); // TODO: Tune feedforward (gravity compensation) if needed
 
@@ -120,29 +117,24 @@ public class IntakeLinkageIOSpark implements IntakeLinkageIO {
         (value) -> inputs.position = Rotations.of(value - absoluteOffsetRotations));
     ifOk(motor, encoder::getVelocity, (value) -> inputs.velocity = RotationsPerSecond.of(value));
 
-    ifOk(
-        motor,
-        new DoubleSupplier[] {motor::getAppliedOutput, motor::getBusVoltage},
-        (values) -> inputs.appliedVoltage = Volts.of(values[0] * values[1]));
-
-    ifOk(motor, motor::getOutputCurrent, (value) -> inputs.current = Amps.of(value));
+    inputs.appliedVoltage = Volts.of(motor.getBusVoltage());
+    inputs.current = Amps.of(motor.getOutputCurrent());
     inputs.desiredAngle = desiredAngle;
-
-    // ifOk(motor, motor::getMotorTemperature, (value) -> inputs.temperature = Celsius.of(value));
+    inputs.atGoal = controller.isAtSetpoint();
+    inputs.isEnabled = !inputs.atGoal && controller.getControlType() == ControlType.kPosition;
 
     inputs.connected = connectedDebounce.calculate(!sparkStickyFault);
-    controller.setSetpoint(desiredAngle.in(Degrees), ControlType.kPosition);
+    controller.setSetpoint(
+        desiredAngle.in(Degrees),
+        ControlType.kPosition,
+        ClosedLoopSlot.kSlot0,
+        armFF.calculate(desiredAngle.in(Radians), inputs.velocity.in(RadiansPerSecond)),
+        ArbFFUnits.kVoltage);
   }
 
   @Override
   public void setPosition(Angle position) {
     desiredAngle = position;
-
-    // Slot 0 = position PID. Add the startup offset (converted to degrees) so the
-    // controller sees values in the same absolute-sensor frame we report.
-    // double offsetDegrees = Rotations.of(absoluteOffsetRotations).in(Degrees);
-    // controller.setSetpoint(
-    //    position.in(Degrees) + offsetDegrees, ControlType.kPosition, ClosedLoopSlot.kSlot0);
   }
 
   public void setPID(double new_kP, double new_kI, double new_kD) {
@@ -154,20 +146,5 @@ public class IntakeLinkageIOSpark implements IntakeLinkageIO {
         () ->
             motor.configure(
                 config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
-  }
-
-  @Override
-  public void stow() {
-    desiredAngle = IntakeLinkageConstants.STOW_ANGLE;
-  }
-
-  @Override
-  public void deploy() {
-    desiredAngle = IntakeLinkageConstants.DEPLOY_ANGLE;
-  }
-
-  @Override
-  public void hopperOpen() {
-    desiredAngle = IntakeLinkageConstants.HOPPER_OPEN_ANGLE;
   }
 }
