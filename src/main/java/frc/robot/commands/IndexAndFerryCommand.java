@@ -3,7 +3,6 @@ package frc.robot.commands;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
-import frc.robot.Constants.RobotType;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.hopper.Hopper;
@@ -63,7 +62,7 @@ public class IndexAndFerryCommand extends Command {
     if (shooter.isAtGoal()) {
       indexer.runVelocity(IndexerConstants.DEFAULT_VELOCITY);
     }
-    if (Constants.robot == RobotType.SIMBOT) {
+    if (Constants.currentMode == Constants.Mode.SIM) {
       // In simulation, we can just pop fuel immediately when the indexer is running
       if (hopper.popFuel()) {
         RobotContainer.launchFuel(
@@ -82,7 +81,7 @@ public class IndexAndFerryCommand extends Command {
 
   @Override
   public boolean isFinished() {
-    if (Constants.robot == RobotType.SIMBOT) {
+    if (Constants.currentMode == Constants.Mode.SIM) {
       // In simulation, we can end the command once we've popped all the fuel
       return hopper.isEmpty();
     }
