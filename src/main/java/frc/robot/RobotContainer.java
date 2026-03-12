@@ -65,6 +65,7 @@ import frc.robot.subsystems.hopper.HopperIOSim;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
+import frc.robot.subsystems.indexer.IndexerIOSpark;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkage;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkageIO;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkageIOSim;
@@ -110,8 +111,7 @@ public class RobotContainer {
   private static final Trigger intakeRollerTrigger = controller.b();
 
   private static final Trigger shootTrigger = controller.leftTrigger();
-  private static final Trigger shootUpdateVelocityTrigger =
-      controller.back().and(controller.start());
+  private static final Trigger indexAndShootTrigger = controller.rightTrigger();
   private static final Trigger intakeDeployTrigger = controller.leftBumper();
 
   private static final Trigger driverAimTrigger = controller.y();
@@ -207,7 +207,7 @@ public class RobotContainer {
                   new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackLeft.MODULE_CONSTANTS),
                   new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackRight.MODULE_CONSTANTS));
 
-          index = new Indexer(new IndexerIO() {});
+          index = new Indexer(new IndexerIOSpark() {});
           intakeLinkage = new IntakeLinkage(new IntakeLinkageIO() {});
           intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
           hopper = new Hopper(new HopperIO() {});
@@ -313,7 +313,10 @@ public class RobotContainer {
 
     // TODO: This is for testing only, replace with proper commands once anotherShooter and indexer
     // functionality are tested
-    // indexTrigger.toggleOnTrue(new IndexerStartCommand(index));
+    indexTrigger
+        .onTrue(Commands.runOnce(() -> index.start(), index))
+        .onFalse(Commands.runOnce(() -> index.stop(), index));
+
     // shootTrigger.whileTrue(new IndexAndShootCommand(anotherShooter, hopper, index, drive));
     // shootUpdateVelocityTrigger.onTrue(anotherShooter.updateVelocityCommand());
 
