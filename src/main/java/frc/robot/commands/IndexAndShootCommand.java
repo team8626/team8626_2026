@@ -4,7 +4,6 @@ import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
-import frc.robot.Constants.RobotType;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.hopper.Hopper;
@@ -27,7 +26,7 @@ public class IndexAndShootCommand extends Command {
 
   @Override
   public void initialize() {
-    shooter.runVelocity(ShooterCommandsUtil.getShooterVelocitytoHub(drive.getPose()));
+    shooter.start(ShooterCommandsUtil.getShooterVelocitytoHub(drive.getPose()));
   }
 
   @Override
@@ -36,13 +35,13 @@ public class IndexAndShootCommand extends Command {
     if (shooter.isAtGoal()) {
       indexer.runVelocity(RPM.of(300)); // TODO: find actual value for indexer velocity
     }
-    if (Constants.robot == RobotType.SIMBOT) {
+    if (Constants.currentMode == Constants.Mode.SIM) {
       // In simulation, we can just pop fuel immediately when the indexer is running
       if (hopper.popFuel()) {
         RobotContainer.launchFuel(ShooterCommandsUtil.getShooterVelocitytoHub(drive.getPose()));
       }
     }
-    shooter.runVelocity(ShooterCommandsUtil.getShooterVelocitytoHub(drive.getPose()));
+    shooter.start(ShooterCommandsUtil.getShooterVelocitytoHub(drive.getPose()));
   }
 
   @Override
@@ -53,7 +52,7 @@ public class IndexAndShootCommand extends Command {
 
   @Override
   public boolean isFinished() {
-    if (Constants.robot == RobotType.SIMBOT) {
+    if (Constants.currentMode == Constants.Mode.SIM) {
       // In simulation, we can end the command once we've popped all the fuel
       return hopper.isEmpty();
     }

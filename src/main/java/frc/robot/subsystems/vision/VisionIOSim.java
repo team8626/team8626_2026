@@ -15,18 +15,17 @@ package frc.robot.subsystems.vision;
 
 import static frc.robot.subsystems.vision.VisionConstants.CAMERA_FOV_HORIZONTAL_DEG;
 import static frc.robot.subsystems.vision.VisionConstants.CAMERA_FOV_VERTICAL_DEG;
+import static frc.robot.subsystems.vision.VisionConstants.CAMERA_NAMES;
 import static frc.robot.subsystems.vision.VisionConstants.CAMERA_TILT_DEG;
 import static frc.robot.subsystems.vision.VisionConstants.MULTI_TAG_PAIRS;
+import static frc.robot.subsystems.vision.VisionConstants.NUM_CAMERAS;
+import static frc.robot.subsystems.vision.VisionConstants.ROBOT_TO_CAMERAS;
 import static frc.robot.subsystems.vision.VisionConstants.SCORE_WEIGHT_AMBIGUITY;
 import static frc.robot.subsystems.vision.VisionConstants.SCORE_WEIGHT_CENTEREDNESS;
 import static frc.robot.subsystems.vision.VisionConstants.SCORE_WEIGHT_DISTANCE;
 import static frc.robot.subsystems.vision.VisionConstants.SCORE_WEIGHT_HEADING_ALIGNMENT;
-import static frc.robot.subsystems.vision.VisionConstants.backCameraName;
 import static frc.robot.subsystems.vision.VisionConstants.fieldLayout;
-import static frc.robot.subsystems.vision.VisionConstants.frontCameraName;
 import static frc.robot.subsystems.vision.VisionConstants.maxDistanceMeters;
-import static frc.robot.subsystems.vision.VisionConstants.robotToBackCamera;
-import static frc.robot.subsystems.vision.VisionConstants.robotToFrontCamera;
 import static frc.robot.subsystems.vision.VisionConstants.simPoseNoiseStdDev;
 import static frc.robot.subsystems.vision.VisionConstants.simPoseNoiseStdDevMultiTag;
 
@@ -81,22 +80,16 @@ public class VisionIOSim implements VisionIO {
   }
 
   public VisionIOSim() {
-    cameraNames = new String[] {frontCameraName, backCameraName};
+    cameraNames = CAMERA_NAMES;
 
-    // Create vision system simulator
     visionSim = new VisionSystemSim("main");
     visionSim.addAprilTags(fieldLayout);
 
-    // Create simulated cameras
-    cameraSims = new PhotonCameraSim[2];
-
-    // Front camera
-    cameraSims[0] = new PhotonCameraSim(new PhotonCamera(frontCameraName));
-    visionSim.addCamera(cameraSims[0], robotToFrontCamera);
-
-    // Back camera
-    cameraSims[1] = new PhotonCameraSim(new PhotonCamera(backCameraName));
-    visionSim.addCamera(cameraSims[1], robotToBackCamera);
+    cameraSims = new PhotonCameraSim[NUM_CAMERAS];
+    for (int i = 0; i < NUM_CAMERAS; i++) {
+      cameraSims[i] = new PhotonCameraSim(new PhotonCamera(cameraNames[i]));
+      visionSim.addCamera(cameraSims[i], ROBOT_TO_CAMERAS[i]);
+    }
   }
 
   /**
@@ -112,7 +105,7 @@ public class VisionIOSim implements VisionIO {
    * Calculate scoring for a target based on distance, centeredness, and ambiguity.
    *
    * @param target The PhotonTrackedTarget to score
-   * @param cameraIndex Which camera sees this target (0=front, 1=back)
+   * @param cameraIndex Which camera sees this target (0=front left, 1=front right, 2=rear right)
    * @param simulatedAmbiguity Ambiguity value for this target
    * @return ScoredTarget with computed score
    */
