@@ -34,7 +34,7 @@ public class AnotherShooterConstants {
   // Flywheel Config
   public static final FlywheelConfig FLYWHEEL_CONFIG =
       switch (Constants.robot) {
-        case REBUILT_COMPBOT -> new FlywheelConfig(7, 6, 1.0 / 1.0, MOMENT_OF_INERTIA, 6000.0);
+        case REBUILT_COMPBOT -> new FlywheelConfig(6, 7, 1.0 / 1.0, MOMENT_OF_INERTIA, 6000.0);
           // All other case use the same as simbot for now, but this should be changed when we have
           // another real to test on
         default -> new FlywheelConfig(0, 0, (1 / 1), MOMENT_OF_INERTIA, 6000.0);
