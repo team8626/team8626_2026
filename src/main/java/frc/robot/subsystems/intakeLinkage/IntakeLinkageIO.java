@@ -15,7 +15,7 @@ package frc.robot.subsystems.intakeLinkage;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Celsius;
-import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 // import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
@@ -32,8 +32,8 @@ public interface IntakeLinkageIO {
   @AutoLog
   public static class IntakeLinkageIOInputs {
     public boolean connected = false;
-    public Angle position = Radians.of(0.0);
-    public Angle desiredAngle = Radians.of(0.0);
+    public Angle position = Degrees.of(160.0);
+    public Angle desiredAngle = Degrees.of(160.0);
     public Voltage appliedVoltage = Volts.of(0.0);
     public Current current = Amps.of(0.0);
     public Temperature temperature = Celsius.of(0.0);

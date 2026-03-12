@@ -14,7 +14,7 @@
 package frc.robot.subsystems.intakeLinkage;
 
 import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.util.SparkUtil.ifOk;
@@ -43,7 +43,7 @@ public class IntakeLinkageIOSpark implements IntakeLinkageIO {
   private final RelativeEncoder encoder;
   private final SparkClosedLoopController controller;
   private final Debouncer connectedDebounce = new Debouncer(0.5);
-  private Angle desiredAngle = Radians.of(0.0);
+  private Angle desiredAngle = Degrees.of(160.0);
 
   public IntakeLinkageIOSpark() {
     spark = new SparkFlex(IntakeLinkageConstants.intakeLinkageCanId, MotorType.kBrushless);
@@ -105,7 +105,7 @@ public class IntakeLinkageIOSpark implements IntakeLinkageIO {
   public void updateInputs(IntakeLinkageIOInputs inputs) {
     sparkStickyFault = false;
 
-    ifOk(spark, encoder::getPosition, (value) -> inputs.position = Radians.of(value));
+    ifOk(spark, encoder::getPosition, (value) -> inputs.position = Degrees.of(value));
     ifOk(spark, encoder::getVelocity, (value) -> inputs.velocity = RadiansPerSecond.of(value));
 
     ifOk(
@@ -126,7 +126,7 @@ public class IntakeLinkageIOSpark implements IntakeLinkageIO {
     desiredAngle = position;
 
     // Slot 0 = position PID
-    controller.setSetpoint(position.in(Radians), ControlType.kPosition, ClosedLoopSlot.kSlot0);
+    controller.setSetpoint(position.in(Degrees), ControlType.kPosition, ClosedLoopSlot.kSlot0);
   }
 
   public void setVoltage(Voltage volts) {

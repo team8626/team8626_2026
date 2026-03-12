@@ -14,7 +14,8 @@
 package frc.robot.subsystems.indexer;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.util.SparkUtil.ifOk;
+import static frc.robot.subsystems.indexer.IndexerConstants.FLYWHEEL_CONFIG;
+import static frc.robot.subsystems.indexer.IndexerConstants.GAINS;
 import static frc.robot.util.SparkUtil.sparkStickyFault;
 import static frc.robot.util.SparkUtil.tryUntilOk;
 
@@ -30,9 +31,9 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.measure.*;
-import java.util.function.DoubleSupplier;
 
 /** Hardware IO for indexer using a SPARK Flex. Velocity control only. */
 public class IndexerIOSpark implements IndexerIO {
@@ -42,32 +43,32 @@ public class IndexerIOSpark implements IndexerIO {
   private final SparkFlexConfig config;
   private final Debouncer connectedDebounce = new Debouncer(0.5);
 
+  private boolean isEnabled = false;
+
   /** Target WHEEL velocity for closed-loop control. */
   private AngularVelocity desiredWheelVelocity = RPM.of(0.0);
 
   /** Feedforward gains for velocity control. */
-  private double kV = IndexerConstants.velocityKv;
-
-  private double kS = IndexerConstants.velocityKs;
+  SimpleMotorFeedforward indexerFF = new SimpleMotorFeedforward(GAINS.kS(), GAINS.kV(), GAINS.kA());
 
   public IndexerIOSpark() {
-    spark = new SparkFlex(IndexerConstants.indexCanId, MotorType.kBrushless);
+    spark = new SparkFlex(FLYWHEEL_CONFIG.CANID(), MotorType.kBrushless);
     encoder = spark.getEncoder();
     controller = spark.getClosedLoopController();
     config = new SparkFlexConfig();
 
     // Motor: inversion, brake, current limit, voltage comp
     config
-        .inverted(IndexerConstants.motorInverted)
+        .inverted(FLYWHEEL_CONFIG.INVERTED())
         .idleMode(IdleMode.kBrake)
-        .smartCurrentLimit(IndexerConstants.motorCurrentLimit)
+        .smartCurrentLimit((int) FLYWHEEL_CONFIG.MAX_CURRENT().in(Amp))
         .voltageCompensation(12.0);
 
     // Encoder: mechanism radians and rad/s
     config
         .encoder
-        .positionConversionFactor(IndexerConstants.encoderPositionFactor)
-        .velocityConversionFactor(IndexerConstants.encoderVelocityFactor)
+        // .positionConversionFactor(IndexerConstants.encoderPositionFactor)
+        // .velocityConversionFactor(IndexerConstants.encoderVelocityFactor)
         .uvwMeasurementPeriod(10)
         .uvwAverageDepth(2); // TODO: Why 2? Is this necessary?
 
@@ -75,7 +76,7 @@ public class IndexerIOSpark implements IndexerIO {
     config
         .closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .pid(IndexerConstants.velocityKp, 0.0, IndexerConstants.velocityKd, ClosedLoopSlot.kSlot0)
+        .pid(GAINS.kP(), GAINS.kI(), GAINS.kD(), ClosedLoopSlot.kSlot0)
         .outputRange(-1, 1);
 
     // Logging: encoder and output at 20 ms
@@ -103,58 +104,60 @@ public class IndexerIOSpark implements IndexerIO {
   public void updateInputs(IndexIOInputs inputs) {
     sparkStickyFault = false;
 
-    ifOk(
-        spark,
-        encoder::getVelocity,
-        (value) -> inputs.actualWheelVelocity = RadiansPerSecond.of(value));
-    ifOk(
-        spark,
-        new DoubleSupplier[] {spark::getAppliedOutput, spark::getBusVoltage},
-        (values) -> inputs.appliedVoltage = Volts.of(values[0] * values[1]));
-    ifOk(spark, spark::getOutputCurrent, (value) -> inputs.current = Amps.of(value));
+    inputs.motorVelocity = RPM.of(encoder.getVelocity());
+    inputs.currentVelocity = inputs.motorVelocity.divide(FLYWHEEL_CONFIG.REDUCTION());
+
+    inputs.current = Amps.of(spark.getOutputCurrent());
+    inputs.appliedVoltage = Volts.of(spark.getAppliedOutput());
+    inputs.temperature = Celsius.of(spark.getMotorTemperature());
+
+    inputs.atGoal = controller.isAtSetpoint();
+    inputs.isEnabled = isEnabled;
 
     inputs.connected = connectedDebounce.calculate(!sparkStickyFault);
-    inputs.desiredWheelVelocity = desiredWheelVelocity;
-    inputs.atGoal =
-        Math.abs(inputs.actualWheelVelocity.in(RPM) - inputs.desiredWheelVelocity.in(RPM))
-            < IndexerConstants.VELOCITY_TOLERANCE.in(RPM);
+    inputs.desiredVelocity = desiredWheelVelocity;
+    inputs.atGoal = controller.isAtSetpoint();
   }
 
   @Override
   public void setOpenLoop(Voltage output) {
-    spark.setVoltage(output);
+    controller.setSetpoint(output.in(Volt), ControlType.kDutyCycle);
+
+    if (output.in(Volt) != 0.0) {
+      isEnabled = true;
+    } else {
+      isEnabled = false;
+    }
   }
 
   @Override
   public void setVelocity(AngularVelocity new_velocity) {
     desiredWheelVelocity = new_velocity;
 
-    AngularVelocity motorAngularVelocity =
-        desiredWheelVelocity.times(IndexerConstants.GEAR_REDUCTION);
-
-    double ffVolts =
-        kS * Math.signum(motorAngularVelocity.in(RadiansPerSecond))
-            + kV * motorAngularVelocity.in(RadiansPerSecond);
+    AngularVelocity motorAngularVelocity = desiredWheelVelocity.times(FLYWHEEL_CONFIG.REDUCTION());
 
     controller.setSetpoint(
         motorAngularVelocity.in(RadiansPerSecond),
         ControlType.kVelocity,
         ClosedLoopSlot.kSlot0,
-        ffVolts,
+        indexerFF.calculate(desiredWheelVelocity.in(RPM) * FLYWHEEL_CONFIG.REDUCTION()),
         ArbFFUnits.kVoltage);
+
+    isEnabled = true;
   }
 
   public void stop() {
     desiredWheelVelocity = RPM.of(0.0);
     controller.setSetpoint(0.0, ControlType.kDutyCycle);
+    isEnabled = false;
   }
 
   @Override
-  public void setPID(double new_kP, double new_kD, double new_kV, double new_kS) {
+  public void setPID(double new_kP, double new_kI, double new_kD, double new_kV, double new_kS) {
 
-    config.closedLoop.pid(new_kP, 0.0, new_kD, ClosedLoopSlot.kSlot0);
-    kV = new_kV;
-    kS = new_kS;
+    config.closedLoop.pid(new_kP, new_kI, new_kD, ClosedLoopSlot.kSlot0);
+
+    indexerFF = new SimpleMotorFeedforward(new_kS, new_kV, GAINS.kA());
 
     tryUntilOk(
         spark,
