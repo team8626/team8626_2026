@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 import frc.robot.Constants;
@@ -57,4 +58,12 @@ public class AnotherShooterConstants {
       double REDUCTION,
       double MOI,
       double MAX_ACCELERATION_RPM_PER_SEC) {}
+
+  public static final InterpolatingDoubleTreeMap RPMMap = new InterpolatingDoubleTreeMap();
+
+  static {
+    RPMMap.put(
+        0.0, 0.0); // format is (distance to target in feet, required shooter velocity in RPM)
+    // TODO: fill in actual values
+  }
 }
