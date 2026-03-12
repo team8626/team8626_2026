@@ -39,13 +39,17 @@ public interface AnotherShooterIO {
     public double kV = GAINS.kV();
   }
 
-  public void start(AngularVelocity new_RPM);
+  public default void start(AngularVelocity new_RPM) {}
+  ;
 
-  public void setVelocity(AngularVelocity new_RPM);
+  public default void setVelocity(AngularVelocity new_RPM) {}
+  ;
 
-  public void stop();
+  public default void stop() {}
+  ;
 
-  public void startBySetpoint(double new_Setpoint);
+  public default void startBySetpoint(double new_Setpoint) {}
+  ;
 
   public default void runCharacterization(double input) {}
 
