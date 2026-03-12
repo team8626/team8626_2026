@@ -13,11 +13,10 @@
 
 package frc.robot.subsystems.vision;
 
-import static frc.robot.subsystems.vision.VisionConstants.backCameraName;
+import static frc.robot.subsystems.vision.VisionConstants.CAMERA_NAMES;
+import static frc.robot.subsystems.vision.VisionConstants.NUM_CAMERAS;
+import static frc.robot.subsystems.vision.VisionConstants.ROBOT_TO_CAMERAS;
 import static frc.robot.subsystems.vision.VisionConstants.fieldLayout;
-import static frc.robot.subsystems.vision.VisionConstants.frontCameraName;
-import static frc.robot.subsystems.vision.VisionConstants.robotToBackCamera;
-import static frc.robot.subsystems.vision.VisionConstants.robotToFrontCamera;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -29,31 +28,27 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
-/** PhotonVision hardware implementation managing dual cameras. */
+/**
+ * PhotonVision hardware implementation managing three cameras (front left, front right, rear
+ * right).
+ */
 public class VisionIOPhotonVision implements VisionIO {
   private final PhotonCamera[] cameras;
   private final PhotonPoseEstimator[] poseEstimators;
   private final String[] cameraNames;
 
   public VisionIOPhotonVision() {
-    // Initialize cameras array
-    cameraNames = new String[] {frontCameraName, backCameraName};
-    cameras = new PhotonCamera[2];
-    poseEstimators = new PhotonPoseEstimator[2];
+    cameraNames = CAMERA_NAMES;
+    cameras = new PhotonCamera[NUM_CAMERAS];
+    poseEstimators = new PhotonPoseEstimator[NUM_CAMERAS];
 
-    // Front camera (index 0)
-    cameras[0] = new PhotonCamera(frontCameraName);
-    poseEstimators[0] =
-        new PhotonPoseEstimator(
-            fieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToFrontCamera);
-    poseEstimators[0].setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
-
-    // Back camera (index 1)
-    cameras[1] = new PhotonCamera(backCameraName);
-    poseEstimators[1] =
-        new PhotonPoseEstimator(
-            fieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToBackCamera);
-    poseEstimators[1].setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+    for (int i = 0; i < NUM_CAMERAS; i++) {
+      cameras[i] = new PhotonCamera(cameraNames[i]);
+      poseEstimators[i] =
+          new PhotonPoseEstimator(
+              fieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, ROBOT_TO_CAMERAS[i]);
+      poseEstimators[i].setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+    }
   }
 
   @Override

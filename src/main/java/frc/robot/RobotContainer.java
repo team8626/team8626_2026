@@ -13,7 +13,14 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -31,6 +38,7 @@ import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.Constants.Dimensions;
 import frc.robot.Constants.Mode;
+import frc.robot.commands.AlignToTargetCommand;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IndexerStartCommand;
 import frc.robot.commands.TeleopDriveCommand;
@@ -188,7 +196,6 @@ public class RobotContainer {
                   (measurement) ->
                       drive.addVisionMeasurement(
                           measurement.pose, measurement.timestamp, measurement.stdDevs));
-
           break;
         case REBUILT_COMPBOT:
           // Real robot, full hardware IO
@@ -217,38 +224,6 @@ public class RobotContainer {
 
           break;
 
-        case SIMBOT:
-          // Sim robot, instantiate physics sim IO implementations
-          drive =
-              new Drive(
-                  new GyroIO() {},
-                  // new ModuleIOSimSpark() {},
-                  // new ModuleIOSimSpark() {},
-                  // new ModuleIOSimSpark() {},
-                  // new ModuleIOSimSpark() {});
-                  new ModuleIOSimTalonFX(Rebuilt_SwerveConstants.FrontLeft.MODULE_CONSTANTS),
-                  new ModuleIOSimTalonFX(Rebuilt_SwerveConstants.FrontRight.MODULE_CONSTANTS),
-                  new ModuleIOSimTalonFX(Rebuilt_SwerveConstants.BackLeft.MODULE_CONSTANTS),
-                  new ModuleIOSimTalonFX(Rebuilt_SwerveConstants.BackRight.MODULE_CONSTANTS));
-          index = new Indexer(new IndexerIOSim());
-          intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSim());
-          intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
-          hopper = new Hopper(new HopperIOSim());
-          anotherShooter = new AnotherShooter(new AnotherShooterIOSim());
-          climber = new Climber(new ClimberIOSim() {});
-
-          vision =
-              new Vision(
-                  new VisionIOSim(),
-                  (measurement) ->
-                      drive.addVisionMeasurement(
-                          measurement.pose, measurement.timestamp, measurement.stdDevs));
-          vision.setPoseSupplier(drive::getPose); // Provide current pose for simulation
-
-          configureFuelSim();
-          configureFuelSimRobot(hopper::ableToIntake, hopper::pushFuel);
-          break;
-
         case REBUILT_DRIVE_ONLY:
           // Real robot, drive only
           drive =
@@ -270,7 +245,6 @@ public class RobotContainer {
           vision = new Vision(new VisionIO() {}, (measurement) -> {});
 
           break;
-
         default:
           throw new IllegalStateException("Unexpected robot: " + Constants.robot);
       }
@@ -310,10 +284,9 @@ public class RobotContainer {
 
     // Align to camera's best AprilTag: POV Left = front left, POV Up = front right, POV Right =
     // rear right
-    // TODO: Re-enable after merge...
-    // controller.povLeft().whileTrue(AlignToTargetCommand.alignToFrontLeftCamera(drive, vision));
-    // controller.povRight().whileTrue(AlignToTargetCommand.alignToFrontRightCamera(drive, vision));
-    // controller.povDown().whileTrue(AlignToTargetCommand.alignToRearRightCamera(drive, vision));
+    controller.povLeft().whileTrue(AlignToTargetCommand.alignToFrontLeftCamera(drive, vision));
+    controller.povRight().whileTrue(AlignToTargetCommand.alignToFrontRightCamera(drive, vision));
+    controller.povDown().whileTrue(AlignToTargetCommand.alignToRearRightCamera(drive, vision));
 
     // Run the intake roller at 500 RPM while the B button is held, stop when released
     // TODO: Should be replace with a proper command ("Start/Stop CollectCommand"), this is just for

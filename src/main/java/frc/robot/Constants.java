@@ -30,7 +30,12 @@ import frc.robot.subsystems.drive.DriveConstants;
  * (log replay from a file).
  */
 public final class Constants {
-  public static final RobotType robot = RobotType.SIMBOT;
+
+  //  MODIFY FOR TESTING PURPOSE - DO NOT COMMIT CHANGE IN REPOSITORY
+  //
+  //  ==> robot = RobotType.REBUILT_COMPBOT
+  //
+  public static final RobotType robot = RobotType.REBUILT_COMPBOT;
 
   public static final boolean tuningMode = false;
 
@@ -49,6 +54,10 @@ public final class Constants {
     REPLAY
   }
 
+  /**
+   * Physical robot hardware types. Simulation is detected via {@link #currentMode} == {@link
+   * Mode#SIM}.
+   */
   public static enum RobotType {
     REBUILT_COMPBOT,
     REBUILT_DRIVE_ONLY,
@@ -65,10 +74,7 @@ public final class Constants {
   /** Checks whether the correct robot is selected when deploying. */
   public static class CheckDeploy {
     public static void main(String... args) {
-      if (robot == RobotType.SIMBOT) {
-        System.err.println("Cannot deploy, invalid robot selected: " + robot);
-        System.exit(1);
-      }
+      // No SIMBOT value—simulation is detected automatically via currentMode.
     }
   }
 
@@ -84,7 +90,7 @@ public final class Constants {
 
   public static class RobotConstants {
 
-    public static final CANBus CAN_FD_BUS = new CANBus("Bobby");
+    public static final CANBus CAN_FD_BUS = new CANBus("CANivore");
     public static final CANBus CAN_RIO_BUS = new CANBus("rio");
 
     public static final NetworkTableInstance INST = NetworkTableInstance.getDefault();
@@ -98,7 +104,7 @@ public final class Constants {
 
     static {
       switch (robot) {
-        case REBUILT_COMPBOT, SIMBOT -> {
+        case REBUILT_COMPBOT, REBUILT_DRIVE_ONLY -> {
           BUMPER_THICKNESS = Inches.of(3.625);
           BUMPER_HEIGHT = Inches.of(7);
           FRAME_SIZE_Y = Inches.of(27.5);
