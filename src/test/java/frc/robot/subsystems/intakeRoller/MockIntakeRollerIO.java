@@ -13,16 +13,9 @@
 
 package frc.robot.subsystems.intakeRoller;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Volts;
+import static edu.wpi.first.units.Units.*;
 
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.units.measure.*;
 
 /**
  * Mock IntakeRollerIO for unit tests. Exposes inputs for injection and records outputs (setpoints,
@@ -42,7 +35,7 @@ public class MockIntakeRollerIO implements IntakeRollerIO {
   @Override
   public void updateInputs(IntakeRollerIOInputs inputs) {
     inputs.connected = connected;
-    inputs.velocity = velocity;
+    inputs.currentVelocity = velocity;
     inputs.appliedVoltage = appliedVolts;
     inputs.current = currentAmps;
   }

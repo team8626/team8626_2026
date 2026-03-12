@@ -13,51 +13,40 @@
 
 package frc.robot.subsystems.intakeRoller;
 
-import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.*;
 
-import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.*;
+import frc.robot.Constants;
 
 public class IntakeRollerConstants {
-  // Hardware configuration
-  public static final int intakeRollerCanId = 20; // TODO: Set actual CAN ID
-  public static final boolean motorInverted = false; // TODO: Verify direction
-  public static final int motorCurrentLimit = 40; // Amps
 
-  // Mechanical configuration
-  public static final double gearReduction = 1.0;
-  public static final AngularVelocity intakeRollerIntakeSpeed =
-      RPM.of(3500.0); // TODO: Set actual RPM
+  // Tuned Values
+  public static final AngularVelocity DEFAULT_VELOCITY = RPM.of(500);
 
-  // Encoder conversion factors (motor rotations/RPM -> mechanism radians/rad/sec)
-  public static final double encoderPositionFactor = (2.0 * Math.PI) / gearReduction;
-  public static final double encoderVelocityFactor = (2.0 * Math.PI) / 60.0 / gearReduction;
+  public static final Current MAX_CURRENT = Amps.of(50);
 
-  // Velocity control: PID + feedforward (used in closed-loop velocity mode)
-  //
-  // velocityKp — Proportional gain. Output = Kp * (setpoint - actual). Drives the motor harder when
-  //   velocity error is large. Tune up if response is sluggish or never reaches setpoint; tune down
-  //   if the indexer overshoots (goes past the target speed then back), oscillates (keeps speeding
-  //   up and slowing down around the target), or sounds rough.
-  public static final double velocityKp = 0.1;
-  //
-  // velocityKd — Derivative gain. Responds to rate of change of error; dampens overshoot (going
-  // past
-  //   the target). Tune up if there is noticeable overshoot or oscillation after a step change
-  //   (speed shoots past then wobbles); tune down (or to 0) if the response becomes noisy or
-  // twitchy
-  //   from derivative kick or encoder noise (small bumps in the feedback make the output jump).
-  public static final double velocityKd = 0.0;
-  //
-  // velocityKs — Feedforward: voltage to overcome static friction (same sign as velocity). Added so
-  //   the motor can start moving at low speeds. Tune up if the indexer barely moves or stalls at
-  //   low speed; tune down if it creeps when it should be stopped or feels too aggressive at low
-  //   speed.
-  public static final double velocityKs = 0.05;
-  //
-  // velocityKv — Feedforward: volts per (rad/s). Approximate linear relationship between velocity
-  // and
-  //   voltage (e.g. 12V / 100 rad/s ≈ 0.12). Tune up if the indexer runs slow for a given setpoint;
-  //   tune down if it runs too fast or the PID is fighting the feedforward (e.g. once settled, the
-  //   controller keeps adding a big correction in the wrong direction).
-  public static final double velocityKv = 0.12;
+  public static final AngularVelocity VELOCITY_TOLERANCE = RPM.of(25);
+
+  private static final double MOI = 1;
+
+  // Flywheel Config
+  public static final RollerConfig ROLLER_CONFIG =
+      switch (Constants.robot) {
+        case REBUILT_COMPBOT -> new RollerConfig(1, false, Amps.of(50), 1.0 / 1.0, 2 * MOI);
+        default -> new RollerConfig(1, false, Amps.of(50), 1.0 / 1.0, 2 * MOI);
+      };
+
+  // PID Constants
+  public static final Gains GAINS =
+      switch (Constants.robot) {
+        case REBUILT_COMPBOT -> new Gains(0.0001, 0.0, 0.0, 0.00015, 0.01, 0.0);
+        default -> new Gains(0.05, 0.0, 0.0, 0.10395, 0.00296, 0.0);
+      };
+
+  public record Gains(double kP, double kI, double kD, double kS, double kV, double kA) {}
+
+  public record RollerConfig(
+      int CANID, boolean INVERTED, Current MAX_CURRENT, double REDUCTION, double MOI) {}
+
+  public static final AngularVelocity MAX_VELOCITY = RPM.of(6700 / ROLLER_CONFIG.REDUCTION());
 }
