@@ -7,6 +7,8 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
+import frc.robot.subsystems.anotherShooter.AnotherShooterConstants;
+import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.shooter.ShooterConstants;
 import org.littletonrobotics.frc2026.FieldConstants;
 import org.littletonrobotics.frc2026.util.geometry.AllianceFlipUtil;
@@ -92,5 +94,24 @@ public class ShooterCommandsUtil {
     Logger.recordOutput("getShooterVelocityToTarget/Velocity Flywheel", vRPM, "RPM");
 
     return RPM.of(vRPM);
+  }
+
+  public static double getDistToHub(Drive drive) {
+    return drive
+        .getPose()
+        .getTranslation()
+        .getDistance(AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d()));
+  }
+
+  public static double getDistToTarget(Drive drive, Translation3d target) {
+    return drive
+        .getPose()
+        .getTranslation()
+        .getDistance(AllianceFlipUtil.apply(target.toTranslation2d()));
+  }
+
+  public static AngularVelocity calculateTreemapRPM(double distToHub) {
+    AngularVelocity shooterRPM = RPM.of(AnotherShooterConstants.RPMMap.get(distToHub));
+    return shooterRPM;
   }
 }

@@ -1,18 +1,12 @@
 package frc.robot.commands;
 
-import static edu.wpi.first.units.Units.*;
-
-import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
-import frc.robot.subsystems.anotherShooter.AnotherShooterConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.shooter.Shooter;
-import org.littletonrobotics.frc2026.FieldConstants;
-import org.littletonrobotics.frc2026.util.geometry.AllianceFlipUtil;
 
 public class IndexAndShootCommand extends Command {
   private final Shooter shooter;
@@ -30,7 +24,7 @@ public class IndexAndShootCommand extends Command {
 
   @Override
   public void initialize() {
-    shooter.start(calculateTreemapRPM(getDistToHub()));
+    shooter.start(ShooterCommandsUtil.calculateTreemapRPM(ShooterCommandsUtil.getDistToHub(drive)));
   }
 
   @Override
@@ -42,10 +36,11 @@ public class IndexAndShootCommand extends Command {
     if (Constants.currentMode == Constants.Mode.SIM) {
       // In simulation, we can just pop fuel immediately when the indexer is running
       if (hopper.popFuel()) {
-        RobotContainer.launchFuel(calculateTreemapRPM(getDistToHub()));
+        RobotContainer.launchFuel(
+            ShooterCommandsUtil.calculateTreemapRPM(ShooterCommandsUtil.getDistToHub(drive)));
       }
     }
-    shooter.start(calculateTreemapRPM(getDistToHub()));
+    shooter.start(ShooterCommandsUtil.calculateTreemapRPM(ShooterCommandsUtil.getDistToHub(drive)));
   }
 
   @Override
@@ -61,17 +56,5 @@ public class IndexAndShootCommand extends Command {
       return hopper.isEmpty();
     }
     return false;
-  }
-
-  private double getDistToHub() {
-    return drive
-        .getPose()
-        .getTranslation()
-        .getDistance(AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d()));
-  }
-
-  private AngularVelocity calculateTreemapRPM(double distToHub) {
-    AngularVelocity shooterRPM = RPM.of(AnotherShooterConstants.RPMMap.get(distToHub));
-    return shooterRPM;
   }
 }

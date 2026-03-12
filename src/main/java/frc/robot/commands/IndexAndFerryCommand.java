@@ -46,7 +46,9 @@ public class IndexAndFerryCommand extends Command {
               ? depotFerryTarget
               : outpostFerryTarget;
     }
-    shooter.start(ShooterCommandsUtil.getShooterVelocityToTarget(drive.getPose(), FerryTarget));
+    shooter.start(
+        ShooterCommandsUtil.calculateTreemapRPM(
+            ShooterCommandsUtil.getDistToTarget(drive, FerryTarget)));
   }
 
   @Override
@@ -64,10 +66,13 @@ public class IndexAndFerryCommand extends Command {
       // In simulation, we can just pop fuel immediately when the indexer is running
       if (hopper.popFuel()) {
         RobotContainer.launchFuel(
-            ShooterCommandsUtil.getShooterVelocityToTarget(drive.getPose(), FerryTarget));
+            ShooterCommandsUtil.calculateTreemapRPM(
+                ShooterCommandsUtil.getDistToTarget(drive, FerryTarget)));
       }
     }
-    shooter.start(ShooterCommandsUtil.getShooterVelocityToTarget(drive.getPose(), FerryTarget));
+    shooter.start(
+        ShooterCommandsUtil.calculateTreemapRPM(
+            ShooterCommandsUtil.getDistToTarget(drive, FerryTarget)));
   }
 
   @Override
