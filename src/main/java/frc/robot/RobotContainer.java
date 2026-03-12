@@ -209,7 +209,7 @@ public class RobotContainer {
 
           index = new Indexer(new IndexerIOSpark() {});
           intakeLinkage = new IntakeLinkage(new IntakeLinkageIO() {});
-          intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
+          intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
           hopper = new Hopper(new HopperIO() {});
           climber = new Climber(new ClimberIO() {});
 
@@ -292,7 +292,7 @@ public class RobotContainer {
     // TODO: Should be replace with a proper command ("Start/Stop CollectCommand"), this is just for
     // testing
     intakeRollerTrigger
-        .whileTrue(Commands.runOnce(() -> intakeRoller.runVelocity(RPM.of(500)), intakeRoller))
+        .onTrue(Commands.runOnce(() -> intakeRoller.runVelocity(RPM.of(1000)), intakeRoller))
         .onFalse(Commands.runOnce(intakeRoller::stop, intakeRoller));
 
     // Toggle the intake linkage between deployed and stowed positions when the left bumper held
@@ -319,7 +319,6 @@ public class RobotContainer {
 
     // shootTrigger.whileTrue(new IndexAndShootCommand(anotherShooter, hopper, index, drive));
     // shootUpdateVelocityTrigger.onTrue(anotherShooter.updateVelocityCommand());
-
     shootTrigger
         .whileTrue(Commands.runOnce(() -> anotherShooter.start(RPM.of(2500)), anotherShooter))
         .onFalse(Commands.runOnce(() -> anotherShooter.stop(), anotherShooter));
