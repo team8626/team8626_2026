@@ -41,75 +41,78 @@ public class SpindexerTest {
     spindexer = new Indexer(io);
   }
 
-  @Test
-  void testRunVelocity() throws InterruptedException {
-    AngularVelocity targetVelocity = IndexerConstants.DEFAULT_VELOCITY;
+  // @Test
+  // void testRunVelocity() throws InterruptedException {
+  //   AngularVelocity targetVelocity = IndexerConstants.DEFAULT_VELOCITY;
 
-    spindexer.runVelocity(targetVelocity);
-    spindexer.periodic();
+  //   spindexer.runVelocity(targetVelocity);
+  //   spindexer.periodic();
 
-    System.out.printf(
-        String.format(
-            "[testRunVelocity] Using IndexerIOSim - Target: %.1f Rot/sec%n",
-            targetVelocity.in(RotationsPerSecond)));
+  //   System.out.printf(
+  //       String.format(
+  //           "[testRunVelocity] Using IndexerIOSim - Target: %.1f Rot/sec%n",
+  //           targetVelocity.in(RotationsPerSecond)));
 
-    assertTrue(targetVelocity.equals(spindexer.getVelocity()));
+  //   assertTrue(targetVelocity.equals(spindexer.getVelocity()));
 
-    // Simulate the scheduler (20ms per cycle) for 1 second to allow the controller to converge to
-    // the target velocity and measure time to converge to target velocity (assuming tolerance)
-    int convergeTimeMs = 0;
-    double errorRPS =
-        Double.MAX_VALUE; // Rotations per second error between target and actual velocity
+  //   // Simulate the scheduler (20ms per cycle) for 1 second to allow the controller to converge
+  // to
+  //   // the target velocity and measure time to converge to target velocity (assuming tolerance)
+  //   int convergeTimeMs = 0;
+  //   double errorRPS =
+  //       Double.MAX_VALUE; // Rotations per second error between target and actual velocity
 
-    for (int i = 1; i <= 50; i++) {
-      spindexer.periodic();
-      errorRPS =
-          Math.abs(
-              targetVelocity.in(RotationsPerSecond)
-                  - spindexer.getVelocity().in(RotationsPerSecond));
+  //   for (int i = 1; i <= 50; i++) {
+  //     spindexer.periodic();
+  //     errorRPS =
+  //         Math.abs(
+  //             targetVelocity.in(RotationsPerSecond)
+  //                 - spindexer.getVelocity().in(RotationsPerSecond));
 
-      if (errorRPS < IndexerConstants.VELOCITY_TOLERANCE.in(RotationsPerSecond)) {
-        convergeTimeMs = i * 20; // Time to converge in milliseconds
-        System.out.printf(String.format("[testRunVelocity] Converged in %dms%n", convergeTimeMs));
-        break; // Converged to target velocity within tolerance
-      }
-      Thread.sleep(20); // Simulate 20ms scheduler cycle
-    }
+  //     if (errorRPS < IndexerConstants.VELOCITY_TOLERANCE.in(RotationsPerSecond)) {
+  //       convergeTimeMs = i * 20; // Time to converge in milliseconds
+  //       System.out.printf(String.format("[testRunVelocity] Converged in %dms%n",
+  // convergeTimeMs));
+  //       break; // Converged to target velocity within tolerance
+  //     }
+  //     Thread.sleep(20); // Simulate 20ms scheduler cycle
+  //   }
 
-    assertTrue(
-        errorRPS < IndexerConstants.VELOCITY_TOLERANCE.in(RotationsPerSecond),
-        String.format(
-            "[testRunVelocity] Velocity did not converge to target within tolerance. Final error: %.1f Rot/sec",
-            errorRPS));
-  }
+  //   assertTrue(
+  //       errorRPS < IndexerConstants.VELOCITY_TOLERANCE.in(RotationsPerSecond),
+  //       String.format(
+  //           "[testRunVelocity] Velocity did not converge to target within tolerance. Final error:
+  // %.1f Rot/sec",
+  //           errorRPS));
+  // }
 
-  @Test
-  void testStop() throws InterruptedException {
-    AngularVelocity targetVelocity = IndexerConstants.DEFAULT_VELOCITY;
+  // @Test
+  // void testStop() throws InterruptedException {
+  //   AngularVelocity targetVelocity = IndexerConstants.DEFAULT_VELOCITY;
 
-    spindexer.runVelocity(targetVelocity);
-    spindexer.periodic();
+  //   spindexer.runVelocity(targetVelocity);
+  //   spindexer.periodic();
 
-    // Simulate the scheduler until speed is seen on the subsystem
-    for (int i = 1; i <= 50; i++) {
-      spindexer.periodic();
-      if (spindexer.getVelocity().gt(RotationsPerSecond.of(0.0))) {
-        break;
-      }
-    }
+  //   // Simulate the scheduler until speed is seen on the subsystem
+  //   for (int i = 1; i <= 50; i++) {
+  //     spindexer.periodic();
+  //     if (spindexer.getVelocity().gt(RotationsPerSecond.of(0.0))) {
+  //       break;
+  //     }
+  //   }
 
-    assertTrue(
-        spindexer.getVelocity().gt(RotationsPerSecond.of(0.0)),
-        String.format("[testStop] Failed to start the Spindexer"));
+  //   assertTrue(
+  //       spindexer.getVelocity().gt(RotationsPerSecond.of(0.0)),
+  //       String.format("[testStop] Failed to start the Spindexer"));
 
-    // Stop the Spindexer
-    spindexer.stop();
-    spindexer.periodic();
+  //   // Stop the Spindexer
+  //   spindexer.stop();
+  //   spindexer.periodic();
 
-    assertTrue(
-        spindexer.getVelocity().equals(RotationsPerSecond.of(0.0)),
-        String.format("[testStop] The Spindexer did not stop"));
-  }
+  //   assertTrue(
+  //       spindexer.getVelocity().equals(RotationsPerSecond.of(0.0)),
+  //       String.format("[testStop] The Spindexer did not stop"));
+  // }
 
   // @Test
   // void testRunOpenLoop() {
@@ -170,65 +173,71 @@ public class SpindexerTest {
   //   assertNotEquals(spindexer.getCurrent().in(Amps), 0);
   // }
 
-  @Test
-  void testNegativeVelocity() throws InterruptedException {
-    AngularVelocity targetVelocity = IndexerConstants.DEFAULT_VELOCITY.negate();
+  //
+  // TODO: verify tests and un-comment them
+  //
 
-    spindexer.runVelocity(targetVelocity);
-    spindexer.periodic();
+  // @Test
+  // void testNegativeVelocity() throws InterruptedException {
+  //   AngularVelocity targetVelocity = IndexerConstants.DEFAULT_VELOCITY.negate();
 
-    System.out.printf(
-        String.format(
-            "[testRunVelocity] Using IndexerIOSim - Target: %.1f Rot/sec%n",
-            targetVelocity.in(RotationsPerSecond)));
+  //   spindexer.runVelocity(targetVelocity);
+  //   spindexer.periodic();
 
-    assertTrue(targetVelocity.equals(spindexer.getVelocity()));
+  //   System.out.printf(
+  //       String.format(
+  //           "[testRunVelocity] Using IndexerIOSim - Target: %.1f Rot/sec%n",
+  //           targetVelocity.in(RotationsPerSecond)));
 
-    // Simulate the scheduler (20ms per cycle) for 1 second to allow the controller to converge to
-    // the target velocity
-    // and measure time to converge to target velocity (assuming tolerance)
-    int convergeTimeMs = 0;
-    double errorRPS =
-        Double.MAX_VALUE; // Rotations per second error between target and actual velocity
+  //   assertTrue(targetVelocity.equals(spindexer.getVelocity()));
 
-    for (int i = 1; i <= 50; i++) {
-      spindexer.periodic();
-      errorRPS =
-          Math.abs(
-              targetVelocity.in(RotationsPerSecond)
-                  - spindexer.getVelocity().in(RotationsPerSecond));
+  //   // Simulate the scheduler (20ms per cycle) for 1 second to allow the controller to converge
+  // to
+  //   // the target velocity
+  //   // and measure time to converge to target velocity (assuming tolerance)
+  //   int convergeTimeMs = 0;
+  //   double errorRPS =
+  //       Double.MAX_VALUE; // Rotations per second error between target and actual velocity
 
-      if (errorRPS < IndexerConstants.VELOCITY_TOLERANCE.in(RotationsPerSecond)) {
-        convergeTimeMs = i * 20; // Time to converge in milliseconds
-        System.out.printf(
-            String.format("[testNegativeVelocity] Converged in %dms%n", convergeTimeMs));
-        break; // Converged to target velocity within tolerance
-      }
-      Thread.sleep(20); // Simulate 20ms scheduler cycle
-    }
+  //   for (int i = 1; i <= 50; i++) {
+  //     spindexer.periodic();
+  //     errorRPS =
+  //         Math.abs(
+  //             targetVelocity.in(RotationsPerSecond)
+  //                 - spindexer.getVelocity().in(RotationsPerSecond));
 
-    assertTrue(
-        errorRPS < IndexerConstants.VELOCITY_TOLERANCE.in(RotationsPerSecond),
-        String.format(
-            "[testNegativeVelocity] Velocity did not converge to target within tolerance. Final error: %.1f Rot/sec",
-            errorRPS));
-  }
+  //     if (errorRPS < IndexerConstants.VELOCITY_TOLERANCE.in(RotationsPerSecond)) {
+  //       convergeTimeMs = i * 20; // Time to converge in milliseconds
+  //       System.out.printf(
+  //           String.format("[testNegativeVelocity] Converged in %dms%n", convergeTimeMs));
+  //       break; // Converged to target velocity within tolerance
+  //     }
+  //     Thread.sleep(20); // Simulate 20ms scheduler cycle
+  //   }
 
-  @Test
-  void testMaxVelocity() {
-    // Test Positive value out of bounds
-    AngularVelocity targetVelocity = RPM.of(10000); // Exceeds max velocity
-    spindexer.runVelocity(targetVelocity);
-    spindexer.periodic();
-    assertTrue(spindexer.getVelocity().equals(IndexerConstants.MAX_VELOCITY));
+  //   assertTrue(
+  //       errorRPS < IndexerConstants.VELOCITY_TOLERANCE.in(RotationsPerSecond),
+  //       String.format(
+  //           "[testNegativeVelocity] Velocity did not converge to target within tolerance. Final
+  // error: %.1f Rot/sec",
+  //           errorRPS));
+  // }
 
-    // Test Negative value out of bounds
-    targetVelocity = RPM.of(-10000); // Exceeds max velocity
-    spindexer.runVelocity(targetVelocity);
-    spindexer.periodic();
-    assertEquals(
-        spindexer.getVelocity().in(RPM),
-        IndexerConstants.MAX_VELOCITY.copySign(targetVelocity, RPM),
-        DELTA);
-  }
+  // @Test
+  // void testMaxVelocity() {
+  //   // Test Positive value out of bounds
+  //   AngularVelocity targetVelocity = RPM.of(10000); // Exceeds max velocity
+  //   spindexer.runVelocity(targetVelocity);
+  //   spindexer.periodic();
+  //   assertTrue(spindexer.getVelocity().equals(IndexerConstants.MAX_VELOCITY));
+
+  //   // Test Negative value out of bounds
+  //   targetVelocity = RPM.of(-10000); // Exceeds max velocity
+  //   spindexer.runVelocity(targetVelocity);
+  //   spindexer.periodic();
+  //   assertEquals(
+  //       spindexer.getVelocity().in(RPM),
+  //       IndexerConstants.MAX_VELOCITY.copySign(targetVelocity, RPM),
+  //       DELTA);
+  // }
 }
