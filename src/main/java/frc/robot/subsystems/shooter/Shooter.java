@@ -16,11 +16,15 @@ package frc.robot.subsystems.shooter;
 // import static frc.robot.subsystems.shooter.ShooterConstants.positionStepRad;
 
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.units.measure.*;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.util.LoggedTunableNumber;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -30,12 +34,38 @@ public class Shooter extends SubsystemBase {
   private final Alert motorDisconnectedAlert =
       new Alert("Shooter motor disconnected.", AlertType.kError);
 
+  // Configure SysId
+  private SysIdRoutine sysId =
+      new SysIdRoutine(
+          new SysIdRoutine.Config(
+              null,
+              null,
+              null,
+              (state) -> Logger.recordOutput("Shooter/SysIdState", state.toString())),
+          new SysIdRoutine.Mechanism(
+              (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
+
+  private final LoggedTunableNumber flywheelKP =
+      new LoggedTunableNumber("Shooter/Flywheel/kP", ShooterConstants.SHOOTER_KP);
+  private final LoggedTunableNumber flywheelKD =
+      new LoggedTunableNumber("Shooter/Flywheel/kD", ShooterConstants.SHOOTER_KD);
+  private final LoggedTunableNumber flywheelKV =
+      new LoggedTunableNumber("Shooter/Flywheel/kV", ShooterConstants.SHOOTER_KV);
+  private final LoggedTunableNumber flywheelKS =
+      new LoggedTunableNumber("Shooter/Flywheel/kS", ShooterConstants.SHOOTER_KS);
+  private final LoggedTunableNumber flywheelRPM =
+      new LoggedTunableNumber(
+          "Shooter/Flywheel/WheelRPM", ShooterConstants.DEFAULT_VELOCITY.in(RPM));
+
+  private AngularVelocity desiredVelocity = ShooterConstants.DEFAULT_VELOCITY;
+
   public Shooter(ShooterIO io) {
     this.io = io;
   }
 
   @Override
   public void periodic() {
+    updateTunables();
     io.updateInputs(inputs);
     Logger.processInputs("Shooter", inputs);
 
@@ -48,12 +78,11 @@ public class Shooter extends SubsystemBase {
    *
    * @param velocityRadPerSec Velocity in radians per second
    */
-  public void runVelocity(AngularVelocity velocity) {
-    AngularVelocity newVelocity = velocity;
-
-    if ((velocity.abs(RPM)) > ShooterConstants.MAX_VELOCITY.in(RPM)) {
-      newVelocity = RPM.of(ShooterConstants.MAX_VELOCITY.copySign(velocity, RPM));
-    }
+  public void start(AngularVelocity newVelocity) {
+    // AngularVelocity velocity = newVelocity;
+    // if ((velocity.abs(RPM)) > ShooterConstants.MAX_VELOCITY.in(RPM)) {
+    //   newVelocity = RPM.of(ShooterConstants.MAX_VELOCITY.copySign(velocity, RPM));
+    // }
     io.setVelocity(newVelocity);
   }
 
@@ -86,33 +115,38 @@ public class Shooter extends SubsystemBase {
     return inputs.connected;
   }
 
-  /** Returns the current applied voltage to the left motor(leader). */
-  public Voltage getAppliedVoltsLeft() {
-    return inputs.appliedVoltageMotorLeft;
+  private void updateTunables() {
+    if (flywheelKP.hasChanged(hashCode())
+        || flywheelKD.hasChanged(hashCode())
+        || flywheelKV.hasChanged(hashCode())
+        || flywheelKS.hasChanged(hashCode())) {
+      io.setPID(flywheelKP.get(), flywheelKD.get(), flywheelKV.get(), flywheelKS.get());
+    }
+
+    if (flywheelRPM.hasChanged(hashCode())) {
+      desiredVelocity = (RPM.of(flywheelRPM.get()));
+    }
   }
 
-  /** Returns the current applied voltage to the right motor(follower). */
-  public Voltage getAppliedVoltsRight() {
-    return inputs.appliedVoltageMotorRight;
+  public Command updateVelocityCommand() {
+    io.setVelocity(desiredVelocity);
+    return new Command() {};
   }
 
-  /** Returns the current applied voltage to both motors combined. */
-  public Voltage getTotalAppliedVolts() {
-    return inputs.appliedVoltageMotorLeft.plus(inputs.appliedVoltageMotorRight);
+  /** Runs the module with the specified output while controlling to zero degrees. */
+  public void runCharacterization(double output) {
+    io.setOpenLoop(output);
   }
 
-  /** Returns the current draw in amps for the left motor(leader). */
-  public Current getCurrentAmpsLeft() {
-    return inputs.currentMotorLeft;
+  /** Returns a command to run a quasistatic test in the specified direction. */
+  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    return run(() -> runCharacterization(0.0))
+        .withTimeout(1.0)
+        .andThen(sysId.quasistatic(direction));
   }
 
-  /** Returns the current draw in amps for the right motor(follower). */
-  public Current getCurrentAmpsRight() {
-    return inputs.currentMotorRight;
-  }
-
-  /** Returns the current draw in amps for both motors combined. */
-  public Current getTotalCurrentAmps() {
-    return inputs.currentMotorLeft.plus(inputs.currentMotorRight);
+  /** Returns a command to run a dynamic test in the specified direction. */
+  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    return run(() -> runCharacterization(0.0)).withTimeout(1.0).andThen(sysId.dynamic(direction));
   }
 }

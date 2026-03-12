@@ -19,7 +19,6 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
-import com.ctre.phoenix6.configs.MountPoseConfigs;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -80,7 +79,7 @@ public class DriveConstants {
 
   static {
     switch (Constants.robot) {
-      case REBUILT_COMPBOT, SIMBOT -> {
+      case REBUILT_COMPBOT, REBUILT_DRIVE_ONLY -> {
         ODOMETRY_UPDATE_FREQ = Hertz.of(250);
         MODULE_DISTANCE_Y = Inches.of(22); // left to right
         MODULE_DISTANCE_X = Inches.of(22); // front to back
@@ -88,9 +87,9 @@ public class DriveConstants {
         WHEEL_RADIUS = Inches.of(1.985);
         WHEEL_COF = 2.255;
         DRIVE_MOTOR_CURRENT_LIMIT = Amps.of(80);
-        DRIVE_GEAR_RATIO = 5.8909; // WCP Swerve x2i 11t pinion, X3 configuration
+        DRIVE_GEAR_RATIO = 5.8909090909090915; // WCP Swerve x2i 11t pinion, X3 configuration
         DRIVE_GEARBOX = DCMotor.getKrakenX60Foc(1);
-        SPEED_AT_12V = MetersPerSecond.of(5.42);
+        SPEED_AT_12V = MetersPerSecond.of(5.24);
 
         TURN_MOTOR_CURRENT_LIMIT = Amps.of(40);
         STEER_GEAR_RATIO = 12.1; // WCP Swerve x2
@@ -188,25 +187,22 @@ public class DriveConstants {
 
     public static final Slot0Configs STEER_GAINS =
         new Slot0Configs()
-            .withKP(1000)
+            .withKP(100)
             .withKI(0)
-            .withKD(8)
-            .withKS(6)
-            .withKV(0)
+            .withKD(.5)
+            .withKS(.1)
+            .withKV(1.5)
             .withKA(0)
             .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseVelocitySign);
 
     public static final Slot0Configs DRIVE_GAINS =
-        new Slot0Configs()
-            .withKP(2)
-            .withKI(0.0)
-            .withKD(0.0)
-            .withKS(0.237) // 0.11367, 0.1301, 0.15349, 0.16187 -> 0.140
-            .withKV(0.733) // 0.13879, 0.13555, 0.13894, 0.13109 -> 0.136
-            .withKA(0.0); // 0.016363, 0.016268, 0.0085342, 0.011084 -> 0.013
+        new Slot0Configs().withKP(.1).withKI(0.0).withKD(0.0).withKS(0.0).withKV(0.124).withKA(0.0);
 
     private static final ClosedLoopOutputType STEER_CLOSED_LOOP_OUTPUT =
-        ClosedLoopOutputType.TorqueCurrentFOC;
+        ClosedLoopOutputType.Voltage;
+    // TODO: Torque probably better but need more tuning
+    // private static final ClosedLoopOutputType STEER_CLOSED_LOOP_OUTPUT =
+    //     ClosedLoopOutputType.TorqueCurrentFOC;
     private static final ClosedLoopOutputType DRIVE_CLOSED_LOOP_OUTPUT =
         ClosedLoopOutputType.Voltage;
 
@@ -239,14 +235,14 @@ public class DriveConstants {
 
     private static final CANcoderConfiguration ENCODER_CONFIGS = new CANcoderConfiguration();
 
-    public static final Pigeon2Configuration PIGEON_CONFIGS =
-        new Pigeon2Configuration()
-            .withMountPose(new MountPoseConfigs().withMountPoseYaw(Degrees.of(-90)));
+    public static final Pigeon2Configuration PIGEON_CONFIGS = new Pigeon2Configuration();
+    // TODO: Figure this out
+    // .withMountPose(new MountPoseConfigs().withMountPoseRoll(Degrees.of(90)));
 
     // Every 1 rotation of the azimuth results in COUPLE_RATIO drive motor turns;
-    private static final double COUPLE_RATIO = 3.375;
+    private static final double COUPLE_RATIO = 4.909090909090909;
 
-    public static final int PIGEON_ID = 6;
+    public static final int PIGEON_ID = 1;
 
     // SIMULATION inertia
     private static final MomentOfInertia STEER_INERTIA = KilogramSquareMeters.of(0.01);
@@ -254,6 +250,12 @@ public class DriveConstants {
     // SIMULATION voltage necessary to overcome friction
     private static final Voltage STEER_FRICTION_VOLTAGE = Volts.of(0.2);
     private static final Voltage DRIVE_FRICTION_VOLTAGE = Volts.of(0.2);
+
+    public static final boolean STEER_INVERTED = true;
+    public static final boolean ENCODER_INVERTED = false;
+
+    private static final boolean DRIVE_LEFT_INVERTED = false;
+    private static final boolean DRIVE_RIGHT_INVERTED = true;
 
     public static final SwerveDrivetrainConstants DRIVETRAIN_CONSTANTS =
         new SwerveDrivetrainConstants()
@@ -291,10 +293,7 @@ public class DriveConstants {
       private static final int DRIVE_ID = 11;
       private static final int STEER_ID = 21;
       private static final int ENCODER_ID = 31;
-      private static final Angle ENCODER_OFFSET = Rotations.of(0.28564453125);
-      private static final boolean STEER_INVERTED = false;
-      private static final boolean ENCODER_INVERTED = false;
-      private static final boolean DRIVE_INVERTED = false;
+      private static final Angle ENCODER_OFFSET = Rotations.of(-0.1171875);
 
       public static final Distance X_POS = MODULE_DISTANCE_X.div(2);
       public static final Distance Y_POS = MODULE_DISTANCE_Y.div(2);
@@ -309,7 +308,7 @@ public class DriveConstants {
                   ENCODER_OFFSET,
                   X_POS,
                   Y_POS,
-                  DRIVE_INVERTED,
+                  DRIVE_LEFT_INVERTED,
                   STEER_INVERTED,
                   ENCODER_INVERTED);
     }
@@ -318,10 +317,7 @@ public class DriveConstants {
       private static final int DRIVE_ID = 14;
       private static final int STEER_ID = 24;
       private static final int ENCODER_ID = 34;
-      private static final Angle ENCODER_OFFSET = Rotations.of(-0.109375);
-      private static final boolean STEER_INVERTED = false;
-      private static final boolean ENCODER_INVERTED = false;
-      private static final boolean DRIVE_INVERTED = true;
+      private static final Angle ENCODER_OFFSET = Rotations.of(-0.26123046875);
 
       public static final Distance X_POS = MODULE_DISTANCE_X.div(2);
       public static final Distance Y_POS = MODULE_DISTANCE_Y.div(-2);
@@ -336,7 +332,7 @@ public class DriveConstants {
                   ENCODER_OFFSET,
                   X_POS,
                   Y_POS,
-                  DRIVE_INVERTED,
+                  DRIVE_RIGHT_INVERTED,
                   STEER_INVERTED,
                   ENCODER_INVERTED);
     }
@@ -345,10 +341,7 @@ public class DriveConstants {
       private static final int DRIVE_ID = 12;
       private static final int STEER_ID = 22;
       private static final int ENCODER_ID = 32;
-      private static final Angle ENCODER_OFFSET = Rotations.of(-0.188232421875);
-      private static final boolean STEER_INVERTED = false;
-      private static final boolean ENCODER_INVERTED = false;
-      private static final boolean DRIVE_INVERTED = false;
+      private static final Angle ENCODER_OFFSET = Rotations.of(-0.105712890625);
 
       public static final Distance X_POS = MODULE_DISTANCE_X.div(-2);
       public static final Distance Y_POS = MODULE_DISTANCE_Y.div(2);
@@ -363,7 +356,7 @@ public class DriveConstants {
                   ENCODER_OFFSET,
                   X_POS,
                   Y_POS,
-                  DRIVE_INVERTED,
+                  DRIVE_LEFT_INVERTED,
                   STEER_INVERTED,
                   ENCODER_INVERTED);
     }
@@ -372,10 +365,7 @@ public class DriveConstants {
       private static final int DRIVE_ID = 13;
       private static final int STEER_ID = 23;
       private static final int ENCODER_ID = 33;
-      private static final Angle ENCODER_OFFSET = Rotations.of(-0.134033203125);
-      private static final boolean STEER_INVERTED = false;
-      private static final boolean ENCODER_INVERTED = false;
-      private static final boolean DRIVE_INVERTED = true;
+      private static final Angle ENCODER_OFFSET = Rotations.of(-0.43017578125);
 
       public static final Distance X_POS = MODULE_DISTANCE_X.div(-2);
       public static final Distance Y_POS = MODULE_DISTANCE_Y.div(-2);
@@ -390,7 +380,7 @@ public class DriveConstants {
                   ENCODER_OFFSET,
                   X_POS,
                   Y_POS,
-                  DRIVE_INVERTED,
+                  DRIVE_RIGHT_INVERTED,
                   STEER_INVERTED,
                   ENCODER_INVERTED);
     }

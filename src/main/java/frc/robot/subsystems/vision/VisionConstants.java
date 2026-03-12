@@ -23,40 +23,59 @@ import java.util.Set;
 
 /** Constants for the vision subsystem. */
 public class VisionConstants {
+  // Number of cameras (single source of truth for IO/sim loops)
+  public static final int NUM_CAMERAS = 3;
+
   // Camera identifiers (must match PhotonVision camera names)
-  public static final String frontCameraName = "front_camera";
-  public static final String backCameraName = "back_camera";
+  public static final String frontLeftCameraName = "front_left_camera";
+  public static final String frontRightCameraName = "front_right_camera";
+  public static final String rearRightCameraName = "rear_right_camera";
+
+  /** Ordered camera names for IO/sim (index 0 = front left, 1 = front right, 2 = rear right). */
+  public static final String[] CAMERA_NAMES =
+      new String[] {frontLeftCameraName, frontRightCameraName, rearRightCameraName};
 
   // AprilTag field layout for 2026 Rebuilt
   public static final AprilTagFieldLayout fieldLayout =
       AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
 
-  // Camera mounting transforms (robot-relative)
-  // 2026 KitBot square config: 26.5" x 26.5" (matches DriveConstants.wheelBase/trackWidth).
-  // Front/back camera X = half wheelbase = 13.25" from center to front/back of frame.
-  // WPILib: +X forward, +Y left, +Z up. Rotation: roll, pitch (negative = tilted up), yaw.
-  public static final Transform3d robotToFrontCamera =
+  // Camera mounting transforms (robot-relative placeholders)
+  // 2026 KitBot square config: 26.5" x 26.5". WPILib: +X forward, +Y left, +Z up.
+  // Cameras at front-left, front-right, rear-right corners; ~halfway up max height (24").
+  // Rotation: roll, pitch (negative = tilted up), yaw.
+  public static final Transform3d robotToFrontLeftCamera =
       new Transform3d(
           new Translation3d(
-              Units.inchesToMeters(13.25), // X: forward (half of 26.5" wheelbase)
-              Units.inchesToMeters(0.0), // Y: left (centered)
-              Units.inchesToMeters(24.0)), // Z: up (typical mast height)
+              Units.inchesToMeters(13.25), // X: forward (half wheelbase)
+              Units.inchesToMeters(13.25), // Y: left (half track)
+              Units.inchesToMeters(24.0)), // Z: up (placeholder height)
           new Rotation3d(
-              0.0, // Roll
-              Units.degreesToRadians(-15.0), // Pitch (negative = tilted up for AprilTags)
-              0.0)); // Yaw (facing forward)
+              0.0,
+              Units.degreesToRadians(-15.0), // Pitch (tilted up for AprilTags)
+              0.0));
 
-  // Back camera: same X magnitude behind center, 180° yaw (facing backward)
-  public static final Transform3d robotToBackCamera =
+  public static final Transform3d robotToFrontRightCamera =
       new Transform3d(
           new Translation3d(
-              Units.inchesToMeters(-13.25), // X: backward (half of 26.5" wheelbase)
-              Units.inchesToMeters(0.0), // Y: left (centered)
-              Units.inchesToMeters(24.0)), // Z: up (typical mast height)
+              Units.inchesToMeters(13.25), // X: forward
+              Units.inchesToMeters(-13.25), // Y: right
+              Units.inchesToMeters(24.0)), // Z: up
+          new Rotation3d(0.0, Units.degreesToRadians(-15.0), 0.0));
+
+  public static final Transform3d robotToRearRightCamera =
+      new Transform3d(
+          new Translation3d(
+              Units.inchesToMeters(-13.25), // X: backward
+              Units.inchesToMeters(-13.25), // Y: right
+              Units.inchesToMeters(24.0)), // Z: up
           new Rotation3d(
-              0.0, // Roll
-              Units.degreesToRadians(-15.0), // Pitch (negative = tilted up)
+              0.0,
+              Units.degreesToRadians(-15.0),
               Units.degreesToRadians(180.0))); // Yaw (facing backward)
+
+  /** Ordered robot-to-camera transforms for IO/sim (same order as CAMERA_NAMES). */
+  public static final Transform3d[] ROBOT_TO_CAMERAS =
+      new Transform3d[] {robotToFrontLeftCamera, robotToFrontRightCamera, robotToRearRightCamera};
 
   // Quality filtering thresholds
   public static final double maxPoseAmbiguity = 0.2; // Reject poses with ambiguity > 0.2
@@ -113,7 +132,7 @@ public class VisionConstants {
   public static final double CAMERA_FOV_HORIZONTAL_DEG = 70.0;
   public static final double CAMERA_FOV_VERTICAL_DEG = 50.0;
 
-  // Camera tilt angle (extracted from robotToFrontCamera/robotToBackCamera)
+  // Camera tilt angle (extracted from robot-to-camera transforms)
   public static final double CAMERA_TILT_DEG = 15.0;
 
   // Align-to-tag command: distance and control

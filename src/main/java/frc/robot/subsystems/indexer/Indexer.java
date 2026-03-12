@@ -14,6 +14,7 @@
 package frc.robot.subsystems.indexer;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.subsystems.indexer.IndexerConstants.GAINS;
 
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -27,7 +28,7 @@ import org.littletonrobotics.junction.Logger;
 
 /**
  * Indexer subsystem: runs a single motor at a set velocity (closed-loop) or open-loop voltage. Use
- * {@link #runVelocity(AngularVelocity)} for normal operation; use {@link #runOpenLoop(Voltage)} for
+ * {@link #start(AngularVelocity)} for normal operation; use {@link #runOpenLoop(Voltage)} for
  * testing. Call {@link #stop()} to stop the motor.
  */
 public class Indexer extends SubsystemBase {
@@ -36,22 +37,24 @@ public class Indexer extends SubsystemBase {
 
   /** Cached inputs from IO, logged each period via AdvantageKit. */
   private final IndexIOInputsAutoLogged inputs = new IndexIOInputsAutoLogged();
-
   /** Shown on the dashboard when the index motor is not connected. */
   private final Alert motorDisconnectedAlert =
       new Alert("Index motor disconnected.", AlertType.kError);
 
   private final LoggedTunableNumber flywheelKP =
-      new LoggedTunableNumber("Spindexer/Flywheel/kP", IndexerConstants.velocityKp);
+      new LoggedTunableNumber("Indexer/Flywheel/kP", GAINS.kP());
+  private final LoggedTunableNumber flywheelKI =
+      new LoggedTunableNumber("Indexer/Flywheel/kI", GAINS.kI());
   private final LoggedTunableNumber flywheelKD =
-      new LoggedTunableNumber("Spindexer/Flywheel/kD", IndexerConstants.velocityKd);
+      new LoggedTunableNumber("Indexer/Flywheel/kD", GAINS.kD());
   private final LoggedTunableNumber flywheelKV =
-      new LoggedTunableNumber("Spindexer/Flywheel/kV", IndexerConstants.velocityKv);
+      new LoggedTunableNumber("Indexer/Flywheel/kV", GAINS.kV());
   private final LoggedTunableNumber flywheelKS =
-      new LoggedTunableNumber("Spindexer/Flywheel/kS", IndexerConstants.velocityKs);
-  private final LoggedTunableNumber flywheelRPM =
+      new LoggedTunableNumber("Indexer/Flywheel/kS", GAINS.kS());
+  private final LoggedTunableNumber flywheelRPS =
       new LoggedTunableNumber(
-          "Spindexer/Flywheel/WheelRPM", IndexerConstants.DEFAULT_VELOCITY.in(RPM));
+          "Indexer/Flywheel/RotPerSecond",
+          IndexerConstants.DEFAULT_VELOCITY.in(RotationsPerSecond));
 
   public Indexer(IndexerIO io) {
     this.io = io;
@@ -72,7 +75,7 @@ public class Indexer extends SubsystemBase {
    *
    * @param velocityRadPerSec Velocity in radians per second
    */
-  public void runVelocity(AngularVelocity velocity) {
+  public void start(AngularVelocity velocity) {
     AngularVelocity new_velocity = velocity;
 
     // Check if the velocity is in bounds before setting it.
@@ -81,7 +84,11 @@ public class Indexer extends SubsystemBase {
     if ((velocity.abs(RPM)) > IndexerConstants.MAX_VELOCITY.in(RPM)) {
       new_velocity = RPM.of(IndexerConstants.MAX_VELOCITY.copySign(new_velocity, RPM));
     }
-    io.setVelocity(new_velocity);
+    io.start(new_velocity);
+  }
+
+  public void start() {
+    start(RotationsPerSecond.of(flywheelRPS.get()));
   }
 
   /**
@@ -100,11 +107,11 @@ public class Indexer extends SubsystemBase {
 
   @AutoLogOutput
   public AngularVelocity getVelocity() {
-    return inputs.actualWheelVelocity;
+    return inputs.currentVelocity;
   }
 
   public AngularVelocity getDesiredVelocity() {
-    return inputs.desiredWheelVelocity;
+    return inputs.desiredVelocity;
   }
 
   public boolean isConnected() {
@@ -121,15 +128,12 @@ public class Indexer extends SubsystemBase {
 
   private void updateTunables() {
     if (flywheelKP.hasChanged(hashCode())
+        || flywheelKI.hasChanged(hashCode())
         || flywheelKD.hasChanged(hashCode())
         || flywheelKV.hasChanged(hashCode())
         || flywheelKS.hasChanged(hashCode())) {
-      io.setPID(flywheelKP.get(), flywheelKD.get(), flywheelKV.get(), flywheelKS.get());
+      io.setPID(
+          flywheelKP.get(), flywheelKI.get(), flywheelKD.get(), flywheelKV.get(), flywheelKS.get());
     }
-
-    // TODO: Update velocity on the fly
-    // if (flywheelRPM.hasChanged(hashCode())) {
-    //   io.setVelocity(RPM.of(flywheelRPM.get()));
-    // }
   }
 }

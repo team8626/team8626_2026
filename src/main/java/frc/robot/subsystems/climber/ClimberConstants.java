@@ -15,7 +15,7 @@ package frc.robot.subsystems.climber;
 
 public class ClimberConstants {
   // Hardware configuration
-  public static final int indexCanId = 20; // TODO: Set actual CAN ID
+  public static final int indexCanId = 4;
   public static final boolean motorInverted = false; // TODO: Verify direction
   public static final int motorCurrentLimit = 40; // Amps
 

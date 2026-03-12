@@ -13,6 +13,7 @@
 
 package frc.robot.subsystems.vision;
 
+import static frc.robot.subsystems.vision.VisionConstants.NUM_CAMERAS;
 import static frc.robot.subsystems.vision.VisionConstants.maxDistanceMeters;
 import static frc.robot.subsystems.vision.VisionConstants.maxPoseAmbiguity;
 import static frc.robot.subsystems.vision.VisionConstants.minTagsForMultiTag;
@@ -45,11 +46,20 @@ public class Vision extends SubsystemBase {
   // Consumer for sending vision measurements to Drive subsystem
   private final Consumer<VisionMeasurement> visionConsumer;
 
-  // Alerts for camera disconnections
-  private final Alert frontCameraDisconnectedAlert =
-      new Alert("Front camera disconnected.", AlertType.kWarning);
-  private final Alert backCameraDisconnectedAlert =
-      new Alert("Back camera disconnected.", AlertType.kWarning);
+  // Alerts for camera disconnections (0=front left, 1=front right, 2=rear right)
+  private static final String[] CAMERA_ALERT_MESSAGES =
+      new String[] {
+        "Front left camera disconnected.",
+        "Front right camera disconnected.",
+        "Rear right camera disconnected."
+      };
+  private final Alert[] cameraDisconnectedAlerts = new Alert[NUM_CAMERAS];
+
+  {
+    for (int i = 0; i < NUM_CAMERAS; i++) {
+      cameraDisconnectedAlerts[i] = new Alert(CAMERA_ALERT_MESSAGES[i], AlertType.kWarning);
+    }
+  }
 
   /** Container for vision measurement data. */
   public static class VisionMeasurement {
@@ -101,9 +111,8 @@ public class Vision extends SubsystemBase {
     }
 
     // Update camera connection alerts
-    if (inputs.connected.length >= 2) {
-      frontCameraDisconnectedAlert.set(!inputs.connected[0]);
-      backCameraDisconnectedAlert.set(!inputs.connected[1]);
+    for (int i = 0; i < cameraDisconnectedAlerts.length && i < inputs.connected.length; i++) {
+      cameraDisconnectedAlerts[i].set(!inputs.connected[i]);
     }
 
     // Process pose estimates from each camera
@@ -199,7 +208,7 @@ public class Vision extends SubsystemBase {
   /**
    * Get best target's field-relative Pose3d.
    *
-   * @param cameraIndex Camera index (0=front, 1=back)
+   * @param cameraIndex Camera index (0=front left, 1=front right, 2=rear right)
    * @return Optional with Pose3d if valid target exists
    */
   public Optional<Pose3d> getBestTargetFieldPose(int cameraIndex) {
@@ -230,7 +239,7 @@ public class Vision extends SubsystemBase {
   /**
    * Check if camera has valid best target.
    *
-   * @param cameraIndex Camera index (0=front, 1=back)
+   * @param cameraIndex Camera index (0=front left, 1=front right, 2=rear right)
    * @return true if camera has valid best target
    */
   public boolean hasBestTarget(int cameraIndex) {
@@ -242,7 +251,7 @@ public class Vision extends SubsystemBase {
   /**
    * Get the best target's AprilTag ID for the given camera.
    *
-   * @param cameraIndex Camera index (0=front, 1=back)
+   * @param cameraIndex Camera index (0=front left, 1=front right, 2=rear right)
    * @return AprilTag ID, or -1 if no valid best target
    */
   public int getBestTargetId(int cameraIndex) {

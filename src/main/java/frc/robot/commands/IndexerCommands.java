@@ -37,7 +37,7 @@ public class IndexerCommands {
    */
   public static Command runForDuration(
       Indexer indexer, double durationSeconds, AngularVelocity velocity) {
-    return Commands.run(() -> indexer.runVelocity(velocity), indexer)
+    return Commands.run(() -> indexer.start(velocity), indexer)
         .withTimeout(durationSeconds)
         .finallyDo(indexer::stop);
   }

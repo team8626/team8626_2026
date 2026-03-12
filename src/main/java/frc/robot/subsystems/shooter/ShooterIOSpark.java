@@ -14,7 +14,6 @@
 package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.util.SparkUtil.ifOk;
 import static frc.robot.util.SparkUtil.sparkStickyFault;
 import static frc.robot.util.SparkUtil.tryUntilOk;
 
@@ -30,165 +29,189 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.measure.AngularVelocity;
-import java.util.function.DoubleSupplier;
 
 /** Shooter IO implementation for SPARK Flex motor controller. */
 public class ShooterIOSpark implements ShooterIO {
-  private final SparkFlex sparkLead;
-  private final SparkFlex sparkFollow;
-  private final SparkFlexConfig config;
-  private final RelativeEncoder encoder;
-  private final SparkClosedLoopController controller;
+  private final SparkFlex motorLeft;
+  private final SparkFlex motorRight;
+
+  private final SparkFlexConfig configLeft;
+  private final RelativeEncoder encoderLeft;
+  private final SparkClosedLoopController controllerLeft;
+
   private final Debouncer connectedDebounce = new Debouncer(0.5);
 
-  private double kV = ShooterConstants.velocityKv;
-  private double kS = ShooterConstants.velocityKs;
+  private AngularVelocity desiredVelocity = RPM.of(0.0);
+
+  private double kV = ShooterConstants.SHOOTER_KV;
+  private double kS = ShooterConstants.SHOOTER_KS;
+
+  private SimpleMotorFeedforward shooterFF = new SimpleMotorFeedforward(kS, kV, 0.0);
 
   public ShooterIOSpark() {
-    sparkLead = new SparkFlex(ShooterConstants.shooterLeadCanId, MotorType.kBrushless);
-    sparkFollow = new SparkFlex(ShooterConstants.shooterFollowCanId, MotorType.kBrushless);
-    encoder = sparkLead.getEncoder();
-    controller = sparkLead.getClosedLoopController();
+    // Initialize motors and related objects
+    motorLeft = new SparkFlex(ShooterConstants.LEFT_CANID, MotorType.kBrushless);
+    motorRight = new SparkFlex(ShooterConstants.RIGHT_CANID, MotorType.kBrushless);
+
+    encoderLeft = motorLeft.getEncoder();
+    controllerLeft = motorLeft.getClosedLoopController();
 
     // Configure motor
-    config = new SparkFlexConfig();
-    config
-        .inverted(ShooterConstants.motorInverted)
-        .idleMode(IdleMode.kBrake)
-        .smartCurrentLimit(ShooterConstants.motorCurrentLimit)
+    configLeft = new SparkFlexConfig();
+    configLeft
+        .inverted(ShooterConstants.SHOOTER_LEFT_INVERTED)
+        .idleMode(IdleMode.kCoast)
+        .smartCurrentLimit((int) ShooterConstants.CURRENT_LIMIT.in(Amps))
         .voltageCompensation(12.0);
 
-    // Configure follower moter
-    var followConfig = new SparkFlexConfig();
-    followConfig.follow(
-        sparkLead, true); // TODO: double check that right motor on shooter needs to be inverted
-
     // Configure encoder
-    config
+    configLeft
         .encoder
-        .positionConversionFactor(ShooterConstants.encoderPositionFactor)
-        .velocityConversionFactor(ShooterConstants.encoderVelocityFactor)
-        .uvwMeasurementPeriod(10)
-        .uvwAverageDepth(2);
+        .positionConversionFactor(1.0 / ShooterConstants.GEAR_REDUCTION)
+        .velocityConversionFactor(1.0 / ShooterConstants.GEAR_REDUCTION)
+        .uvwMeasurementPeriod(10);
 
     // Configure closed loop control
-    config
+    configLeft
         .closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .pid(ShooterConstants.velocityKp, 0.0, ShooterConstants.velocityKd, ClosedLoopSlot.kSlot0);
+        .pid(
+            ShooterConstants.SHOOTER_KP,
+            ShooterConstants.SHOOTER_KI,
+            ShooterConstants.SHOOTER_KD,
+            ClosedLoopSlot.kSlot0)
+        .outputRange(-1.0, 1.0);
 
     // Configure signal update rates
-    config
-        .signals
-        .primaryEncoderPositionAlwaysOn(true)
-        .primaryEncoderPositionPeriodMs(20)
-        .primaryEncoderVelocityAlwaysOn(true)
-        .primaryEncoderVelocityPeriodMs(20)
-        .appliedOutputPeriodMs(20)
-        .busVoltagePeriodMs(20)
-        .outputCurrentPeriodMs(20);
+    // config
+    //     .signals
+    //     .primaryEncoderPositionAlwaysOn(true)
+    //     .primaryEncoderPositionPeriodMs(20)
+    //     .primaryEncoderVelocityAlwaysOn(true)
+    //     .primaryEncoderVelocityPeriodMs(20)
+    //     .appliedOutputPeriodMs(20)
+    //     .busVoltagePeriodMs(20)
+    //     .outputCurrentPeriodMs(20);
+
+    // Configure right motor as a follower (inverted)
+    var configRight = new SparkFlexConfig();
+    configRight.follow(motorLeft, true);
 
     // Apply configuration
     tryUntilOk(
-        sparkLead,
+        motorLeft,
         5,
         () ->
-            sparkLead.configure(
-                config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
+            motorLeft.configure(
+                configLeft, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
 
     tryUntilOk(
-        sparkFollow,
+        motorRight,
         5,
         () ->
-            sparkFollow.configure(
-                followConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
+            motorRight.configure(
+                configRight, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
 
     // Reset encoder to zero position
-    tryUntilOk(sparkLead, 5, () -> encoder.setPosition(0.0));
+    tryUntilOk(motorLeft, 5, () -> encoderLeft.setPosition(0.0));
   }
 
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
     sparkStickyFault = false;
 
+    // Update Currents
+    inputs.currentMotorLeft = Amps.of(motorLeft.getOutputCurrent());
+    inputs.currentMotorRight = Amps.of(motorRight.getOutputCurrent());
+
+    // Update Voltages
+    inputs.appliedVoltageMotorLeft = Volts.of(motorLeft.getAppliedOutput());
+    inputs.appliedVoltageMotorRight = Volts.of(motorRight.getAppliedOutput());
+
     // Update velocities
-    ifOk(
-        sparkLead,
-        encoder::getVelocity,
-        (value) -> {
-          inputs.velocityMotorLeft = RadiansPerSecond.of(value);
-          inputs.velocityShooterWheel = RadiansPerSecond.of(value);
-        });
-    ifOk(
-        sparkFollow,
-        sparkFollow.getEncoder()::getVelocity,
-        (value) -> inputs.velocityMotorRight = RadiansPerSecond.of(value));
-    // Update appliedVoltage
-    ifOk(
-        sparkLead,
-        new DoubleSupplier[] {sparkLead::getAppliedOutput, sparkLead::getBusVoltage},
-        (values) -> inputs.appliedVoltageMotorLeft = Volts.of(values[0] * values[1]));
-    ifOk(
-        sparkFollow,
-        new DoubleSupplier[] {sparkFollow::getAppliedOutput, sparkFollow::getBusVoltage},
-        (values) -> inputs.appliedVoltageMotorRight = Volts.of(values[0] * values[1]));
-    // Update current
-    ifOk(
-        sparkLead,
-        sparkLead::getOutputCurrent,
-        (value) -> inputs.currentMotorLeft = Amps.of(value));
-    ifOk(
-        sparkFollow,
-        sparkFollow::getOutputCurrent,
-        (value) -> inputs.currentMotorRight = Amps.of(value));
+    inputs.velocityMotorLeft = RPM.of(encoderLeft.getVelocity());
+    inputs.velocityMotorRight = RPM.of(motorRight.getEncoder().getVelocity());
+    inputs.velocityShooterWheel = RPM.of(encoderLeft.getVelocity());
+    inputs.desiredWheelVelocity = desiredVelocity;
+
+    // Update position
+    inputs.positionMotorLeft = Radians.of(encoderLeft.getPosition());
+
+    // Update velocities
+    // ifOk(
+    //     motorLeft,
+    //     encoderLeft::getVelocity,
+    //     (value) -> {
+    //       inputs.velocityMotorLeft = RadiansPerSecond.of(value);
+    //       inputs.velocityShooterWheel = RadiansPerSecond.of(value);
+    //     });
+    // ifOk(
+    //     motorRight,
+    //     motorRight.getEncoder()::getVelocity,
+    //     (value) -> inputs.velocityMotorRight = RadiansPerSecond.of(value));
+    // // Update appliedVoltage
+    // ifOk(
+    //     motorLeft,
+    //     new DoubleSupplier[] {motorLeft::getAppliedOutput, motorLeft::getBusVoltage},
+    //     (values) -> inputs.appliedVoltageMotorLeft = Volts.of(values[0] * values[1]));
+    // ifOk(
+    //     motorRight,
+    //     new DoubleSupplier[] {motorRight::getAppliedOutput, motorRight::getBusVoltage},
+    //     (values) -> inputs.appliedVoltageMotorRight = Volts.of(values[0] * values[1]));
+    // // Update current
+    // ifOk(
+    //     motorLeft,
+    //     motorLeft::getOutputCurrent,
+    //     (value) -> inputs.currentMotorLeft = Amps.of(value));
+    // ifOk(
+    //     motorRight,
+    //     motorRight::getOutputCurrent,
+    //     (value) -> inputs.currentMotorRight = Amps.of(value));
 
     inputs.connected = connectedDebounce.calculate(!sparkStickyFault);
   }
 
   @Override
   public void setOpenLoop(double output) {
-    sparkLead.setVoltage(output);
+    controllerLeft.setSetpoint(output, ControlType.kDutyCycle);
+    desiredVelocity = RPM.of(0); // Setpoint is zero since we're controlling voltage directly
   }
 
   @Override
-  public void setVelocity(AngularVelocity wheelVelocity) {
-    // Use velocity PID slot (slot 0) with feedforward
-    AngularVelocity motorVelocity = wheelVelocity.times(ShooterConstants.gearReduction);
-    double ffVolts =
-        kS * Math.signum(motorVelocity.in(RadiansPerSecond))
-            + kV * motorVelocity.in(RadiansPerSecond);
-    controller.setSetpoint(
-        motorVelocity.in(RadiansPerSecond),
+  public void setVelocity(AngularVelocity new_wheelVelocity) {
+    desiredVelocity = new_wheelVelocity;
+
+    // Apply gear reduction to get motor setpoint
+    // AngularVelocity motorVelocity = new_wheelVelocity.times(ShooterConstants.GEAR_REDUCTION);
+
+    controllerLeft.setSetpoint(
+        desiredVelocity.in(RPM),
         ControlType.kVelocity,
         ClosedLoopSlot.kSlot0,
-        ffVolts,
+        shooterFF.calculate(desiredVelocity.in(RPM)),
         ArbFFUnits.kVoltage);
   }
 
-  /*@Override //TODO: ask Mr. Dumet for removal
-  public void setPosition(double positionRad) {
-    // Use position PID slot (slot 1)
-    controller.setReference(positionRad, ControlType.kPosition, ClosedLoopSlot.kSlot1);
-  }*/
-
   @Override
   public void stop() {
-    sparkLead.setVoltage(0.0);
+    controllerLeft.setSetpoint(0.0, ControlType.kDutyCycle);
+    desiredVelocity = RPM.of(0);
   }
 
   @Override
-  public void setPID(double new_kP, double new_kD, double new_kV, double new_kS) {
-    config.closedLoop.pid(new_kP, 0.0, new_kD, ClosedLoopSlot.kSlot0);
+  public void setPID(double new_kP, double new_kI, double new_kD, double new_kV, double new_kS) {
+    configLeft.closedLoop.pid(new_kP, new_kI, new_kD, ClosedLoopSlot.kSlot0);
     kV = new_kV;
     kS = new_kS;
 
     tryUntilOk(
-        sparkLead,
+        motorLeft,
         5,
         () ->
-            sparkLead.configure(
-                config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
+            motorLeft.configure(
+                configLeft, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
   }
 }
