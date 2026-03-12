@@ -39,7 +39,7 @@ public class IndexerConstants {
   // PID Constants
   public static final Gains GAINS =
       switch (Constants.robot) {
-        case REBUILT_COMPBOT -> new Gains(0.0001, 0.0, 0.0, 0.00015, 0.01, 0.0);
+        case REBUILT_COMPBOT -> new Gains(2.0e-7, 0.0, 1.0e-3, 9.0e-4, 8.5e-4, 0.0);
         default -> new Gains(0.05, 0.0, 0.0, 0.10395, 0.00296, 0.0);
       };
 
