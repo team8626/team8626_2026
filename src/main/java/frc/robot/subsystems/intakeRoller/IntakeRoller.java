@@ -20,8 +20,6 @@ import edu.wpi.first.units.Units.*;
 import edu.wpi.first.units.measure.*;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.LoggedTunableNumber;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -73,7 +71,7 @@ public class IntakeRoller extends SubsystemBase {
   /**
    * Run the IntakeRoller motor at a constant velocity.
    *
-   * @param velocityRadPerSec Velocity in radians per second
+   * @param velocity Angular Velocity
    */
   public void runVelocity(AngularVelocity velocity) {
     AngularVelocity new_velocity = velocity;
@@ -130,10 +128,5 @@ public class IntakeRoller extends SubsystemBase {
         || rollerKS.hasChanged(hashCode())) {
       io.setPID(rollerKP.get(), rollerKI.get(), rollerKD.get(), rollerKV.get(), rollerKS.get());
     }
-  }
-
-  public Command applyDashboardVelocity() {
-    io.setVelocity(RPM.of(rollerRPM.get()));
-    return new InstantCommand();
   }
 }

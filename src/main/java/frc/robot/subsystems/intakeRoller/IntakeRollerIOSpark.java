@@ -61,7 +61,7 @@ public class IntakeRollerIOSpark implements IntakeRollerIO {
     // Motor: inversion, brake, current limit, voltage comp
     config
         .inverted(ROLLER_CONFIG.INVERTED())
-        .idleMode(IdleMode.kBrake)
+        .idleMode(IdleMode.kCoast)
         .smartCurrentLimit((int) ROLLER_CONFIG.MAX_CURRENT().in(Amp))
         .voltageCompensation(12.0);
 
@@ -138,10 +138,10 @@ public class IntakeRollerIOSpark implements IntakeRollerIO {
     AngularVelocity motorAngularVelocity = desiredWheelVelocity.times(ROLLER_CONFIG.REDUCTION());
 
     controller.setSetpoint(
-        motorAngularVelocity.in(RadiansPerSecond),
+        motorAngularVelocity.in(RPM),
         ControlType.kVelocity,
         ClosedLoopSlot.kSlot0,
-        intakeRollerFF.calculate(desiredWheelVelocity.in(RPM) * ROLLER_CONFIG.REDUCTION()),
+        intakeRollerFF.calculate(motorAngularVelocity.in(RPM)),
         ArbFFUnits.kVoltage);
 
     isEnabled = true;
