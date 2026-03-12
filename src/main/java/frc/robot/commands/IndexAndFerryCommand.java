@@ -7,7 +7,6 @@ import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.indexer.Indexer;
-import frc.robot.subsystems.indexer.IndexerConstants;
 import frc.robot.subsystems.shooter.Shooter;
 import org.littletonrobotics.frc2026.FieldConstants;
 import org.littletonrobotics.frc2026.util.geometry.AllianceFlipUtil;
@@ -59,7 +58,7 @@ public class IndexAndFerryCommand extends Command {
       FerryTarget = outpostFerryTarget;
     }
     if (shooter.isAtGoal()) {
-      indexer.runVelocity(IndexerConstants.DEFAULT_VELOCITY);
+      indexer.start();
     }
     if (Constants.currentMode == Constants.Mode.SIM) {
       // In simulation, we can just pop fuel immediately when the indexer is running

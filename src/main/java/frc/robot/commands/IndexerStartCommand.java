@@ -23,7 +23,7 @@ public class IndexerStartCommand extends Command {
 
   @Override
   public void initialize() {
-    spindexer.runVelocity(targetVelocitySupplier.get());
+    spindexer.start(targetVelocitySupplier.get());
   }
 
   @Override

@@ -114,7 +114,7 @@ public class IndexerIOSim implements IndexerIO {
   }
 
   @Override
-  public void setVelocity(AngularVelocity new_velocity) {
+  public void start(AngularVelocity new_velocity) {
     velocityClosedLoop = true;
     desiredWheelVelocity = new_velocity;
 

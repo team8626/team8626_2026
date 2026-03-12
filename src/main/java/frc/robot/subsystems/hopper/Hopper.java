@@ -13,16 +13,10 @@
 
 package frc.robot.subsystems.hopper;
 
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
-/**
- * Indexer subsystem: runs a single motor at a set velocity (closed-loop) or open-loop voltage. Use
- * {@link #runVelocity(AngularVelocity)} for normal operation; use {@link #runOpenLoop(Voltage)} for
- * testing. Call {@link #stop()} to stop the motor.
- */
+/** Hopper subsystem: Simulation only... Simulate having a hopper loading/unloading Fuels */
 public class Hopper extends SubsystemBase {
   /** Hardware IO implementation (Spark or Simulated). */
   private final HopperIO io;

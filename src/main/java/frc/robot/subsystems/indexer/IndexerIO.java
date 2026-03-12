@@ -39,7 +39,7 @@ public interface IndexerIO {
   public default void setOpenLoop(Voltage output) {}
 
   /** Run the motor at the specified --WHEEL-- velocity */
-  public default void setVelocity(AngularVelocity velocity) {}
+  public default void start(AngularVelocity velocity) {}
 
   /** Stop the motor. */
   public default void stop() {}

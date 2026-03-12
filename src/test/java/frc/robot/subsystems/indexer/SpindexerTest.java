@@ -128,7 +128,7 @@ public class SpindexerTest {
   void testGetVelocity() {
     AngularVelocity targetVelocity = IndexerConstants.DEFAULT_VELOCITY;
 
-    spindexer.runVelocity(targetVelocity);
+    spindexer.start(targetVelocity);
     spindexer.periodic();
 
     // Simulate the scheduler until speed is seen on the subsystem

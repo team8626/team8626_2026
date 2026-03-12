@@ -33,7 +33,7 @@ public class IndexAndShootCommand extends Command {
   public void execute() {
     // If shooter is fast enough, run indexer to feed balls into shooter
     if (shooter.isAtGoal()) {
-      indexer.runVelocity(RPM.of(300)); // TODO: find actual value for indexer velocity
+      indexer.start();
     }
     if (Constants.currentMode == Constants.Mode.SIM) {
       // In simulation, we can just pop fuel immediately when the indexer is running
@@ -56,6 +56,6 @@ public class IndexAndShootCommand extends Command {
       // In simulation, we can end the command once we've popped all the fuel
       return hopper.isEmpty();
     }
-    return false; // TODO: implement actual logic to determine when finished
+    return false;
   }
 }
