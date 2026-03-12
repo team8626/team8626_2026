@@ -21,7 +21,7 @@ import frc.robot.Constants;
 public class IndexerConstants {
 
   // Tuned Values
-  public static final AngularVelocity DEFAULT_VELOCITY = RevolutionsPerSecond.of(5);
+  public static final AngularVelocity DEFAULT_VELOCITY = RevolutionsPerSecond.of(10);
 
   public static final Current MAX_CURRENT = Amps.of(50);
 
