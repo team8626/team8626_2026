@@ -21,8 +21,6 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.LoggedTunableNumber;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -30,7 +28,7 @@ import org.littletonrobotics.junction.Logger;
 
 /**
  * Indexer subsystem: runs a single motor at a set velocity (closed-loop) or open-loop voltage. Use
- * {@link #runVelocity(AngularVelocity)} for normal operation; use {@link #runOpenLoop(Voltage)} for
+ * {@link #start(AngularVelocity)} for normal operation; use {@link #runOpenLoop(Voltage)} for
  * testing. Call {@link #stop()} to stop the motor.
  */
 public class Indexer extends SubsystemBase {
@@ -44,18 +42,19 @@ public class Indexer extends SubsystemBase {
       new Alert("Index motor disconnected.", AlertType.kError);
 
   private final LoggedTunableNumber flywheelKP =
-      new LoggedTunableNumber("Spindexer/Flywheel/kP", GAINS.kP());
+      new LoggedTunableNumber("Indexer/Flywheel/kP", GAINS.kP());
   private final LoggedTunableNumber flywheelKI =
-      new LoggedTunableNumber("Spindexer/Flywheel/kI", GAINS.kI());
+      new LoggedTunableNumber("Indexer/Flywheel/kI", GAINS.kI());
   private final LoggedTunableNumber flywheelKD =
-      new LoggedTunableNumber("Spindexer/Flywheel/kD", GAINS.kD());
+      new LoggedTunableNumber("Indexer/Flywheel/kD", GAINS.kD());
   private final LoggedTunableNumber flywheelKV =
-      new LoggedTunableNumber("Spindexer/Flywheel/kV", GAINS.kV());
+      new LoggedTunableNumber("Indexer/Flywheel/kV", GAINS.kV());
   private final LoggedTunableNumber flywheelKS =
-      new LoggedTunableNumber("Spindexer/Flywheel/kS", GAINS.kS());
-  private final LoggedTunableNumber flywheelRPM =
+      new LoggedTunableNumber("Indexer/Flywheel/kS", GAINS.kS());
+  private final LoggedTunableNumber flywheelRPS =
       new LoggedTunableNumber(
-          "Spindexer/Flywheel/WheelRPM", IndexerConstants.DEFAULT_VELOCITY.in(RPM));
+          "Indexer/Flywheel/RotPerSecond",
+          IndexerConstants.DEFAULT_VELOCITY.in(RotationsPerSecond));
 
   public Indexer(IndexerIO io) {
     this.io = io;
@@ -76,7 +75,7 @@ public class Indexer extends SubsystemBase {
    *
    * @param velocityRadPerSec Velocity in radians per second
    */
-  public void runVelocity(AngularVelocity velocity) {
+  public void start(AngularVelocity velocity) {
     AngularVelocity new_velocity = velocity;
 
     // Check if the velocity is in bounds before setting it.
@@ -85,7 +84,11 @@ public class Indexer extends SubsystemBase {
     if ((velocity.abs(RPM)) > IndexerConstants.MAX_VELOCITY.in(RPM)) {
       new_velocity = RPM.of(IndexerConstants.MAX_VELOCITY.copySign(new_velocity, RPM));
     }
-    io.setVelocity(new_velocity);
+    io.start(new_velocity);
+  }
+
+  public void start() {
+    start(RotationsPerSecond.of(flywheelRPS.get()));
   }
 
   /**
@@ -132,10 +135,5 @@ public class Indexer extends SubsystemBase {
       io.setPID(
           flywheelKP.get(), flywheelKI.get(), flywheelKD.get(), flywheelKV.get(), flywheelKS.get());
     }
-  }
-
-  public Command applyDashboardVelocity() {
-    io.setVelocity(RPM.of(flywheelRPM.get()));
-    return new InstantCommand();
   }
 }
