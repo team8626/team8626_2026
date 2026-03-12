@@ -13,18 +13,21 @@
 
 package frc.robot.subsystems.intakeRoller;
 
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Voltage;
+import static edu.wpi.first.units.Units.RPM;
+import static frc.robot.subsystems.intakeRoller.IntakeRollerConstants.GAINS;
+
+import edu.wpi.first.units.Units.*;
+import edu.wpi.first.units.measure.*;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.util.LoggedTunableNumber;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 /**
- * Intake Roller subsystem: runs a single motor at a set velocity (closed-loop) or open-loop
- * voltage. Use {@link #runVelocity(double)} for normal operation; use {@link #runOpenLoop(double)}
+ * IntakeRoller subsystem: runs a single motor at a set velocity (closed-loop) or open-loop voltage.
+ * Use {@link #runVelocity(AngularVelocity)} for normal operation; use {@link #runOpenLoop(Voltage)}
  * for testing. Call {@link #stop()} to stop the motor.
  */
 public class IntakeRoller extends SubsystemBase {
@@ -33,10 +36,23 @@ public class IntakeRoller extends SubsystemBase {
 
   /** Cached inputs from IO, logged each period via AdvantageKit. */
   private final IntakeRollerIOInputsAutoLogged inputs = new IntakeRollerIOInputsAutoLogged();
-
-  /** Shown on the dashboard when the intake roller motor is not connected. */
+  /** Shown on the dashboard when the IntakeRoller motor is not connected. */
   private final Alert motorDisconnectedAlert =
-      new Alert("Intake Roller motor disconnected.", AlertType.kError);
+      new Alert("IntakeRoller motor disconnected.", AlertType.kError);
+
+  private final LoggedTunableNumber rollerKP =
+      new LoggedTunableNumber("IntakeRoller/Roller/kP", GAINS.kP());
+  private final LoggedTunableNumber rollerKI =
+      new LoggedTunableNumber("IntakeRoller/Roller/kI", GAINS.kI());
+  private final LoggedTunableNumber rollerKD =
+      new LoggedTunableNumber("IntakeRoller/Roller/kD", GAINS.kD());
+  private final LoggedTunableNumber rollerKV =
+      new LoggedTunableNumber("IntakeRoller/Roller/kV", GAINS.kV());
+  private final LoggedTunableNumber rollerKS =
+      new LoggedTunableNumber("IntakeRoller/Roller/kS", GAINS.kS());
+  private final LoggedTunableNumber rollerRPM =
+      new LoggedTunableNumber(
+          "IntakeRoller/Roller/WheelRPM", IntakeRollerConstants.DEFAULT_VELOCITY.in(RPM));
 
   public IntakeRoller(IntakeRollerIO io) {
     this.io = io;
@@ -44,24 +60,33 @@ public class IntakeRoller extends SubsystemBase {
 
   @Override
   public void periodic() {
+    updateTunables();
     io.updateInputs(inputs);
-    Logger.processInputs("Intake Roller", inputs);
+    Logger.processInputs("IntakeRoller", inputs);
 
-    // Show alert if the intake roller motor is not connected.
+    // Show alert if the IntakeRoller motor is not connected.
     motorDisconnectedAlert.set(!inputs.connected);
   }
 
   /**
-   * Run the intake roller motor at a constant velocity.
+   * Run the IntakeRoller motor at a constant velocity.
    *
-   * @param velocityRadPerSec Velocity in radians per second
+   * @param velocity Angular Velocity
    */
   public void runVelocity(AngularVelocity velocity) {
-    io.setVelocity(velocity);
+    AngularVelocity new_velocity = velocity;
+
+    // Check if the velocity is in bounds before setting it.
+    // otherwise set it to the max velocity with the same sign.
+    // This prevents the controller from trying to reach an invalid setpoint.
+    if ((velocity.abs(RPM)) > IntakeRollerConstants.MAX_VELOCITY.in(RPM)) {
+      new_velocity = RPM.of(IntakeRollerConstants.MAX_VELOCITY.copySign(new_velocity, RPM));
+    }
+    io.setVelocity(new_velocity);
   }
 
   /**
-   * Run the intake roller motor at open-loop voltage (for testing).
+   * Run the index motor at open-loop voltage (for testing).
    *
    * @param output Voltage output (-12.0 to 12.0)
    */
@@ -69,14 +94,18 @@ public class IntakeRoller extends SubsystemBase {
     io.setOpenLoop(output);
   }
 
-  /** Stop the intake roller motor. */
+  /** Stop the index motor. */
   public void stop() {
     io.stop();
   }
 
   @AutoLogOutput
   public AngularVelocity getVelocity() {
-    return inputs.velocity;
+    return inputs.currentVelocity;
+  }
+
+  public AngularVelocity getDesiredVelocity() {
+    return inputs.desiredVelocity;
   }
 
   public boolean isConnected() {
@@ -89,5 +118,15 @@ public class IntakeRoller extends SubsystemBase {
 
   public Current getCurrent() {
     return inputs.current;
+  }
+
+  private void updateTunables() {
+    if (rollerKP.hasChanged(hashCode())
+        || rollerKI.hasChanged(hashCode())
+        || rollerKD.hasChanged(hashCode())
+        || rollerKV.hasChanged(hashCode())
+        || rollerKS.hasChanged(hashCode())) {
+      io.setPID(rollerKP.get(), rollerKI.get(), rollerKD.get(), rollerKV.get(), rollerKS.get());
+    }
   }
 }

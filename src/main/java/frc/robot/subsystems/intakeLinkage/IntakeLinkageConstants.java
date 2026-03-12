@@ -25,7 +25,7 @@ import edu.wpi.first.units.measure.Mass;
 
 public class IntakeLinkageConstants {
   // Hardware configuration
-  public static final int intakeLinkageCanId = 20; // TODO: Set actual CAN ID
+  public static final int intakeLinkageCanId = 2;
   public static final boolean motorInverted = false; // TODO: Verify direction
   public static final int motorCurrentLimit = 40; // Amps
 
