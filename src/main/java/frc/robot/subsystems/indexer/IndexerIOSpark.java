@@ -60,7 +60,7 @@ public class IndexerIOSpark implements IndexerIO {
     // Motor: inversion, brake, current limit, voltage comp
     config
         .inverted(FLYWHEEL_CONFIG.INVERTED())
-        .idleMode(IdleMode.kBrake)
+        .idleMode(IdleMode.kCoast)
         .smartCurrentLimit((int) FLYWHEEL_CONFIG.MAX_CURRENT().in(Amp))
         .voltageCompensation(12.0);
 
@@ -131,16 +131,15 @@ public class IndexerIOSpark implements IndexerIO {
   }
 
   @Override
-  public void setVelocity(AngularVelocity new_velocity) {
+  public void start(AngularVelocity new_velocity) {
     desiredWheelVelocity = new_velocity;
-
     AngularVelocity motorAngularVelocity = desiredWheelVelocity.times(FLYWHEEL_CONFIG.REDUCTION());
 
     controller.setSetpoint(
-        motorAngularVelocity.in(RadiansPerSecond),
+        motorAngularVelocity.in(RPM),
         ControlType.kVelocity,
         ClosedLoopSlot.kSlot0,
-        indexerFF.calculate(desiredWheelVelocity.in(RPM) * FLYWHEEL_CONFIG.REDUCTION()),
+        indexerFF.calculate(motorAngularVelocity.in(RPM)),
         ArbFFUnits.kVoltage);
 
     isEnabled = true;
