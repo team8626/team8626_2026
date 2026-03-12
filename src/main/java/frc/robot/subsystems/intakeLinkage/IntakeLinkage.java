@@ -13,16 +13,15 @@
 
 package frc.robot.subsystems.intakeLinkage;
 
-import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Degrees;
+import static frc.robot.subsystems.intakeLinkage.IntakeLinkageConstants.GAINS;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.units.measure.Angle;
-// import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.units.measure.*;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.util.LoggedTunableNumber;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -38,6 +37,17 @@ public class IntakeLinkage extends SubsystemBase {
   private final Alert motorDisconnectedAlert =
       new Alert("IntakeLinkage motor disconnected.", AlertType.kError);
 
+  private final LoggedTunableNumber KP =
+      new LoggedTunableNumber("IntakeLinkage/Gains/kP", GAINS.kP());
+  private final LoggedTunableNumber KI =
+      new LoggedTunableNumber("IntakeLinkage/Gains/kI", GAINS.kI());
+  private final LoggedTunableNumber KD =
+      new LoggedTunableNumber("IntakeLinkage/Gains/kD", GAINS.kD());
+  private final LoggedTunableNumber KV =
+      new LoggedTunableNumber("IntakeLinkage/Gains/kV", GAINS.kV());
+  private final LoggedTunableNumber KS =
+      new LoggedTunableNumber("IntakeLinkage/Gains/kS", GAINS.kS());
+
   public IntakeLinkage(IntakeLinkageIO io) {
     this.io = io;
   }
@@ -46,14 +56,10 @@ public class IntakeLinkage extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("IntakeLinkage", inputs);
+    updateTunables();
 
     // Show alert if the intake linkage motor is not connected.
     motorDisconnectedAlert.set(!inputs.connected);
-  }
-
-  /** Stop the intake linkage motor. */
-  public void stop() {
-    io.stop();
   }
 
   @AutoLogOutput
@@ -63,7 +69,7 @@ public class IntakeLinkage extends SubsystemBase {
 
   @AutoLogOutput
   public Rotation2d getAngle() {
-    return new Rotation2d(inputs.position.in(Radians));
+    return new Rotation2d(inputs.position.in(Degrees));
   }
 
   public void setPosition(Angle position) {
@@ -80,5 +86,27 @@ public class IntakeLinkage extends SubsystemBase {
 
   public Current getCurrent() {
     return inputs.current;
+  }
+
+  public void stow() {
+    io.setPosition(IntakeLinkageConstants.STOW_ANGLE);
+  }
+
+  public void deploy() {
+    io.setPosition(IntakeLinkageConstants.DEPLOY_ANGLE);
+  }
+
+  public void hopperOpen() {
+    io.setPosition(IntakeLinkageConstants.HOPPER_OPEN_ANGLE);
+  }
+
+  private void updateTunables() {
+    if (KP.hasChanged(hashCode())
+        || KI.hasChanged(hashCode())
+        || KD.hasChanged(hashCode())
+        || KV.hasChanged(hashCode())
+        || KS.hasChanged(hashCode())) {
+      io.setPID(KP.get(), KI.get(), KD.get(), KV.get(), KS.get());
+    }
   }
 }

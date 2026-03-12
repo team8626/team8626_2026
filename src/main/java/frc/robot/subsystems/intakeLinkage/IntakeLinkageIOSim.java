@@ -14,100 +14,94 @@
 package frc.robot.subsystems.intakeLinkage;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.subsystems.intakeLinkage.IntakeLinkageConstants.gearReduction;
-import static frc.robot.subsystems.intakeLinkage.IntakeLinkageConstants.positionKd;
-import static frc.robot.subsystems.intakeLinkage.IntakeLinkageConstants.positionKp;
+import static frc.robot.subsystems.intakeLinkage.IntakeLinkageConstants.*;
+import static frc.robot.subsystems.intakeLinkage.IntakeLinkageConstants.GAINS;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
-/**
- * Simulation IO for the IntakeLinkage subsystem.
- *
- * <p><b>Open-loop mode:</b> The motor is driven by a commanded voltage (or duty cycle) with no
- * feedback. Speed depends on load and battery voltage; useful for simple on/off or manual control
- * where exact speed is not critical.
- *
- * <p><b>Closed-loop (velocity) mode:</b> A target velocity (setpoint) is given, and the actual
- * velocity is measured and fed back. The controller adjusts the motor output so the actual velocity
- * tracks the setpoint despite load or voltage changes. This implementation uses a PID controller
- * plus feedforward (Ks, Kv) to achieve accurate, responsive velocity control.
- *
- * <p><b>PID controller:</b> Computes a correction from the velocity error (setpoint minus actual).
- *
- * <ul>
- *   <li><b>Kp</b> (proportional): Output proportional to error; larger Kp gives a stronger, faster
- *       response but can cause overshoot or oscillation.
- *   <li><b>Ki</b> (integral): Not used here (0). Would eliminate steady-state error over time.
- *   <li><b>Kd</b> (derivative): Responds to the rate of change of error; helps dampen overshoot and
- *       smooth the response.
- * </ul>
- *
- * Tuning (velocityKp, velocityKd in {@link IntakeLinkageConstants}) balances response speed and
- * stability.
- */
 public class IntakeLinkageIOSim implements IntakeLinkageIO {
   /**
    * Simulates intakeLinkage motor dynamics (Neo Vortex + gearbox) for physics-accurate behavior.
    */
-  private final DCMotorSim motorSim;
+  private final SingleJointedArmSim motorSim;
   /** PID used to correct position error when in position closed-loop mode. */
-  private final PIDController positionController = new PIDController(positionKp, 0, positionKd);
-
-  /** True when setPosition() is active; false for open-loop (setOpenLoop/stop). */
-  private boolean positionClosedLoop = false;
+  private final PIDController positionController =
+      new PIDController(GAINS.kP(), GAINS.kI(), GAINS.kD());
 
   private double appliedVolts = 0.0;
-  private double positionGoalRad;
+  private Angle desiredAngle = IntakeLinkageConstants.STARTING_ANGLE;
 
   public IntakeLinkageIOSim() {
     motorSim =
-        new DCMotorSim(
-            LinearSystemId.createDCMotorSystem(DCMotor.getNeoVortex(1), 0.01, gearReduction),
-            DCMotor.getNeoVortex(1));
+        new SingleJointedArmSim(
+            DCMotor.getNeoVortex(1),
+            IntakeLinkageConstants.GEAR_REDUCTION,
+            IntakeLinkageConstants.ARM_INERTIA.in(KilogramSquareMeters),
+            IntakeLinkageConstants.ARM_LENGTH.in(Meters),
+            IntakeLinkageConstants.MIN_ANGLE.in(Radians),
+            IntakeLinkageConstants.MAX_ANGLE.in(Radians),
+            true,
+            IntakeLinkageConstants.MIN_ANGLE.in(Radians),
+            new double[0]);
   }
 
   @Override
   public void updateInputs(IntakeLinkageIOInputs inputs) {
-
-    if (positionClosedLoop) {
-
-      double currentRad = motorSim.getAngularPositionRad();
-
-      appliedVolts = positionController.calculate(currentRad, positionGoalRad);
-
-    } else {
-
-      positionController.reset();
-    }
+    desiredAngle =
+        Degrees.of(
+            MathUtil.clamp(
+                desiredAngle.in(Degrees),
+                IntakeLinkageConstants.MIN_ANGLE.in(Degrees),
+                IntakeLinkageConstants.MAX_ANGLE.in(Degrees)));
 
     motorSim.update(0.02);
 
-    inputs.position = Degrees.of(motorSim.getAngularPositionRad());
-    inputs.desiredAngle = Degrees.of(positionGoalRad);
+    inputs.position = Degrees.of(motorSim.getAngleRads() * 180.0 / Math.PI);
 
     motorSim.setInputVoltage(MathUtil.clamp(appliedVolts, -12.0, 12.0));
 
     inputs.connected = true;
-    // inputs.position = Radians.of(motorSim.getAngularPositionRad());
-    inputs.velocity = RadiansPerSecond.of(motorSim.getAngularVelocityRadPerSec());
+    inputs.position = Degrees.of(motorSim.getAngleRads() * 180.0 / Math.PI);
+    inputs.velocity = DegreesPerSecond.of(motorSim.getVelocityRadPerSec() * 180.0 / Math.PI);
     inputs.appliedVoltage = Volts.of(appliedVolts);
     inputs.current = Amps.of(Math.abs(motorSim.getCurrentDrawAmps()));
   }
 
   @Override
   public void setPosition(Angle position) {
-    positionGoalRad = position.in(Degrees);
-    positionClosedLoop = true;
+    desiredAngle = position;
+  }
+
+  public void setPID(double new_kP, double new_kI, double new_kD) {
+    positionController.setPID(new_kP, new_kI, new_kD);
   }
 
   @Override
-  public void stop() {
-    positionClosedLoop = false;
-    appliedVolts = 0.0;
+  public void goUp(Angle offset) {
+    desiredAngle.minus(offset);
+  }
+
+  @Override
+  public void stow() {
+    desiredAngle = IntakeLinkageConstants.STOW_ANGLE;
+  }
+
+  @Override
+  public void deploy() {
+    desiredAngle = IntakeLinkageConstants.DEPLOY_ANGLE;
+  }
+
+  @Override
+  public void hopperOpen() {
+    desiredAngle = IntakeLinkageConstants.HOPPER_OPEN_ANGLE;
+  }
+
+  @Override
+  public void goDown(Angle offset) {
+    desiredAngle.plus(offset);
   }
 }

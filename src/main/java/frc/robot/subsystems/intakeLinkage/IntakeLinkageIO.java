@@ -13,31 +13,25 @@
 
 package frc.robot.subsystems.intakeLinkage;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Celsius;
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-// import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Volts;
+import static edu.wpi.first.units.Units.*;
 
+import edu.wpi.first.units.measure.*;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
-// import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Temperature;
-import edu.wpi.first.units.measure.Voltage;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface IntakeLinkageIO {
   @AutoLog
   public static class IntakeLinkageIOInputs {
     public boolean connected = false;
-    public Angle position = Degrees.of(160.0);
-    public Angle desiredAngle = Degrees.of(160.0);
+    public Angle position = Degrees.of(0.0);
+    public Angle desiredAngle = IntakeLinkageConstants.MIN_ANGLE;
     public Voltage appliedVoltage = Volts.of(0.0);
     public Current current = Amps.of(0.0);
     public Temperature temperature = Celsius.of(0.0);
-    public AngularVelocity velocity = AngularVelocity.ofBaseUnits(0.0, RadiansPerSecond);
+    public boolean atGoal = false;
+    public boolean isEnabled = false;
+    public AngularVelocity velocity = AngularVelocity.ofBaseUnits(0.0, DegreesPerSecond);
   }
 
   /** Updates the set of loggable inputs. */
@@ -46,6 +40,17 @@ public interface IntakeLinkageIO {
   /** Run the motor at the specified angle position */
   public default void setPosition(Angle position) {}
 
-  /** Stop the motor. */
-  public default void stop() {}
+  public default void goUp(Angle offset) {}
+
+  public default void goDown(Angle offset) {}
+
+  public default void stow() {}
+
+  public default void deploy() {}
+
+  public default void hopperOpen() {}
+
+  public default void setPID(double kP, double kI, double kD) {}
+
+  public default void setPID(double kP, double kI, double kD, double kV, double kS) {}
 }
