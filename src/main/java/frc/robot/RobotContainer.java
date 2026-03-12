@@ -78,7 +78,6 @@ import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOSpark;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.util.FuelSim;
 import java.util.Set;
@@ -192,12 +191,13 @@ public class RobotContainer {
           shooter = new Shooter(new ShooterIOSim());
 
           climber = new Climber(new ClimberIO() {});
-          vision =
-              new Vision(
-                  new VisionIOPhotonVision(),
-                  (measurement) ->
-                      drive.addVisionMeasurement(
-                          measurement.pose, measurement.timestamp, measurement.stdDevs));
+          // vision =
+          //     new Vision(
+          //         new VisionIOPhotonVision(),
+          //         (measurement) ->
+          //             drive.addVisionMeasurement(
+          //                 measurement.pose, measurement.timestamp, measurement.stdDevs));
+          vision = new Vision(new VisionIO() {}, (measurement) -> {});
 
           break;
         case REBUILT_COMPBOT:
@@ -217,12 +217,13 @@ public class RobotContainer {
           shooter = new Shooter(new ShooterIOSpark());
           climber = new Climber(new ClimberIOSpark() {});
 
-          vision =
-              new Vision(
-                  new VisionIOPhotonVision(),
-                  (measurement) ->
-                      drive.addVisionMeasurement(
-                          measurement.pose, measurement.timestamp, measurement.stdDevs));
+          // vision =
+          //     new Vision(
+          //         new VisionIOPhotonVision(),
+          //         (measurement) ->
+          //             drive.addVisionMeasurement(
+          //                 measurement.pose, measurement.timestamp, measurement.stdDevs));
+          vision = new Vision(new VisionIO() {}, (measurement) -> {});
 
           break;
 
@@ -243,6 +244,12 @@ public class RobotContainer {
           shooter = new Shooter(new ShooterIO() {});
           climber = new Climber(new ClimberIO() {});
 
+          // vision =
+          //     new Vision(
+          //         new VisionIOPhotonVision(),
+          //         (measurement) ->
+          //             drive.addVisionMeasurement(
+          //                 measurement.pose, measurement.timestamp, measurement.stdDevs));
           vision = new Vision(new VisionIO() {}, (measurement) -> {});
 
           break;
