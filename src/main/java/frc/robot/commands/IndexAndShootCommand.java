@@ -26,7 +26,7 @@ public class IndexAndShootCommand extends Command {
 
   @Override
   public void initialize() {
-    shooter.runVelocity(ShooterCommandsUtil.getShooterVelocitytoHub(drive.getPose()));
+    shooter.start(ShooterCommandsUtil.getShooterVelocitytoHub(drive.getPose()));
   }
 
   @Override
@@ -41,7 +41,7 @@ public class IndexAndShootCommand extends Command {
         RobotContainer.launchFuel(ShooterCommandsUtil.getShooterVelocitytoHub(drive.getPose()));
       }
     }
-    shooter.runVelocity(ShooterCommandsUtil.getShooterVelocitytoHub(drive.getPose()));
+    shooter.start(ShooterCommandsUtil.getShooterVelocitytoHub(drive.getPose()));
   }
 
   @Override

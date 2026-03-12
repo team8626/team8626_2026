@@ -47,8 +47,7 @@ public class IndexAndFerryCommand extends Command {
               ? depotFerryTarget
               : outpostFerryTarget;
     }
-    shooter.runVelocity(
-        ShooterCommandsUtil.getShooterVelocityToTarget(drive.getPose(), FerryTarget));
+    shooter.start(ShooterCommandsUtil.getShooterVelocityToTarget(drive.getPose(), FerryTarget));
   }
 
   @Override
@@ -69,8 +68,7 @@ public class IndexAndFerryCommand extends Command {
             ShooterCommandsUtil.getShooterVelocityToTarget(drive.getPose(), FerryTarget));
       }
     }
-    shooter.runVelocity(
-        ShooterCommandsUtil.getShooterVelocityToTarget(drive.getPose(), FerryTarget));
+    shooter.start(ShooterCommandsUtil.getShooterVelocityToTarget(drive.getPose(), FerryTarget));
   }
 
   @Override

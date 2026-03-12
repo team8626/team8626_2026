@@ -26,13 +26,13 @@ import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 public class ShooterIOSim implements ShooterIO {
   private final FlywheelSim wheelSim;
 
-  private double kV = ShooterConstants.velocityKv;
-  private double kS = ShooterConstants.velocityKs;
+  private double kV = ShooterConstants.SHOOTER_KV;
+  private double kS = ShooterConstants.SHOOTER_KS;
 
   private boolean velocityClosedLoop = false;
 
   private PIDController velocityController =
-      new PIDController(ShooterConstants.velocityKp, 0, ShooterConstants.velocityKd);
+      new PIDController(ShooterConstants.SHOOTER_KP, 0, ShooterConstants.SHOOTER_KD);
   private double velocityFFVolts = 0.0;
   private double appliedVolts = 0.0;
   private AngularVelocity desiredWheelVelocity = RPM.of(0.0);
@@ -47,7 +47,7 @@ public class ShooterIOSim implements ShooterIO {
             LinearSystemId.createFlywheelSystem(
                 DCMotor.getNeoVortex(2),
                 ShooterConstants.flywheelMOI,
-                ShooterConstants.gearReduction),
+                ShooterConstants.GEAR_REDUCTION),
             DCMotor.getNeoVortex(2),
             0.00363458292);
   }
@@ -74,7 +74,7 @@ public class ShooterIOSim implements ShooterIO {
     inputs.velocityMotorRight = RadiansPerSecond.of(wheelSim.getAngularVelocityRadPerSec());
     inputs.velocityShooterWheel =
         RadiansPerSecond.of(
-            wheelSim.getAngularVelocityRadPerSec() / ShooterConstants.gearReduction);
+            wheelSim.getAngularVelocityRadPerSec() / ShooterConstants.GEAR_REDUCTION);
     inputs.desiredWheelVelocity = desiredWheelVelocity;
 
     inputs.appliedVoltageMotorLeft = Volts.of(appliedVolts);
@@ -96,7 +96,7 @@ public class ShooterIOSim implements ShooterIO {
     desiredWheelVelocity = newVelocity;
 
     AngularVelocity motorAngularVelocity =
-        desiredWheelVelocity.times(ShooterConstants.gearReduction);
+        desiredWheelVelocity.times(ShooterConstants.GEAR_REDUCTION);
 
     velocityFFVolts =
         kS * Math.signum(motorAngularVelocity.in(RadiansPerSecond))

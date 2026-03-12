@@ -42,7 +42,7 @@ public class ShooterCommandsUtil {
 
     Translation3d targetPose = (AllianceFlipUtil.apply(new_targetPose));
 
-    Pose3d shooterPose3d = new Pose3d(robotPose).plus(ShooterConstants.shootertoRobotCenter);
+    Pose3d shooterPose3d = new Pose3d(robotPose).plus(ShooterConstants.SHOOTER_OFFSET);
 
     // Robot position in shooting plane coordinates (origin at target, x forward, y up)
     double x0 =
@@ -61,7 +61,7 @@ public class ShooterCommandsUtil {
     double ys = Units.metersToFeet(shooterPose3d.getTranslation().getZ());
 
     // Shooter angle and target position
-    double ThetaS = ShooterConstants.shooterAngle.in(Radians);
+    double ThetaS = ShooterConstants.SHOOTER_ANGLE.in(Radians);
 
     // Target position in shooting plane coordinates (origin at target, x forward, y up)
     double xT = 0;
@@ -80,7 +80,7 @@ public class ShooterCommandsUtil {
             (g * Math.pow(Dx, 2))
                 / ((2 * Math.pow(Math.cos(ThetaS), 2)) * (Dx * Math.tan(ThetaS) - Dy)));
 
-    double vRPM = (v0 * 60.0) / (2.0 * Math.PI * ShooterConstants.flywheelRadius.in(Feet));
+    double vRPM = (v0 * 60.0) / (2.0 * Math.PI * ShooterConstants.FLYWHEEL_RADIUS.in(Feet));
 
     Logger.recordOutput("getShooterVelocityToTarget/Pose Robot", robotPose);
     Logger.recordOutput("getShooterVelocityToTarget/Pose Shooter", shooterPose3d);

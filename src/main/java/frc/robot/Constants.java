@@ -61,7 +61,8 @@ public final class Constants {
   public static enum RobotType {
     REBUILT_COMPBOT,
     REBUILT_DRIVE_ONLY,
-    TSUNAMI
+    TSUNAMI,
+    SIMBOT
   }
 
   public static boolean disableHAL = false;

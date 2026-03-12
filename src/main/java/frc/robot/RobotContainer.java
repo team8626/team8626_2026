@@ -40,13 +40,16 @@ import frc.robot.Constants.Dimensions;
 import frc.robot.Constants.Mode;
 import frc.robot.commands.AlignToTargetCommand;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.IndexAndShootCommand;
 import frc.robot.commands.IndexerStartCommand;
 import frc.robot.commands.TeleopDriveCommand;
+import frc.robot.subsystems.anotherShooter.AnotherShooter;
+import frc.robot.subsystems.anotherShooter.AnotherShooterConstants;
+import frc.robot.subsystems.anotherShooter.AnotherShooterIO;
+import frc.robot.subsystems.anotherShooter.AnotherShooterIOSim;
+import frc.robot.subsystems.anotherShooter.AnotherShooterIOSparkFlex;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberIOSim;
-import frc.robot.subsystems.climber.ClimberIOSpark;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants.Rebuilt_SwerveConstants;
 import frc.robot.subsystems.drive.GyroIO;
@@ -62,20 +65,13 @@ import frc.robot.subsystems.hopper.HopperIOSim;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
-import frc.robot.subsystems.indexer.IndexerIOSpark;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkage;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkageIO;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkageIOSim;
-import frc.robot.subsystems.intakeLinkage.IntakeLinkageIOSpark;
 import frc.robot.subsystems.intakeRoller.IntakeRoller;
 import frc.robot.subsystems.intakeRoller.IntakeRollerIO;
 import frc.robot.subsystems.intakeRoller.IntakeRollerIOSim;
 import frc.robot.subsystems.intakeRoller.IntakeRollerIOSpark;
-import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.shooter.ShooterConstants;
-import frc.robot.subsystems.shooter.ShooterIO;
-import frc.robot.subsystems.shooter.ShooterIOSim;
-import frc.robot.subsystems.shooter.ShooterIOSpark;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -98,7 +94,7 @@ public class RobotContainer {
   private final IntakeLinkage intakeLinkage;
   private final IntakeRoller intakeRoller;
   private final Hopper hopper;
-  private final Shooter shooter;
+  private final AnotherShooter anotherShooter;
   private final Climber climber;
 
   private final Vision vision;
@@ -114,6 +110,8 @@ public class RobotContainer {
   private static final Trigger intakeRollerTrigger = controller.b();
 
   private static final Trigger shootTrigger = controller.leftTrigger();
+  private static final Trigger shootUpdateVelocityTrigger =
+      controller.back().and(controller.start());
   private static final Trigger intakeDeployTrigger = controller.leftBumper();
 
   private static final Trigger driverAimTrigger = controller.y();
@@ -143,7 +141,7 @@ public class RobotContainer {
       intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSim());
       intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
       hopper = new Hopper(new HopperIOSim());
-      shooter = new Shooter(new ShooterIOSim());
+      anotherShooter = new AnotherShooter(new AnotherShooterIOSim());
       climber = new Climber(new ClimberIOSim() {});
 
       vision =
@@ -169,7 +167,7 @@ public class RobotContainer {
       intakeLinkage = new IntakeLinkage(new IntakeLinkageIO() {});
       intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
       hopper = new Hopper(new HopperIO() {});
-      shooter = new Shooter(new ShooterIO() {});
+      anotherShooter = new AnotherShooter(new AnotherShooterIO() {});
       climber = new Climber(new ClimberIO() {});
 
       vision = new Vision(new VisionIO() {}, (measurement) -> {});
@@ -189,7 +187,7 @@ public class RobotContainer {
           intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSim());
           intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
           hopper = new Hopper(new HopperIOSim());
-          shooter = new Shooter(new ShooterIOSim());
+          anotherShooter = new AnotherShooter(new AnotherShooterIOSim());
 
           climber = new Climber(new ClimberIO() {});
           vision =
@@ -198,7 +196,6 @@ public class RobotContainer {
                   (measurement) ->
                       drive.addVisionMeasurement(
                           measurement.pose, measurement.timestamp, measurement.stdDevs));
-
           break;
         case REBUILT_COMPBOT:
           // Real robot, full hardware IO
@@ -210,12 +207,13 @@ public class RobotContainer {
                   new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackLeft.MODULE_CONSTANTS),
                   new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackRight.MODULE_CONSTANTS));
 
-          index = new Indexer(new IndexerIOSpark() {});
-          intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSpark());
-          intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
+          index = new Indexer(new IndexerIO() {});
+          intakeLinkage = new IntakeLinkage(new IntakeLinkageIO() {});
+          intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
           hopper = new Hopper(new HopperIO() {});
-          shooter = new Shooter(new ShooterIOSpark());
-          climber = new Climber(new ClimberIOSpark() {});
+          climber = new Climber(new ClimberIO() {});
+
+          anotherShooter = new AnotherShooter(new AnotherShooterIOSparkFlex());
 
           vision =
               new Vision(
@@ -240,7 +238,8 @@ public class RobotContainer {
           intakeLinkage = new IntakeLinkage(new IntakeLinkageIO() {});
           intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
           hopper = new Hopper(new HopperIO() {});
-          shooter = new Shooter(new ShooterIO() {});
+          anotherShooter = new AnotherShooter(new AnotherShooterIOSparkFlex());
+
           climber = new Climber(new ClimberIO() {});
 
           vision = new Vision(new VisionIO() {}, (measurement) -> {});
@@ -312,10 +311,15 @@ public class RobotContainer {
     climberPullrigger.whileTrue(
         Commands.runOnce(() -> climber.runOpenLoop(Volts.of(-6.0)), climber));
 
-    // TODO: This is for testing only, replace with proper commands once shooter and indexer
+    // TODO: This is for testing only, replace with proper commands once anotherShooter and indexer
     // functionality are tested
-    indexTrigger.toggleOnTrue(new IndexerStartCommand(index));
-    shootTrigger.whileTrue(new IndexAndShootCommand(shooter, hopper, index, drive));
+    // indexTrigger.toggleOnTrue(new IndexerStartCommand(index));
+    // shootTrigger.whileTrue(new IndexAndShootCommand(anotherShooter, hopper, index, drive));
+    // shootUpdateVelocityTrigger.onTrue(anotherShooter.updateVelocityCommand());
+
+    shootTrigger
+        .whileTrue(Commands.runOnce(() -> anotherShooter.start(RPM.of(2500)), anotherShooter))
+        .onFalse(Commands.runOnce(() -> anotherShooter.stop(), anotherShooter));
   }
 
   private void configureFuelSim() {
@@ -353,10 +357,11 @@ public class RobotContainer {
   public static void launchFuel(AngularVelocity flywheelVelocity) {
     fuelSim.launchFuel(
         MetersPerSecond.of(
-            flywheelVelocity.in(RadiansPerSecond) * ShooterConstants.flywheelRadius.in(Meters)),
-        ShooterConstants.shooterAngle,
-        Degrees.of(ShooterConstants.shootertoRobotCenter.getRotation().getAngle()),
-        Meters.of(ShooterConstants.shootertoRobotCenter.getZ()));
+            flywheelVelocity.in(RadiansPerSecond)
+                * AnotherShooterConstants.FLYWHEEL_RADIUS.in(Meters)),
+        AnotherShooterConstants.ANOTHERSHOOTER_ANGLE,
+        Degrees.of(AnotherShooterConstants.ANOTHERSHOOTER_OFFSET.getRotation().getAngle()),
+        Meters.of(AnotherShooterConstants.ANOTHERSHOOTER_OFFSET.getZ()));
   }
 
   public static Trigger getHubAimTrigger() {
@@ -371,15 +376,18 @@ public class RobotContainer {
 
     NamedCommands.registerCommand(
         "AimAndDumpShort",
-        Commands.defer(() -> new IndexerStartCommand(index), Set.of(index, /* shooter, */ drive))
+        Commands.defer(
+                () -> new IndexerStartCommand(index), Set.of(index, /* anotherShooter, */ drive))
             .withTimeout(AutoConstants.DUMP_DURATION_SHORT.in(Seconds)));
     NamedCommands.registerCommand(
         "AimAndDumpMedium",
-        Commands.defer(() -> new IndexerStartCommand(index), Set.of(index, /* shooter, */ drive))
+        Commands.defer(
+                () -> new IndexerStartCommand(index), Set.of(index, /* anotherShooter, */ drive))
             .withTimeout(AutoConstants.DUMP_DURATION_MEDIUM.in(Seconds)));
     NamedCommands.registerCommand(
         "AimAndDumpLong",
-        Commands.defer(() -> new IndexerStartCommand(index), Set.of(index, /* shooter, */ drive))
+        Commands.defer(
+                () -> new IndexerStartCommand(index), Set.of(index, /* anotherShooter, */ drive))
             .withTimeout(AutoConstants.DUMP_DURATION_LONG.in(Seconds)));
   }
 
@@ -421,6 +429,22 @@ public class RobotContainer {
         drive
             .sysIdDynamic(SysIdRoutine.Direction.kReverse)
             .withName("Characterization/Drive Dynamic Reverse"));
+    SmartDashboard.putData(
+        anotherShooter
+            .sysIdQuasistatic(SysIdRoutine.Direction.kForward)
+            .withName("Characterization/AnotherShooter Quasistatic Forward"));
+    SmartDashboard.putData(
+        anotherShooter
+            .sysIdDynamic(SysIdRoutine.Direction.kForward)
+            .withName("Characterization/AnotherShooter Dynamic Forward"));
+    SmartDashboard.putData(
+        anotherShooter
+            .sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
+            .withName("Characterization/AnotherShooter Quasistatic Reverse"));
+    SmartDashboard.putData(
+        anotherShooter
+            .sysIdDynamic(SysIdRoutine.Direction.kReverse)
+            .withName("Characterization/AnotherShooter Dynamic Reverse"));
   }
 
   /**
