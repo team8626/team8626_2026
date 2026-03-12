@@ -30,7 +30,7 @@ import frc.robot.subsystems.drive.DriveConstants;
  * (log replay from a file).
  */
 public final class Constants {
-  public static final RobotType robot = RobotType.REBUILT_COMPBOT;
+  public static final RobotType robot = RobotType.SIMBOT;
 
   public static final boolean tuningMode = false;
 
