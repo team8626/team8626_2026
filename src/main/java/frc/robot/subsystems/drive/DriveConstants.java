@@ -51,11 +51,14 @@ import java.util.function.Supplier;
 public class DriveConstants {
   //   public static final double maxSpeedMetersPerSec = 4.8;
 
-  public static final LinearVelocity DEFAULT_DRIVE_SPEED = MetersPerSecond.of(3.2);
-  public static final AngularVelocity DEFAULT_ROT_SPEED = RotationsPerSecond.of(0.75);
+  public static final LinearVelocity SLOW_DRIVE_SPEED = MetersPerSecond.of(3.2);
+  public static final AngularVelocity SLOW_ROT_SPEED = RotationsPerSecond.of(0.75);
 
-  public static final LinearVelocity FAST_DRIVE_SPEED = MetersPerSecond.of(4.5);
-  public static final AngularVelocity FAST_ROT_SPEED = RotationsPerSecond.of(2);
+  public static final LinearVelocity FAST_DRIVE_SPEED = MetersPerSecond.of(5);
+  public static final AngularVelocity FAST_ROT_SPEED = RotationsPerSecond.of(2.5);
+
+  public static final LinearVelocity DEFAULT_DRIVE_SPEED = FAST_DRIVE_SPEED;
+  public static final AngularVelocity DEFAULT_ROT_SPEED = FAST_ROT_SPEED;
 
   public static final LinearAcceleration MAX_TELEOP_ACCEL = MetersPerSecondPerSecond.of(25);
 
