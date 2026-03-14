@@ -41,8 +41,11 @@ import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.Constants.Dimensions;
 import frc.robot.Constants.Mode;
+import frc.robot.commands.AnotherShooterRampupCommand;
+import frc.robot.commands.AnotherShooterStopCommand;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IndexerStartCommand;
+import frc.robot.commands.IndexerStopCommand;
 import frc.robot.commands.TeleopDriveCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.anotherShooter.AnotherShooter;
@@ -322,10 +325,10 @@ public class RobotContainer {
 
     collectTrigger
         .onTrue(
-            Commands.runOnce(
-                    () -> intakeLinkage.setPosition(IntakeLinkageConstants.DEPLOY_ANGLE),
-                    intakeLinkage)
-                .alongWith(Commands.runOnce(() -> intakeRoller.start(RPM.of(750)), intakeRoller)))
+            Commands.sequence(
+                Commands.runOnce(
+                    () -> intakeLinkage.setPosition(IntakeLinkageConstants.DEPLOY_ANGLE)),
+                Commands.runOnce(() -> intakeRoller.start(RPM.of(750)), intakeRoller)))
         .onFalse(
             Commands.sequence(
                 Commands.runOnce(
@@ -467,7 +470,7 @@ public class RobotContainer {
         new SequentialCommandGroup(
                 Commands.runOnce(() -> anotherShooter.start(RPM.of(2500)), anotherShooter)
                     .alongWith(Commands.runOnce(() -> index.start(), index)))
-            .withTimeout(10));
+            .withTimeout(AutoConstants.DUMP_DURATION_LONG.in(Seconds)));
 
     //     (index), Set.of(index, /* anotherShooter, */ drive))
     // .withTimeout(AutoConstants.DUMP_DURATION_LONG.in(Seconds)));
@@ -496,7 +499,10 @@ public class RobotContainer {
     new EventTrigger("CollectStart")
         .whileTrue(Commands.print("--- PP Event Trigger - CollectStart"));
     new EventTrigger("CollectDone").whileTrue(Commands.print("--- PP Event Trigger - CollectDone"));
-    new EventTrigger("RampUp").whileTrue(Commands.print("--- PP Event Trigger - RampUp"));
+    new EventTrigger("RampUp").whileTrue(new AnotherShooterRampupCommand(anotherShooter));
+    new EventTrigger("StopDump")
+        .whileTrue(
+            new IndexerStopCommand(index).alongWith(new AnotherShooterStopCommand(anotherShooter)));
   }
 
   /**
