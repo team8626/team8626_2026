@@ -88,7 +88,7 @@ public class AkitDrive extends SubsystemBase {
     HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_AdvantageKit);
 
     // Start odometry thread
-    SparkOdometryThread.getInstance().start();
+    PhoenixOdometryThread.getInstance().start();
 
     // Configure AutoBuilder for PathPlanner (only if not already configured)
     if (!AutoBuilder.isConfigured()) {
