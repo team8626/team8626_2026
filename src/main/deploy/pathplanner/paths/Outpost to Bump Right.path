@@ -3,38 +3,43 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.6170277777777775,
-        "y": 2.4174222222222226
-      },
-      "prevControl": null,
-      "nextControl": {
-        "x": 2.768688078703704,
-        "y": 1.9727953559027775
-      },
-      "isLocked": false,
-      "linkedName": "Bump Start Right"
-    },
-    {
-      "anchor": {
         "x": 0.75,
         "y": 0.65
       },
+      "prevControl": null,
+      "nextControl": {
+        "x": -0.05391666666666728,
+        "y": 0.24560555555555524
+      },
+      "isLocked": false,
+      "linkedName": "Outpost"
+    },
+    {
+      "anchor": {
+        "x": 3.570874803795662,
+        "y": 2.031362193207763
+      },
       "prevControl": {
-        "x": 1.3638999999999994,
-        "y": 0.8546333333333326
+        "x": 3.247374803795662,
+        "y": 1.471043756959231
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Outpost"
+      "linkedName": null
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1,
+      "rotationDegrees": 0.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "StopDump",
-      "waypointRelativePos": 0.11766767026578075,
+      "name": "RampUp",
+      "waypointRelativePos": 0.7621859426910295,
       "endWaypointRelativePos": null,
       "command": null
     }
@@ -49,13 +54,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 59.99999999999999
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }
