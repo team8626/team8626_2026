@@ -25,7 +25,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.RobotContainer;
-import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.AkitDrive;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.util.SlewRateLimiter2d;
 import frc.robot.util.TunableControls.TunablePIDController;
@@ -37,7 +37,7 @@ import org.littletonrobotics.junction.Logger;
 
 /** Default drive command to run that drives based on controller input */
 public class TeleopDriveCommand extends Command {
-  private final Drive drive;
+  private final AkitDrive drive;
   private final DoubleSupplier xSupplier;
   private final DoubleSupplier ySupplier;
   private final DoubleSupplier omegaSupplier;
@@ -65,7 +65,7 @@ public class TeleopDriveCommand extends Command {
   @AutoLogOutput private double trenchLockAngle = 9999;
 
   /** Creates a new TeleopDrive. */
-  public TeleopDriveCommand(Drive drive, CommandXboxController controller) {
+  public TeleopDriveCommand(AkitDrive drive, CommandXboxController controller) {
     this.drive = drive;
     this.xSupplier = () -> -controller.getLeftY() * flipFactor;
     this.ySupplier = () -> -controller.getLeftX() * flipFactor;

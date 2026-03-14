@@ -39,7 +39,7 @@ public class DriveTest {
   private MockModuleIO frModuleIO;
   private MockModuleIO blModuleIO;
   private MockModuleIO brModuleIO;
-  private Drive drive;
+  private AkitDrive drive;
 
   @BeforeAll
   static void initializeHAL() {
@@ -58,7 +58,7 @@ public class DriveTest {
     // Set default odometry data so periodic() doesn't fail
     setDefaultOdometryData();
 
-    drive = new Drive(gyroIO, flModuleIO, frModuleIO, blModuleIO, brModuleIO);
+    drive = new AkitDrive(gyroIO, flModuleIO, frModuleIO, blModuleIO, brModuleIO);
   }
 
   private void setDefaultOdometryData() {

@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.AkitDrive;
 import frc.robot.subsystems.drive.MockGyroIO;
 import frc.robot.subsystems.drive.MockModuleIO;
 import org.junit.jupiter.api.BeforeAll;
@@ -39,7 +39,7 @@ public class DriveCommandsTest {
   private MockModuleIO frModuleIO;
   private MockModuleIO blModuleIO;
   private MockModuleIO brModuleIO;
-  private Drive drive;
+  private AkitDrive drive;
 
   @BeforeAll
   static void initializeHAL() {
@@ -56,7 +56,7 @@ public class DriveCommandsTest {
 
     setDefaultOdometryData();
 
-    drive = new Drive(gyroIO, flModuleIO, frModuleIO, blModuleIO, brModuleIO);
+    drive = new AkitDrive(gyroIO, flModuleIO, frModuleIO, blModuleIO, brModuleIO);
     drive.periodic();
   }
 

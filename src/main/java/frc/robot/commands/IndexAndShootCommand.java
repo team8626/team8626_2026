@@ -5,7 +5,7 @@ import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
-import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.AkitDrive;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.shooter.Shooter;
@@ -13,10 +13,10 @@ import frc.robot.subsystems.shooter.Shooter;
 public class IndexAndShootCommand extends Command {
   private final Shooter shooter;
   private final Indexer indexer;
-  private final Drive drive;
+  private final AkitDrive drive;
   private final Hopper hopper;
 
-  public IndexAndShootCommand(Shooter shooter, Hopper hopper, Indexer indexer, Drive drive) {
+  public IndexAndShootCommand(Shooter shooter, Hopper hopper, Indexer indexer, AkitDrive drive) {
     this.shooter = shooter;
     this.hopper = hopper;
     this.indexer = indexer;
