@@ -16,8 +16,6 @@ package frc.robot.subsystems.intakeLinkage;
 import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.units.measure.*;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface IntakeLinkageIO {
@@ -32,6 +30,9 @@ public interface IntakeLinkageIO {
     public boolean atGoal = false;
     public boolean isEnabled = false;
     public AngularVelocity velocity = AngularVelocity.ofBaseUnits(0.0, DegreesPerSecond);
+
+    public double positionRad = 0.0;
+    public double velocityRadPerSec = 0.0;
   }
 
   /** Updates the set of loggable inputs. */
@@ -52,5 +53,7 @@ public interface IntakeLinkageIO {
 
   public default void setPID(double kP, double kI, double kD) {}
 
-  public default void setPID(double kP, double kI, double kD, double kV, double kS) {}
+  public default void setPID(double kP, double kI, double kD, double kV, double kG, double kS) {}
+
+  public default void runCharacterization(double input) {}
 }

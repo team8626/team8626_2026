@@ -42,7 +42,7 @@ public class IntakeLinkageIOSpark implements IntakeLinkageIO {
   private final AbsoluteEncoder encoder;
   private final SparkClosedLoopController controller;
   private final Debouncer connectedDebounce = new Debouncer(0.5);
-  private Angle desiredAngle;
+  private Angle desiredAngle = IntakeLinkageConstants.STOW_ANGLE;
   private SparkFlexConfig config;
   private ArmFeedforward armFF = new ArmFeedforward(GAINS.kS(), GAINS.kG(), GAINS.kV());
 
@@ -70,15 +70,14 @@ public class IntakeLinkageIOSpark implements IntakeLinkageIO {
 
     // Encoder: mechanism  deg and deg/s (via conversion factors)
     config
-        .encoder
+        .absoluteEncoder
         .positionConversionFactor(IntakeLinkageConstants.ENCODER_POSITION_FACTOR)
         .velocityConversionFactor(IntakeLinkageConstants.ENCODER_VELOCITY_FACTOR)
-        .uvwMeasurementPeriod(10)
-        .uvwAverageDepth(2);
+        .inverted(true);
 
     config
         .closedLoop
-        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
         .pid(GAINS.kP(), GAINS.kI(), GAINS.kD(), ClosedLoopSlot.kSlot0)
         .feedForward
         .kCosRatio(0.0); // TODO: Tune feedforward (gravity compensation) if needed
@@ -110,25 +109,22 @@ public class IntakeLinkageIOSpark implements IntakeLinkageIO {
   public void updateInputs(IntakeLinkageIOInputs inputs) {
     sparkStickyFault = false;
 
-    // Report position relative to the startup zero offset we captured earlier.
-    ifOk(
-        motor,
-        encoder::getPosition,
-        (value) -> inputs.position = Rotations.of(value - absoluteOffsetRotations));
-    ifOk(motor, encoder::getVelocity, (value) -> inputs.velocity = RotationsPerSecond.of(value));
-
+    inputs.position = Degrees.of(encoder.getPosition());
     inputs.appliedVoltage = Volts.of(motor.getBusVoltage());
     inputs.current = Amps.of(motor.getOutputCurrent());
     inputs.desiredAngle = desiredAngle;
     inputs.atGoal = controller.isAtSetpoint();
     inputs.isEnabled = !inputs.atGoal && controller.getControlType() == ControlType.kPosition;
 
+    inputs.positionRad = inputs.position.in(Radians);
+    inputs.velocityRadPerSec = inputs.velocity.in(RadiansPerSecond);
+
     inputs.connected = connectedDebounce.calculate(!sparkStickyFault);
     controller.setSetpoint(
         desiredAngle.in(Degrees),
         ControlType.kPosition,
         ClosedLoopSlot.kSlot0,
-        armFF.calculate(desiredAngle.in(Radians), inputs.velocity.in(RadiansPerSecond)),
+        armFF.calculate(desiredAngle.in(Degrees), inputs.velocity.in(DegreesPerSecond)),
         ArbFFUnits.kVoltage);
   }
 
@@ -146,5 +142,18 @@ public class IntakeLinkageIOSpark implements IntakeLinkageIO {
         () ->
             motor.configure(
                 config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
+  }
+
+  public void setPID(
+      double new_kP, double new_kI, double new_kD, double new_kV, double new_kG, double new_kS) {
+    setPID(new_kP, new_kI, new_kD);
+    armFF.setKv(new_kV);
+    armFF.setKg(new_kG);
+    armFF.setKs(new_kS);
+  }
+
+  @Override
+  public void runCharacterization(double input) {
+    motor.setVoltage(input);
   }
 }

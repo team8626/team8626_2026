@@ -48,7 +48,7 @@ public class IntakeRollerTest {
     intakeRoller.periodic();
 
     double targetVelocityRPM = 5.0;
-    intakeRoller.runVelocity(RPM.of(targetVelocityRPM));
+    intakeRoller.start(RPM.of(targetVelocityRPM));
 
     assertEquals(targetVelocityRPM, io.lastVelocitySetpoint.in(RPM), DELTA);
   }
@@ -67,7 +67,7 @@ public class IntakeRollerTest {
   void testStop() {
     intakeRoller.periodic();
 
-    intakeRoller.runVelocity(RPM.of(100.0));
+    intakeRoller.start(RPM.of(100.0));
     intakeRoller.stop();
 
     assertTrue(io.stopCalled);
@@ -112,7 +112,7 @@ public class IntakeRollerTest {
   void testNegativeVelocity() {
     intakeRoller.periodic();
 
-    intakeRoller.runVelocity(RPM.of(-200));
+    intakeRoller.start(RPM.of(-200));
 
     assertEquals(-200, io.lastVelocitySetpoint.in(RPM), DELTA);
   }
