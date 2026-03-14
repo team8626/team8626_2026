@@ -4,7 +4,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
-import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.AkitDrive;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.shooter.Shooter;
@@ -14,7 +14,7 @@ import org.littletonrobotics.frc2026.util.geometry.AllianceFlipUtil;
 public class IndexAndFerryCommand extends Command {
   private final Shooter shooter;
   private final Indexer indexer;
-  private final Drive drive;
+  private final AkitDrive drive;
   private final Hopper hopper;
 
   private Translation3d FerryTarget;
@@ -25,7 +25,7 @@ public class IndexAndFerryCommand extends Command {
   private final Translation3d outpostFerryTarget =
       AllianceFlipUtil.apply(new Translation3d(2.5, 1.75, 0));
 
-  public IndexAndFerryCommand(Shooter shooter, Hopper hopper, Indexer indexer, Drive drive) {
+  public IndexAndFerryCommand(Shooter shooter, Hopper hopper, Indexer indexer, AkitDrive drive) {
     this.shooter = shooter;
     this.hopper = hopper;
     this.indexer = indexer;

@@ -35,16 +35,17 @@ public class AnotherShooterConstants {
   // Flywheel Config
   public static final FlywheelConfig FLYWHEEL_CONFIG =
       switch (Constants.robot) {
-        case REBUILT_COMPBOT -> new FlywheelConfig(6, 7, 1.0 / 1.0, MOMENT_OF_INERTIA, 6000.0);
+        case REBUILT_PHOENIX, REBUILT_AKIT -> new FlywheelConfig(
+            6, 7, 1.0 / 1.0, MOMENT_OF_INERTIA, 6000.0);
           // All other case use the same as simbot for now, but this should be changed when we have
           // another real to test on
-        default -> new FlywheelConfig(0, 0, (1 / 1), MOMENT_OF_INERTIA, 6000.0);
+        default -> new FlywheelConfig(6, 7, (1 / 1), MOMENT_OF_INERTIA, 6000.0);
       };
 
   // PID Constants
   public static final Gains GAINS =
       switch (Constants.robot) {
-        case REBUILT_COMPBOT -> new Gains(0.001, 0.0, 0.0006, 0.10395, 0.0019, 0);
+        case REBUILT_PHOENIX, REBUILT_AKIT -> new Gains(0.001, 0.0, 0.0006, 0.10395, 0.0019, 0);
           // All other case use the same as simbot for now, but this should be changed when we have
           // another real to test on
         default -> new Gains(0.05, 0.0, 0.0, 0.10395, 0.00296, 0.0);

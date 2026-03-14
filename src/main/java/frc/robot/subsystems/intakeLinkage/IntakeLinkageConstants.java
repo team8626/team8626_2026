@@ -56,7 +56,7 @@ public class IntakeLinkageConstants {
 
   public static final MotorConfig MOTOR_CONFIG =
       switch (Constants.robot) {
-        case REBUILT_COMPBOT -> new MotorConfig(
+        case REBUILT_PHOENIX, REBUILT_AKIT -> new MotorConfig(
             2, false, Amps.of(50), 3.0 / 1.0, 2 * ARM_INERTIA.in(KilogramSquareMeters));
         default -> new MotorConfig(
             0, false, Amps.of(50), 3.0 / 1.0, 2 * ARM_INERTIA.in(KilogramSquareMeters));
@@ -65,7 +65,7 @@ public class IntakeLinkageConstants {
   // PID Constants
   public static final Gains GAINS =
       switch (Constants.robot) {
-        case REBUILT_COMPBOT -> new Gains(0.02, 0.0, 0.0, 0.0, 0.0, 0.0);
+        case REBUILT_PHOENIX, REBUILT_AKIT -> new Gains(0.02, 0.0, 0.0, 0.0, 0.0, 0.0);
         default -> new Gains(0.05, 0.0, 0.0, 0.10395, 0.00296, 0.0);
       };
 

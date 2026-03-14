@@ -41,7 +41,7 @@ public class DriveSimIntegrationTest {
   private ModuleIOSimSpark frModuleIO;
   private ModuleIOSimSpark blModuleIO;
   private ModuleIOSimSpark brModuleIO;
-  private Drive drive;
+  private AkitDrive drive;
 
   @BeforeAll
   static void initializeHAL() {
@@ -60,7 +60,7 @@ public class DriveSimIntegrationTest {
     blModuleIO = new ModuleIOSimSpark();
     brModuleIO = new ModuleIOSimSpark();
 
-    drive = new Drive(gyroIO, flModuleIO, frModuleIO, blModuleIO, brModuleIO);
+    drive = new AkitDrive(gyroIO, flModuleIO, frModuleIO, blModuleIO, brModuleIO);
     drive.periodic();
   }
 

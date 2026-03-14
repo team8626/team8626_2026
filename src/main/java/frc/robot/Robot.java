@@ -116,7 +116,7 @@ public class Robot extends LoggedRobot {
     // Threads.setCurrentThreadPriority(false, 10);
 
     // Update the field in the dashboard
-    m_field.setRobotPose(robotContainer.drive.getPose());
+    m_field.setRobotPose(robotContainer.akitDrive.getPose());
   }
 
   /** This function is called once when the robot is disabled. */
@@ -137,7 +137,7 @@ public class Robot extends LoggedRobot {
       CommandScheduler.getInstance().schedule(autonomousCommand);
     }
     if (Constants.currentMode == Constants.Mode.SIM) {
-      robotContainer.drive.setPose(
+      robotContainer.akitDrive.setPose(
           AllianceFlipUtil.apply(new Pose2d(3.6, 0.64, new Rotation2d(Degrees.of(72)))));
       RobotContainer.fuelSim.clearFuel();
       RobotContainer.fuelSim.spawnStartingFuel();
@@ -159,7 +159,7 @@ public class Robot extends LoggedRobot {
       autonomousCommand.cancel();
     }
     if (Constants.currentMode == Constants.Mode.SIM) {
-      robotContainer.drive.setPose(
+      robotContainer.akitDrive.setPose(
           AllianceFlipUtil.apply(new Pose2d(0.5, 0.5, new Rotation2d(Degrees.of(0)))));
       RobotContainer.fuelSim.clearFuel();
       RobotContainer.fuelSim.spawnStartingFuel();

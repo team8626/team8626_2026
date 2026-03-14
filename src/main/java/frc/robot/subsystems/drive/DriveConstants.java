@@ -82,7 +82,7 @@ public class DriveConstants {
 
   static {
     switch (Constants.robot) {
-      case REBUILT_COMPBOT, REBUILT_DRIVE_ONLY -> {
+      case REBUILT_PHOENIX, REBUILT_AKIT -> {
         ODOMETRY_UPDATE_FREQ = Hertz.of(250);
         MODULE_DISTANCE_Y = Inches.of(22); // left to right
         MODULE_DISTANCE_X = Inches.of(22); // front to back
@@ -407,7 +407,7 @@ public class DriveConstants {
 
     public static final Matrix<N3, N1> ODOMETRY_STD_DEV = VecBuilder.fill(0.02, 0.02, 0.01);
 
-    public static final DriveRequestType DRIVE_REQUEST_TYPE = DriveRequestType.Velocity;
+    public static final DriveRequestType DRIVE_REQUEST_TYPE = DriveRequestType.OpenLoopVoltage;
     public static final SteerRequestType STEER_REQUEST_TYPE = SteerRequestType.MotionMagicExpo;
 
     public static final LinearVelocity LINEAR_VEL_DEADBAND = MetersPerSecond.of(0.02);

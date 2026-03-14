@@ -35,7 +35,8 @@ public final class Constants {
   //
   //  ==> robot = RobotType.REBUILT_COMPBOT
   //
-  public static final RobotType robot = RobotType.REBUILT_COMPBOT;
+  public static final RobotType robot = RobotType.REBUILT_AKIT;
+  // public static final RobotType robot = RobotType.REBUILT_PHOENIX;
 
   public static final boolean tuningMode = false;
 
@@ -59,8 +60,8 @@ public final class Constants {
    * Mode#SIM}.
    */
   public static enum RobotType {
-    REBUILT_COMPBOT,
-    REBUILT_DRIVE_ONLY,
+    REBUILT_PHOENIX,
+    REBUILT_AKIT,
     TSUNAMI,
     SIMBOT
   }
@@ -81,7 +82,7 @@ public final class Constants {
   /** Checks that the default robot is selected and tuning mode is disabled. */
   public static class CheckPullRequest {
     public static void main(String... args) {
-      if (robot != RobotType.REBUILT_COMPBOT || tuningMode) {
+      if (robot != RobotType.REBUILT_PHOENIX || tuningMode) {
         System.err.println("Do not merge, non-default constants are configured.");
         System.exit(1);
       }
@@ -104,7 +105,7 @@ public final class Constants {
 
     static {
       switch (robot) {
-        case REBUILT_COMPBOT, REBUILT_DRIVE_ONLY -> {
+        case REBUILT_PHOENIX, REBUILT_AKIT -> {
           BUMPER_THICKNESS = Inches.of(3.625);
           BUMPER_HEIGHT = Inches.of(7);
           FRAME_SIZE_Y = Inches.of(27.5);
