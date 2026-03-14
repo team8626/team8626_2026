@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -109,7 +110,7 @@ public class RobotContainer {
   private static final Trigger testIndexTrigger = operator.a();
   private static final Trigger testIntakeRollerTrigger = operator.b();
   private static final Trigger testShootTrigger = operator.leftTrigger();
-//   private static final Trigger testIndexAndShootTrigger = operator.rightTrigger();
+  //   private static final Trigger testIndexAndShootTrigger = operator.rightTrigger();
   private static final Trigger testIntakeDeployTrigger = operator.leftBumper();
 
   private static final Trigger collectTrigger = controller.leftBumper();
@@ -224,10 +225,9 @@ public class RobotContainer {
                   new VisionIOPhotonVision(
                       VisionConstants.CAMERA_NAMES[0], VisionConstants.CAMERA_TRANSFORMS[0]),
                   new VisionIOPhotonVision(
-                      VisionConstants.CAMERA_NAMES[1], VisionConstants.CAMERA_TRANSFORMS[1])
-                  //   new VisionIOPhotonVision(
-                  //       VisionConstants.CAMERA_NAMES[2], VisionConstants.CAMERA_TRANSFORMS[2]));
-                  );
+                      VisionConstants.CAMERA_NAMES[1], VisionConstants.CAMERA_TRANSFORMS[1]),
+                  new VisionIOPhotonVision(
+                      VisionConstants.CAMERA_NAMES[2], VisionConstants.CAMERA_TRANSFORMS[2]));
 
           break;
 
@@ -298,7 +298,7 @@ public class RobotContainer {
             Commands.runOnce(
                     () -> intakeLinkage.setPosition(IntakeLinkageConstants.DEPLOY_ANGLE),
                     intakeLinkage)
-                .alongWith(Commands.runOnce(() -> intakeRoller.start(RPM.of(1000)), intakeRoller)))
+                .alongWith(Commands.runOnce(() -> intakeRoller.start(RPM.of(750)), intakeRoller)))
         .onFalse(
             Commands.sequence(
                 Commands.runOnce(
@@ -435,6 +435,24 @@ public class RobotContainer {
             .withTimeout(AutoConstants.DUMP_DURATION_MEDIUM.in(Seconds)));
     NamedCommands.registerCommand(
         "AimAndDumpLong",
+        new SequentialCommandGroup(
+                Commands.runOnce(() -> anotherShooter.start(RPM.of(2500)), anotherShooter)
+                    .alongWith(Commands.runOnce(() -> index.start(), index)))
+            .withTimeout(10));
+
+    //     (index), Set.of(index, /* anotherShooter, */ drive))
+    // .withTimeout(AutoConstants.DUMP_DURATION_LONG.in(Seconds)));
+
+    // dumpHopperTrigger
+    //     .whileTrue(
+    //         Commands.runOnce(() -> anotherShooter.start(RPM.of(2500)), anotherShooter)
+    //             .alongWith(Commands.runOnce(() -> index.start(), index)))
+    //     .onFalse(
+    //         Commands.runOnce(() -> anotherShooter.stop(), anotherShooter)
+    //             .alongWith(Commands.runOnce(() -> index.stop(), index)));
+
+    NamedCommands.registerCommand(
+        "AutoAimAndDumpLong",
         Commands.defer(
                 () -> new IndexerStartCommand(index), Set.of(index, /* anotherShooter, */ drive))
             .withTimeout(AutoConstants.DUMP_DURATION_LONG.in(Seconds)));
