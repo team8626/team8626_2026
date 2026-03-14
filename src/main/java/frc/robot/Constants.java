@@ -154,7 +154,7 @@ public final class Constants {
     // --------------------------------------------------------------------------
     // Dump duration for Autos
     public static final Time DUMP_DURATION_SHORT = Seconds.of(1.0);
-    public static final Time DUMP_DURATION_MEDIUM = Seconds.of(2.0);
-    public static final Time DUMP_DURATION_LONG = Seconds.of(3.0);
+    public static final Time DUMP_DURATION_MEDIUM = Seconds.of(4.5);
+    public static final Time DUMP_DURATION_LONG = Seconds.of(10);
   }
 }
