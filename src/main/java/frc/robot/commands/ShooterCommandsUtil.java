@@ -1,6 +1,8 @@
 package frc.robot.commands;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.Feet;
+import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -104,10 +106,11 @@ public class ShooterCommandsUtil {
   }
 
   public static double getDistToTarget(Drive drive, Translation3d target) {
-    return drive
-        .getPose()
-        .getTranslation()
-        .getDistance(AllianceFlipUtil.apply(target.toTranslation2d()));
+    return Units.metersToFeet(
+        drive
+            .getPose()
+            .getTranslation()
+            .getDistance(AllianceFlipUtil.apply(target.toTranslation2d())));
   }
 
   public static AngularVelocity calculateTreemapRPM(double distToHub) {
