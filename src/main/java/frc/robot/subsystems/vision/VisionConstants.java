@@ -27,13 +27,13 @@ public class VisionConstants {
   public static final int NUM_CAMERAS = 3;
 
   // Camera identifiers (must match PhotonVision camera names)
-  public static final String frontLeftCameraName = "front_left_camera";
-  public static final String frontRightCameraName = "front_right_camera";
-  public static final String rearRightCameraName = "rear_right_camera";
+  public static final String FLCameraName = "OV9182_3";
+  public static final String RLCameraName = "OV9182_1";
+  public static final String RRCameraName = "OV9182_2";
 
   /** Ordered camera names for IO/sim (index 0 = front left, 1 = front right, 2 = rear right). */
   public static final String[] CAMERA_NAMES =
-      new String[] {frontLeftCameraName, frontRightCameraName, rearRightCameraName};
+      new String[] {FLCameraName, RLCameraName, RRCameraName};
 
   // AprilTag field layout for 2026 Rebuilt
   public static final AprilTagFieldLayout fieldLayout =
@@ -43,45 +43,49 @@ public class VisionConstants {
   // 2026 KitBot square config: 26.5" x 26.5". WPILib: +X forward, +Y left, +Z up.
   // Cameras at front-left, front-right, rear-right corners; ~halfway up max height (24").
   // Rotation: roll, pitch (negative = tilted up), yaw.
-  public static final Transform3d robotToFrontLeftCamera =
-      new Transform3d(
-          new Translation3d(
-              Units.inchesToMeters(13.25), // X: forward (half wheelbase)
-              Units.inchesToMeters(13.25), // Y: left (half track)
-              Units.inchesToMeters(24.0)), // Z: up (placeholder height)
-          new Rotation3d(
-              0.0,
-              Units.degreesToRadians(-15.0), // Pitch (tilted up for AprilTags)
-              0.0));
 
-  public static final Transform3d robotToFrontRightCamera =
+  // Back camera: same X magnitude behind center, 180° yaw (facing backward)
+  public static final Transform3d robotToFLCamera =
       new Transform3d(
           new Translation3d(
-              Units.inchesToMeters(13.25), // X: forward
-              Units.inchesToMeters(-13.25), // Y: right
-              Units.inchesToMeters(24.0)), // Z: up
-          new Rotation3d(0.0, Units.degreesToRadians(-15.0), 0.0));
-
-  public static final Transform3d robotToRearRightCamera =
-      new Transform3d(
-          new Translation3d(
-              Units.inchesToMeters(-13.25), // X: backward
-              Units.inchesToMeters(-13.25), // Y: right
-              Units.inchesToMeters(24.0)), // Z: up
+              .332, // X: forward (half of 26.5" wheelbase)
+              .3175, // Y: left (centered)
+              .545), // Z: up (typical mast height)
           new Rotation3d(
-              0.0,
-              Units.degreesToRadians(-15.0),
-              Units.degreesToRadians(180.0))); // Yaw (facing backward)
+              Units.degreesToRadians(-3.195), // Roll
+              Units.degreesToRadians(-19.688), // Pitch (negative = tilted up for AprilTags)
+              Units.degreesToRadians(9.981))); // Yaw (facing forward)
+
+  public static final Transform3d robotToRLCamera =
+      new Transform3d(
+          new Translation3d(
+              -.332, // X: forward (half of 26.5" wheelbase)
+              .3175, // Y: left (centered)
+              .367), // Z: up (typical mast height)
+          new Rotation3d(
+              Units.degreesToRadians(3.195), // Roll
+              Units.degreesToRadians(-19.688), // Pitch (negative = tilted up for AprilTags)
+              Units.degreesToRadians(170.019))); // Yaw (facing forward)
+
+  public static final Transform3d robotToRRCamera =
+      new Transform3d(
+          new Translation3d(
+              -.332, // X: forward (half of 26.5" wheelbase)
+              -.3175, // Y: left (centered)
+              .367), // Z: up (typical mast height)
+          new Rotation3d(
+              Units.degreesToRadians(-3.195), // Roll
+              Units.degreesToRadians(-19.688), // Pitch (negative = tilted up for AprilTags)
+              Units.degreesToRadians(-170.019))); // Yaw (facing forward)
 
   /** Ordered robot-to-camera transforms for IO/sim (same order as CAMERA_NAMES). */
   public static final Transform3d[] ROBOT_TO_CAMERAS =
-      new Transform3d[] {robotToFrontLeftCamera, robotToFrontRightCamera, robotToRearRightCamera};
+      new Transform3d[] {robotToFLCamera, robotToRLCamera, robotToRRCamera};
 
   // Quality filtering thresholds
   public static final double maxPoseAmbiguity = 0.2; // Reject poses with ambiguity > 0.2
   public static final double maxDistanceMeters = 5.0; // Reject tags farther than 5m
   public static final int minTagsForMultiTag = 2; // Require 2+ tags for multi-tag pose
-
   // Standard deviation calculation parameters
   // These tune how much we trust vision vs wheel odometry
   public static final double xyStdDevBase = 0.5; // Base std dev in meters

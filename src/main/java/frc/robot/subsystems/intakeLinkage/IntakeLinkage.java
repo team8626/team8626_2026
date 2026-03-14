@@ -13,14 +13,16 @@
 
 package frc.robot.subsystems.intakeLinkage;
 
-import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.intakeLinkage.IntakeLinkageConstants.GAINS;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.*;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.util.LoggedTunableNumber;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -47,6 +49,19 @@ public class IntakeLinkage extends SubsystemBase {
       new LoggedTunableNumber("IntakeLinkage/Gains/kV", GAINS.kV());
   private final LoggedTunableNumber KS =
       new LoggedTunableNumber("IntakeLinkage/Gains/kS", GAINS.kS());
+  private final LoggedTunableNumber KG =
+      new LoggedTunableNumber("IntakeLinkage/Gains/kG", GAINS.kG());
+
+  // Configure SysId
+  private SysIdRoutine sysId =
+      new SysIdRoutine(
+          new SysIdRoutine.Config(
+              null,
+              null,
+              null,
+              (state) -> Logger.recordOutput("Linkage/SysIdState", state.toString())),
+          new SysIdRoutine.Mechanism(
+              (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
 
   public IntakeLinkage(IntakeLinkageIO io) {
     this.io = io;
@@ -105,8 +120,24 @@ public class IntakeLinkage extends SubsystemBase {
         || KI.hasChanged(hashCode())
         || KD.hasChanged(hashCode())
         || KV.hasChanged(hashCode())
+        || KG.hasChanged(hashCode())
         || KS.hasChanged(hashCode())) {
-      io.setPID(KP.get(), KI.get(), KD.get(), KV.get(), KS.get());
+      io.setPID(KP.get(), KI.get(), KD.get(), KV.get(), KG.get(), KS.get());
     }
+  }
+
+  // Characterization methods
+  public void runCharacterization(double input) {
+    io.runCharacterization(input);
+  }
+
+  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    return run(() -> runCharacterization(0.0)).withTimeout(1.0).andThen(sysId.dynamic(direction));
+  }
+
+  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    return run(() -> runCharacterization(0.0))
+        .withTimeout(1.0)
+        .andThen(sysId.quasistatic(direction));
   }
 }

@@ -20,7 +20,6 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Volts;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -47,9 +46,6 @@ import frc.robot.subsystems.anotherShooter.AnotherShooterConstants;
 import frc.robot.subsystems.anotherShooter.AnotherShooterIO;
 import frc.robot.subsystems.anotherShooter.AnotherShooterIOSim;
 import frc.robot.subsystems.anotherShooter.AnotherShooterIOSparkFlex;
-import frc.robot.subsystems.climber.Climber;
-import frc.robot.subsystems.climber.ClimberIO;
-import frc.robot.subsystems.climber.ClimberIOSim;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants.Rebuilt_SwerveConstants;
 import frc.robot.subsystems.drive.GyroIO;
@@ -67,8 +63,10 @@ import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
 import frc.robot.subsystems.indexer.IndexerIOSpark;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkage;
+import frc.robot.subsystems.intakeLinkage.IntakeLinkageConstants;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkageIO;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkageIOSim;
+import frc.robot.subsystems.intakeLinkage.IntakeLinkageIOSpark;
 import frc.robot.subsystems.intakeRoller.IntakeRoller;
 import frc.robot.subsystems.intakeRoller.IntakeRollerIO;
 import frc.robot.subsystems.intakeRoller.IntakeRollerIOSim;
@@ -96,7 +94,7 @@ public class RobotContainer {
   private final IntakeRoller intakeRoller;
   private final Hopper hopper;
   private final AnotherShooter anotherShooter;
-  private final Climber climber;
+  //   private final Climber climber;
 
   private final Vision vision;
 
@@ -142,7 +140,7 @@ public class RobotContainer {
       intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
       hopper = new Hopper(new HopperIOSim());
       anotherShooter = new AnotherShooter(new AnotherShooterIOSim());
-      climber = new Climber(new ClimberIOSim() {});
+      //   climber = new Climber(new ClimberIOSim() {});
 
       vision =
           new Vision(
@@ -168,7 +166,7 @@ public class RobotContainer {
       intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
       hopper = new Hopper(new HopperIO() {});
       anotherShooter = new AnotherShooter(new AnotherShooterIO() {});
-      climber = new Climber(new ClimberIO() {});
+      //   climber = new Climber(new ClimberIO() {});
 
       vision = new Vision(new VisionIO() {}, (measurement) -> {});
     } else {
@@ -189,7 +187,7 @@ public class RobotContainer {
           hopper = new Hopper(new HopperIOSim());
           anotherShooter = new AnotherShooter(new AnotherShooterIOSim());
 
-          climber = new Climber(new ClimberIO() {});
+          //   climber = new Climber(new ClimberIO() {});
           vision =
               new Vision(
                   new VisionIOPhotonVision(),
@@ -208,12 +206,11 @@ public class RobotContainer {
                   new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackRight.MODULE_CONSTANTS));
 
           index = new Indexer(new IndexerIOSpark() {});
-          intakeLinkage = new IntakeLinkage(new IntakeLinkageIO() {});
-          intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
+          intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSpark() {});
+          intakeRoller = new IntakeRoller(new IntakeRollerIOSpark() {});
           hopper = new Hopper(new HopperIO() {});
-          climber = new Climber(new ClimberIO() {});
-
           anotherShooter = new AnotherShooter(new AnotherShooterIOSparkFlex());
+          //   climber = new Climber(new ClimberIO() {});
 
           vision =
               new Vision(
@@ -239,8 +236,7 @@ public class RobotContainer {
           intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
           hopper = new Hopper(new HopperIO() {});
           anotherShooter = new AnotherShooter(new AnotherShooterIOSparkFlex());
-
-          climber = new Climber(new ClimberIO() {});
+          //   climber = new Climber(new ClimberIO() {});
 
           vision = new Vision(new VisionIO() {}, (measurement) -> {});
 
@@ -292,7 +288,7 @@ public class RobotContainer {
     // TODO: Should be replace with a proper command ("Start/Stop CollectCommand"), this is just for
     // testing
     intakeRollerTrigger
-        .whileTrue(Commands.runOnce(() -> intakeRoller.runVelocity(RPM.of(500)), intakeRoller))
+        .whileTrue(Commands.runOnce(() -> intakeRoller.start(RPM.of(1000)), intakeRoller))
         .onFalse(Commands.runOnce(intakeRoller::stop, intakeRoller));
 
     // Toggle the intake linkage between deployed and stowed positions when the left bumper held
@@ -300,16 +296,19 @@ public class RobotContainer {
     // TODO: Should be replace with a proper command ("Start/Stop CollectCommand"), this is just for
     // testing
     intakeDeployTrigger
-        .whileTrue(Commands.runOnce(() -> intakeLinkage.setPosition(Degrees.of(90)), intakeLinkage))
-        .onFalse(Commands.runOnce(() -> intakeLinkage.setPosition(Degrees.of(135)), intakeLinkage));
+        .whileTrue(
+            Commands.runOnce(
+                () -> intakeLinkage.setPosition(IntakeLinkageConstants.STOW_ANGLE), intakeLinkage))
+        .onFalse(
+            Commands.runOnce(
+                () -> intakeLinkage.setPosition(IntakeLinkageConstants.DEPLOY_ANGLE),
+                intakeLinkage));
 
     // Run the climber motors
-    // TODO: replace with proper commands once climber functionality is implemented, this is just
-    // for testing
-    climberReleaseTrigger.whileTrue(
-        Commands.runOnce(() -> climber.runOpenLoop(Volts.of(6.0)), climber));
-    climberPullrigger.whileTrue(
-        Commands.runOnce(() -> climber.runOpenLoop(Volts.of(-6.0)), climber));
+    // climberReleaseTrigger.whileTrue(
+    //     Commands.runOnce(() -> climber.runOpenLoop(Volts.of(6.0)), climber));
+    // climberPullrigger.whileTrue(
+    //     Commands.runOnce(() -> climber.runOpenLoop(Volts.of(-6.0)), climber));
 
     // TODO: This is for testing only, replace with proper commands once anotherShooter and indexer
     // functionality are tested
@@ -448,6 +447,23 @@ public class RobotContainer {
         anotherShooter
             .sysIdDynamic(SysIdRoutine.Direction.kReverse)
             .withName("Characterization/AnotherShooter Dynamic Reverse"));
+
+    SmartDashboard.putData(
+        intakeLinkage
+            .sysIdQuasistatic(SysIdRoutine.Direction.kForward)
+            .withName("Characterization/Linkage Quasistatic Forward"));
+    SmartDashboard.putData(
+        intakeLinkage
+            .sysIdDynamic(SysIdRoutine.Direction.kForward)
+            .withName("Characterization/Linkage Dynamic Forward"));
+    SmartDashboard.putData(
+        intakeLinkage
+            .sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
+            .withName("Characterization/Linkage Quasistatic Reverse"));
+    SmartDashboard.putData(
+        intakeLinkage
+            .sysIdDynamic(SysIdRoutine.Direction.kReverse)
+            .withName("Characterization/Linkage Dynamic Reverse"));
   }
 
   /**

@@ -31,14 +31,12 @@ public class IntakeLinkageConstants {
       Degrees.of(
           90); // TODO: Set actual starting angle (where the intake starts at the beginning of a
   // match)
-  public static final Angle STOW_ANGLE =
-      Degrees.of(100); // TODO: Set actual stow angle (where the intake should be when stowed
-  public static final Angle DEPLOY_ANGLE =
-      Degrees.of(160); // TODO: Set actual deploy angle (where the intake should be when deployed)
+  public static final Angle STOW_ANGLE = Degrees.of(120);
+  public static final Angle DEPLOY_ANGLE = Degrees.of(195);
   public static final Angle HOPPER_OPEN_ANGLE =
-      Degrees.of(145); // TODO: Set actual score angle (where the intake should be when scoring)
+      Degrees.of(175); // TODO: Set actual score angle (where the intake should be when scoring)
   public static final Angle POSITION_CONVERSION_FACTOR = Degrees.of(360);
-  public static final AngularVelocity velocityConversionFactor =
+  public static final AngularVelocity VELOCITY_CONVESSION_FACTOR =
       DegreesPerSecond.of(360 / 60.0); // degrees per second
 
   public static final int MAX_CURRENT = 40; // Amps
@@ -52,9 +50,9 @@ public class IntakeLinkageConstants {
   // Mechanical configuration
   public static final double GEAR_REDUCTION = 80.0 / 1.0;
 
-  // Encoder conversion factors (motor rotations/RPM -> mechanism deg/rad/sec)
-  public static final double ENCODER_POSITION_FACTOR = 360.0 / GEAR_REDUCTION;
-  public static final double ENCODER_VELOCITY_FACTOR = 360.0 / 60.0 / GEAR_REDUCTION;
+  // Encoder conversion factors
+  public static final double ENCODER_POSITION_FACTOR = 360.0;
+  public static final double ENCODER_VELOCITY_FACTOR = 360.0 / 60.0;
 
   public static final MotorConfig MOTOR_CONFIG =
       switch (Constants.robot) {
@@ -67,7 +65,7 @@ public class IntakeLinkageConstants {
   // PID Constants
   public static final Gains GAINS =
       switch (Constants.robot) {
-        case REBUILT_COMPBOT -> new Gains(0.0001, 0.0, 0.0, 0.00015, 0.01, 0.0);
+        case REBUILT_COMPBOT -> new Gains(0.02, 0.0, 0.0, 0.0, 0.0, 0.0);
         default -> new Gains(0.05, 0.0, 0.0, 0.10395, 0.00296, 0.0);
       };
 

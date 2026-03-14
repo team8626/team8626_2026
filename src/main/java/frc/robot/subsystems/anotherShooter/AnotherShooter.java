@@ -10,16 +10,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.util.LoggedTunableNumber;
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class AnotherShooter extends SubsystemBase {
   private AnotherShooterIO anotherShooterInterface;
   private final AnotherShooterIO io;
   private final AnotherShooterIOInputsAutoLogged inputs = new AnotherShooterIOInputsAutoLogged();
-
-  @AutoLogOutput(unit = "RadPerSec")
-  private AngularVelocity DesiredRPM = RPM.of(2500); // TODO: find actual value for desired RPM
 
   /** Shown on the dashboard when the index motor is not connected. */
   private final Alert motorDisconnectedAlert =
@@ -46,15 +42,25 @@ public class AnotherShooter extends SubsystemBase {
       new LoggedTunableNumber("AnotherShooter/Flywheel/kV", AnotherShooterConstants.GAINS.kV());
   private final LoggedTunableNumber flywheelKS =
       new LoggedTunableNumber("AnotherShooter/Flywheel/kS", AnotherShooterConstants.GAINS.kS());
+  private final LoggedTunableNumber flywheelRPM =
+      new LoggedTunableNumber(
+          "AnotherShooter/Flywheel/RPM", AnotherShooterConstants.DEFAULT_VELOCITY.in(RPM));
 
   public AnotherShooter(AnotherShooterIO io) {
     this.io = io;
   }
 
-  public void start(AngularVelocity newRPM) {
-    DesiredRPM = newRPM;
-    // io.setVelocity(newRPM);
-    io.start(DesiredRPM);
+  public void start(AngularVelocity new_velocity) {
+    AngularVelocity velocity = new_velocity;
+
+    if ((new_velocity.abs(RPM)) > AnotherShooterConstants.MAX_VELOCITY.in(RPM)) {
+      velocity = RPM.of(AnotherShooterConstants.MAX_VELOCITY.copySign(velocity, RPM));
+    }
+    io.start(new_velocity);
+  }
+
+  public void start() {
+    io.start(RPM.of(flywheelRPM.get()));
   }
 
   public void setVelocity(AngularVelocity newRPM) {
@@ -73,20 +79,8 @@ public class AnotherShooter extends SubsystemBase {
     return inputs.currentVelocity;
   }
 
-  public void setPID(double newkP, double newkI, double newkD) {
-    anotherShooterInterface.setPID(newkP, newkI, newkD);
-  }
-
-  public void setkP(double newkP) {
-    anotherShooterInterface.setPID(newkP, inputs.kI, inputs.kD);
-  }
-
-  public void setkI(double newkI) {
-    anotherShooterInterface.setPID(inputs.kP, newkI, inputs.kD);
-  }
-
-  public void setkD(double newkD) {
-    anotherShooterInterface.setPID(inputs.kP, inputs.kI, newkD);
+  public void setPID(double new_kP, double new_kI, double new_kD) {
+    anotherShooterInterface.setPID(new_kP, new_kI, new_kD);
   }
 
   @Override

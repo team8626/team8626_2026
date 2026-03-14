@@ -27,8 +27,8 @@ import org.littletonrobotics.junction.Logger;
 
 /**
  * IntakeRoller subsystem: runs a single motor at a set velocity (closed-loop) or open-loop voltage.
- * Use {@link #runVelocity(AngularVelocity)} for normal operation; use {@link #runOpenLoop(Voltage)}
- * for testing. Call {@link #stop()} to stop the motor.
+ * Use {@link #start(AngularVelocity)} for normal operation; use {@link #runOpenLoop(Voltage)} for
+ * testing. Call {@link #stop()} to stop the motor.
  */
 public class IntakeRoller extends SubsystemBase {
   /** Hardware IO implementation (Spark or Simulated). */
@@ -71,18 +71,19 @@ public class IntakeRoller extends SubsystemBase {
   /**
    * Run the IntakeRoller motor at a constant velocity.
    *
-   * @param velocity Angular Velocity
+   * @param new_velocity Angular Velocity
    */
-  public void runVelocity(AngularVelocity velocity) {
-    AngularVelocity new_velocity = velocity;
+  public void start(AngularVelocity new_velocity) {
+    AngularVelocity velocity = new_velocity;
 
-    // Check if the velocity is in bounds before setting it.
-    // otherwise set it to the max velocity with the same sign.
-    // This prevents the controller from trying to reach an invalid setpoint.
-    if ((velocity.abs(RPM)) > IntakeRollerConstants.MAX_VELOCITY.in(RPM)) {
-      new_velocity = RPM.of(IntakeRollerConstants.MAX_VELOCITY.copySign(new_velocity, RPM));
+    if ((new_velocity.abs(RPM)) > IntakeRollerConstants.MAX_VELOCITY.in(RPM)) {
+      velocity = RPM.of(IntakeRollerConstants.MAX_VELOCITY.copySign(velocity, RPM));
     }
-    io.setVelocity(new_velocity);
+    io.setVelocity(velocity);
+  }
+
+  public void start() {
+    start(RPM.of(rollerRPM.get()));
   }
 
   /**
