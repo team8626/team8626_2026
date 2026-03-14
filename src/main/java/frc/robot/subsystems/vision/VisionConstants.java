@@ -27,9 +27,9 @@ public class VisionConstants {
   public static final int NUM_CAMERAS = 3;
 
   // Camera identifiers (must match PhotonVision camera names)
-  public static final String FLCameraName = "Arducam_FL";
-  public static final String RLCameraName = "Arducam_RL";
-  public static final String RRCameraName = "Arducam_RR";
+  public static final String FLCameraName = "OV9182_3";
+  public static final String RLCameraName = "OV9182_1";
+  public static final String RRCameraName = "OV9182_2";
 
   /** Ordered camera names for IO/sim (index 0 = front left, 1 = front right, 2 = rear right). */
   public static final String[] CAMERA_NAMES =
