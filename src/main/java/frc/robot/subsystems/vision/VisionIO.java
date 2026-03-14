@@ -1,66 +1,47 @@
-// Copyright 2025-2026 FRC 8626
-// https://github.com/team8626
+// Copyright (c) 2021-2026 Littleton Robotics
+// http://github.com/Mechanical-Advantage
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// version 3 as published by the Free Software Foundation or
-// available in the root directory of this project.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// Use of this source code is governed by a BSD
+// license that can be found in the LICENSE file
+// at the root directory of this project.
 
 package frc.robot.subsystems.vision;
 
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
-/** Vision subsystem hardware interface. */
 public interface VisionIO {
   @AutoLog
   public static class VisionIOInputs {
-    // Connection status per camera
-    public boolean[] connected = new boolean[] {};
-    public String[] cameraNames = new String[] {};
-
-    // Per-camera detection data (arrays indexed by camera)
-    public boolean[] hasTargets = new boolean[] {};
-    public double[] timestampSeconds = new double[] {};
-
-    // Pose estimation results (per camera)
-    public double[] poseX = new double[] {}; // meters
-    public double[] poseY = new double[] {}; // meters
-    public double[] poseRotationDeg = new double[] {}; // degrees
-    public double[] poseAmbiguity = new double[] {}; // 0-1, lower is better
-
-    // Quality metrics (per camera)
-    public int[] tagCount = new int[] {}; // number of tags in view
-    public double[] avgTagDistance = new double[] {}; // average distance to tags (meters)
-
-    // Best target tracking (per camera)
-    public int[] bestTargetId = new int[] {}; // -1 if none
-    public double[] bestTargetAmbiguity = new double[] {};
-
-    // Best target Transform3d (camera-to-target)
-    public double[] bestTargetTransformX = new double[] {};
-    public double[] bestTargetTransformY = new double[] {};
-    public double[] bestTargetTransformZ = new double[] {};
-    public double[] bestTargetRotationRoll = new double[] {};
-    public double[] bestTargetRotationPitch = new double[] {};
-    public double[] bestTargetRotationYaw = new double[] {};
-
-    // Best target field-relative Pose3d
-    public double[] bestTargetFieldX = new double[] {};
-    public double[] bestTargetFieldY = new double[] {};
-    public double[] bestTargetFieldZ = new double[] {};
-    public double[] bestTargetFieldRotRoll = new double[] {};
-    public double[] bestTargetFieldRotPitch = new double[] {};
-    public double[] bestTargetFieldRotYaw = new double[] {};
-
-    // All visible tag IDs across all cameras (for tracking)
-    public int[] visibleTagIds = new int[] {};
+    public boolean connected = false;
+    public TargetObservation latestTargetObservation =
+        new TargetObservation(Rotation2d.kZero, Rotation2d.kZero);
+    public PoseObservation[] poseObservations = new PoseObservation[0];
+    public int[] tagIds = new int[0];
   }
 
-  /** Updates the set of loggable inputs. */
+  /** Represents the angle to a simple target, not used for pose estimation. */
+  public static record TargetObservation(Rotation2d tx, Rotation2d ty) {}
+
+  /** Represents a robot pose sample used for pose estimation. */
+  public static record PoseObservation(
+      double timestamp,
+      Pose3d pose,
+      double ambiguity,
+      int tagCount,
+      double averageTagDistance,
+      PoseObservationType type) {}
+
+  public static enum PoseObservationType {
+    MEGATAG_1,
+    MEGATAG_2,
+    PHOTONVISION
+  }
+
   public default void updateInputs(VisionIOInputs inputs) {}
+
+  public default String getName() {
+    return "";
+  }
 }
