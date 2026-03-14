@@ -14,6 +14,7 @@ public class AnotherShooterConstants {
   // Tuned Values
   public static final int MAX_CURRENT = 50; // Amps
 
+  public static final AngularVelocity DEFAULT_VELOCITY = RPM.of(2500);
   public static final AngularVelocity VELOCITY_TOLERANCE = RPM.of(25);
 
   public static final Angle ANOTHERSHOOTER_ANGLE = Degrees.of(55);
@@ -48,6 +49,8 @@ public class AnotherShooterConstants {
           // another real to test on
         default -> new Gains(0.05, 0.0, 0.0, 0.10395, 0.00296, 0.0);
       };
+
+  public static final AngularVelocity MAX_VELOCITY = RPM.of(6700 / FLYWHEEL_CONFIG.REDUCTION());
 
   public record Gains(double kP, double kI, double kD, double kS, double kV, double kA) {}
 
