@@ -35,8 +35,8 @@ public final class Constants {
   //
   //  ==> robot = RobotType.REBUILT_COMPBOT
   //
-  public static final RobotType robot = RobotType.REBUILT_AKIT;
-  // public static final RobotType robot = RobotType.REBUILT_PHOENIX;
+  // public static final RobotType robot = RobotType.REBUILT_AKIT;
+  public static final RobotType robot = RobotType.REBUILT_PHOENIX;
 
   public static final boolean tuningMode = false;
 
