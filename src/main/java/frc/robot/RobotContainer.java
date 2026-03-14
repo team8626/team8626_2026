@@ -37,7 +37,6 @@ import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.Constants.Dimensions;
 import frc.robot.Constants.Mode;
-import frc.robot.commands.AlignToTargetCommand;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IndexerStartCommand;
 import frc.robot.commands.TeleopDriveCommand;
@@ -72,9 +71,9 @@ import frc.robot.subsystems.intakeRoller.IntakeRollerIO;
 import frc.robot.subsystems.intakeRoller.IntakeRollerIOSim;
 import frc.robot.subsystems.intakeRoller.IntakeRollerIOSpark;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
-import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.util.FuelSim;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
@@ -101,21 +100,28 @@ public class RobotContainer {
   // Controller
   private static final CommandXboxController controller =
       new CommandXboxController(ControllerConstants.DRIVERPORT);
+  private static final CommandXboxController operator =
+      new CommandXboxController(ControllerConstants.OPERATORPORT);
   // Commands
   private final TeleopDriveCommand teleopDrive;
 
   // Triggers for Bindings
-  private static final Trigger indexTrigger = controller.a();
-  private static final Trigger intakeRollerTrigger = controller.b();
+  private static final Trigger testIndexTrigger = operator.a();
+  private static final Trigger testIntakeRollerTrigger = operator.b();
+  private static final Trigger testShootTrigger = operator.leftTrigger();
+//   private static final Trigger testIndexAndShootTrigger = operator.rightTrigger();
+  private static final Trigger testIntakeDeployTrigger = operator.leftBumper();
 
-  private static final Trigger shootTrigger = controller.leftTrigger();
-  private static final Trigger indexAndShootTrigger = controller.rightTrigger();
-  private static final Trigger intakeDeployTrigger = controller.leftBumper();
+  private static final Trigger collectTrigger = controller.leftBumper();
+  private static final Trigger collectTriggerHold = controller.leftTrigger();
 
-  private static final Trigger driverAimTrigger = controller.y();
+  private static final Trigger dumpHopperTrigger = controller.rightTrigger();
+  private static final Trigger dumpHopperAutoTrigger = controller.rightBumper();
 
-  private static final Trigger climberReleaseTrigger = controller.povUp();
-  private static final Trigger climberPullrigger = controller.povDown();
+  private static final Trigger driverAimTrigger = controller.a();
+
+  private static final Trigger climberReleaseTrigger = operator.povUp();
+  private static final Trigger climberPullrigger = operator.povDown();
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -140,15 +146,12 @@ public class RobotContainer {
       intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
       hopper = new Hopper(new HopperIOSim());
       anotherShooter = new AnotherShooter(new AnotherShooterIOSim());
-      //   climber = new Climber(new ClimberIOSim() {});
-
+      //   climber = new Climber(new ClimberIOSim() {})`;
       vision =
           new Vision(
-              new VisionIOSim(),
-              (measurement) ->
-                  drive.addVisionMeasurement(
-                      measurement.pose, measurement.timestamp, measurement.stdDevs));
-      vision.setPoseSupplier(drive::getPose);
+              drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {}, new VisionIO() {});
+
+      //   vision.setPoseSupplier(drive::getPose);
       configureFuelSim();
       configureFuelSimRobot(hopper::ableToIntake, hopper::pushFuel);
     } else if (Constants.currentMode == Mode.REPLAY) {
@@ -168,7 +171,9 @@ public class RobotContainer {
       anotherShooter = new AnotherShooter(new AnotherShooterIO() {});
       //   climber = new Climber(new ClimberIO() {});
 
-      vision = new Vision(new VisionIO() {}, (measurement) -> {});
+      vision =
+          new Vision(
+              drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {}, new VisionIO() {});
     } else {
       switch (Constants.robot) {
         case TSUNAMI:
@@ -190,10 +195,11 @@ public class RobotContainer {
           //   climber = new Climber(new ClimberIO() {});
           vision =
               new Vision(
-                  new VisionIOPhotonVision(),
-                  (measurement) ->
-                      drive.addVisionMeasurement(
-                          measurement.pose, measurement.timestamp, measurement.stdDevs));
+                  drive::addVisionMeasurement,
+                  new VisionIO() {},
+                  new VisionIO() {},
+                  new VisionIO() {});
+
           break;
         case REBUILT_COMPBOT:
           // Real robot, full hardware IO
@@ -214,10 +220,14 @@ public class RobotContainer {
 
           vision =
               new Vision(
-                  new VisionIOPhotonVision(),
-                  (measurement) ->
-                      drive.addVisionMeasurement(
-                          measurement.pose, measurement.timestamp, measurement.stdDevs));
+                  drive::addVisionMeasurement,
+                  new VisionIOPhotonVision(
+                      VisionConstants.CAMERA_NAMES[0], VisionConstants.CAMERA_TRANSFORMS[0]),
+                  new VisionIOPhotonVision(
+                      VisionConstants.CAMERA_NAMES[1], VisionConstants.CAMERA_TRANSFORMS[1])
+                  //   new VisionIOPhotonVision(
+                  //       VisionConstants.CAMERA_NAMES[2], VisionConstants.CAMERA_TRANSFORMS[2]));
+                  );
 
           break;
 
@@ -238,7 +248,12 @@ public class RobotContainer {
           anotherShooter = new AnotherShooter(new AnotherShooterIOSparkFlex());
           //   climber = new Climber(new ClimberIO() {});
 
-          vision = new Vision(new VisionIO() {}, (measurement) -> {});
+          vision =
+              new Vision(
+                  drive::addVisionMeasurement,
+                  new VisionIO() {},
+                  new VisionIO() {},
+                  new VisionIO() {});
 
           break;
         default:
@@ -278,16 +293,52 @@ public class RobotContainer {
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
+    collectTrigger
+        .onTrue(
+            Commands.runOnce(
+                    () -> intakeLinkage.setPosition(IntakeLinkageConstants.DEPLOY_ANGLE),
+                    intakeLinkage)
+                .alongWith(Commands.runOnce(() -> intakeRoller.start(RPM.of(1000)), intakeRoller)))
+        .onFalse(
+            Commands.sequence(
+                Commands.runOnce(
+                    () -> intakeLinkage.setPosition(IntakeLinkageConstants.STOW_ANGLE),
+                    intakeLinkage),
+                Commands.waitSeconds(0.25),
+                Commands.runOnce(() -> intakeRoller.stop(), intakeRoller)));
+
+    collectTriggerHold
+        .whileTrue(
+            Commands.runOnce(
+                    () -> intakeLinkage.setPosition(IntakeLinkageConstants.DEPLOY_ANGLE),
+                    intakeLinkage)
+                .alongWith(Commands.runOnce(() -> intakeRoller.start(RPM.of(1000)), intakeRoller)))
+        .onFalse(
+            Commands.sequence(
+                Commands.runOnce(
+                    () -> intakeLinkage.setPosition(IntakeLinkageConstants.STOW_ANGLE),
+                    intakeLinkage),
+                Commands.waitSeconds(0.25),
+                Commands.runOnce(() -> anotherShooter.stop(), anotherShooter)));
+
+    dumpHopperTrigger
+        .whileTrue(
+            Commands.runOnce(() -> anotherShooter.start(RPM.of(2500)), anotherShooter)
+                .alongWith(Commands.runOnce(() -> index.start(), index)))
+        .onFalse(
+            Commands.runOnce(() -> anotherShooter.stop(), anotherShooter)
+                .alongWith(Commands.runOnce(() -> index.stop(), index)));
+
     // Align to camera's best AprilTag: POV Left = front left, POV Up = front right, POV Right =
     // rear right
-    controller.povLeft().whileTrue(AlignToTargetCommand.alignToFrontLeftCamera(drive, vision));
-    controller.povRight().whileTrue(AlignToTargetCommand.alignToFrontRightCamera(drive, vision));
-    controller.povDown().whileTrue(AlignToTargetCommand.alignToRearRightCamera(drive, vision));
+    // controller.povLeft().whileTrue(AlignToTargetCommand.alignToFrontLeftCamera(drive, vision));
+    // controller.povRight().whileTrue(AlignToTargetCommand.alignToFrontRightCamera(drive, vision));
+    // controller.povDown().whileTrue(AlignToTargetCommand.alignToRearRightCamera(drive, vision));
 
     // Run the intake roller at 500 RPM while the B button is held, stop when released
     // TODO: Should be replace with a proper command ("Start/Stop CollectCommand"), this is just for
     // testing
-    intakeRollerTrigger
+    testIntakeRollerTrigger
         .whileTrue(Commands.runOnce(() -> intakeRoller.start(RPM.of(1000)), intakeRoller))
         .onFalse(Commands.runOnce(intakeRoller::stop, intakeRoller));
 
@@ -295,7 +346,7 @@ public class RobotContainer {
     // back to stowed position when released
     // TODO: Should be replace with a proper command ("Start/Stop CollectCommand"), this is just for
     // testing
-    intakeDeployTrigger
+    testIntakeDeployTrigger
         .whileTrue(
             Commands.runOnce(
                 () -> intakeLinkage.setPosition(IntakeLinkageConstants.STOW_ANGLE), intakeLinkage))
@@ -310,16 +361,12 @@ public class RobotContainer {
     // climberPullrigger.whileTrue(
     //     Commands.runOnce(() -> climber.runOpenLoop(Volts.of(-6.0)), climber));
 
-    // TODO: This is for testing only, replace with proper commands once anotherShooter and indexer
-    // functionality are tested
-    indexTrigger
+    testIndexTrigger
         .onTrue(Commands.runOnce(() -> index.start(), index))
         .onFalse(Commands.runOnce(() -> index.stop(), index));
 
     // shootTrigger.whileTrue(new IndexAndShootCommand(anotherShooter, hopper, index, drive));
-    // shootUpdateVelocityTrigger.onTrue(anotherShooter.updateVelocityCommand());
-
-    shootTrigger
+    testShootTrigger
         .whileTrue(Commands.runOnce(() -> anotherShooter.start(RPM.of(2500)), anotherShooter))
         .onFalse(Commands.runOnce(() -> anotherShooter.stop(), anotherShooter));
   }
