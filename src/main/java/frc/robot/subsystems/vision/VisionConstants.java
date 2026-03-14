@@ -32,8 +32,7 @@ public class VisionConstants {
   public static final double ANGULAR_STD_DEV_BASELINE = 1.0; // Radians
 
   // Front left, rear left, rear right camera names (must match PhotonVision config)
-  // public static final String[] CAMERA_NAMES = {"OV9182_3", "OV9182_1", "OV9182_2"};
-  public static final String[] CAMERA_NAMES = {"OV9182_1", "OV9182_2"};
+  public static final String[] CAMERA_NAMES = {"OV9182_1", "OV9182_2", "OV9182_3"};
 
   public static final double MAX_AMBIGUITY = 0.3;
   public static final Distance MAX_Z_HEIGHT = Meters.of(0.2);
@@ -64,10 +63,6 @@ public class VisionConstants {
   // Transforms from robot to cameras, (x forward, y left, z up), (roll, pitch,
   // yaw)
   public static final Transform3d[] CAMERA_TRANSFORMS = {
-    // new Transform3d(
-    //     // Front left camera
-    //     new Translation3d(0.332, 0.3175, 0.545),
-    //     new Rotation3d(Degrees.of(-3.195), Degrees.of(-19.688), Degrees.of(9.981))),
 
     // Rear left camera
     new Transform3d(
@@ -77,6 +72,10 @@ public class VisionConstants {
     // Rear right camera
     new Transform3d(
         new Translation3d(-0.332, -0.3175, 0.367),
-        new Rotation3d(Degrees.of(-3.195), Degrees.of(-19.688), Degrees.of(-170.019)))
+        new Rotation3d(Degrees.of(-3.195), Degrees.of(-19.688), Degrees.of(-170.019))),
+    new Transform3d(
+        // Front left camera
+        new Translation3d(0.332, 0.3175, 0.545),
+        new Rotation3d(Degrees.of(-3.195), Degrees.of(-19.688), Degrees.of(9.981)))
   };
 }
