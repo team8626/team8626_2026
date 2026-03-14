@@ -241,8 +241,20 @@ public class TeleopDriveCommand extends Command {
           setRotSpeed(DriveConstants.FAST_ROT_SPEED);
         },
         () -> {
-          setDriveSpeed(DriveConstants.DEFAULT_DRIVE_SPEED);
-          setRotSpeed(DriveConstants.DEFAULT_ROT_SPEED);
+          setDriveSpeed(DriveConstants.SLOW_DRIVE_SPEED);
+          setRotSpeed(DriveConstants.SLOW_ROT_SPEED);
+        });
+  }
+
+  public Command slowDownCommand() {
+    return Commands.startEnd(
+        () -> {
+          setDriveSpeed(DriveConstants.SLOW_DRIVE_SPEED);
+          setRotSpeed(DriveConstants.SLOW_ROT_SPEED);
+        },
+        () -> {
+          setDriveSpeed(DriveConstants.FAST_DRIVE_SPEED);
+          setRotSpeed(DriveConstants.SLOW_ROT_SPEED);
         });
   }
 
