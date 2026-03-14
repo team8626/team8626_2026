@@ -21,7 +21,7 @@ import frc.robot.Constants;
 public class IntakeLinkageConstants {
   // Hardware configuration
   public static final int INTAKE_LINKAGE_CAN_ID = 2;
-  public static final boolean MOTOR_INVERTED = false; // TODO: Verify direction
+  public static final boolean MOTOR_INVERTED = false;
   public static final Current MOTOR_CURRENT_LIMIT = Amps.of(40);
 
   public static final Angle MIN_ANGLE =
@@ -32,7 +32,7 @@ public class IntakeLinkageConstants {
           90); // TODO: Set actual starting angle (where the intake starts at the beginning of a
   // match)
   public static final Angle STOW_ANGLE = Degrees.of(120);
-  public static final Angle DEPLOY_ANGLE = Degrees.of(195);
+  public static final Angle DEPLOY_ANGLE = Degrees.of(198);
   public static final Angle HOPPER_OPEN_ANGLE =
       Degrees.of(175); // TODO: Set actual score angle (where the intake should be when scoring)
   public static final Angle POSITION_CONVERSION_FACTOR = Degrees.of(360);
