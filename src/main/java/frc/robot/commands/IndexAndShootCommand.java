@@ -1,5 +1,7 @@
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.RPM;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
@@ -7,6 +9,7 @@ import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.shooter.Shooter;
+import org.littletonrobotics.junction.Logger;
 
 public class IndexAndShootCommand extends Command {
   private final Shooter shooter;
@@ -41,6 +44,17 @@ public class IndexAndShootCommand extends Command {
       }
     }
     shooter.start(ShooterCommandsUtil.calculateTreemapRPM(ShooterCommandsUtil.getDistToHub(drive)));
+
+    Logger.recordOutput(
+        "getShooterVelocityToTarget/Robot Distance to Hub",
+        (float) ShooterCommandsUtil.getDistToHub(drive),
+        "feet");
+    Logger.recordOutput(
+        "getShooterVelocityToTarget/Calculated Shooter Velocity (based on treemap)",
+        (float)
+            ShooterCommandsUtil.calculateTreemapRPM(ShooterCommandsUtil.getDistToHub(drive))
+                .in(RPM),
+        "RPM");
   }
 
   @Override
