@@ -4,7 +4,6 @@
 
 package frc.robot.commands;
 
-import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
@@ -182,7 +181,7 @@ public class TeleopDriveCommand extends Command {
     linearVelocity = driveLimiter.calculate(linearVelocity);
 
     switch (currentDriveMode) {
-      case NORMAL:
+      case NORMAL, TRENCH_LOCK, BUMP_LOCK:
         double omega =
             MathUtil.applyDeadband(omegaSupplier.getAsDouble(), ControllerConstants.DEADBAND);
         omega = Math.copySign(omega * omega, omega); // square for more precise rotation control
@@ -191,27 +190,6 @@ public class TeleopDriveCommand extends Command {
             MetersPerSecond.of(linearVelocity.getX()),
             MetersPerSecond.of(linearVelocity.getY()),
             maxRotSpeed.times(omega));
-        break;
-      case TRENCH_LOCK:
-        double yVel = trenchYController.calculate(drive.getPose().getY(), getTrenchY().in(Meters));
-        double rotSpeedToStraight =
-            rotationController.calculate(
-                drive.getRotation().getRadians(),
-                getTrenchLockAngle(drive.getRotation()).getRadians());
-        drive.driveFieldCentric(
-            MetersPerSecond.of(linearVelocity.getX()),
-            MetersPerSecond.of(yVel),
-            RadiansPerSecond.of(rotSpeedToStraight));
-        break;
-      case BUMP_LOCK:
-        double rotSpeedToDiagonal =
-            rotationController.calculate(
-                drive.getRotation().getRadians(),
-                getBumpLockAngle(drive.getRotation()).getRadians());
-        drive.driveFieldCentric(
-            MetersPerSecond.of(linearVelocity.getX()),
-            MetersPerSecond.of(linearVelocity.getY()),
-            RadiansPerSecond.of(rotSpeedToDiagonal));
         break;
       case HUB_LOCK:
         double rotSpeedToHub =
