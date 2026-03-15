@@ -129,8 +129,9 @@ public class RobotContainer {
   private static final Trigger testIntakeDeployTrigger = operator.leftBumper();
 
   private static final Trigger collectTrigger = controller.leftBumper();
-  private static final Trigger collectTriggerHold = controller.leftTrigger();
-  private static final Trigger plowTriggerHold = controller.x();
+  // private static final Trigger collectTriggerHold = controller.leftTrigger();
+  private static final Trigger plowTrigger = controller.x();
+  private static final Trigger plowTriggerHold = controller.leftTrigger();
   private static final Trigger agitateTrigger = controller.y();
 
   private static final Trigger dumpHopperTrigger = controller.rightTrigger();
@@ -331,7 +332,15 @@ public class RobotContainer {
 
     collectTrigger.toggleOnTrue(new CollectCommand(intakeLinkage, intakeRoller));
 
-    collectTriggerHold.whileTrue(new CollectCommand(intakeLinkage, intakeRoller));
+    plowTrigger.toggleOnTrue(
+        Commands.defer(
+            () ->
+                new CollectCommand(
+                    () -> IntakeLinkageConstants.PLOW_ANGLE,
+                    () -> IntakeRollerConstants.PLOW_VELOCITY,
+                    intakeLinkage,
+                    intakeRoller),
+            Set.of(intakeLinkage, intakeRoller)));
 
     plowTriggerHold.whileTrue(
         Commands.defer(
