@@ -41,8 +41,10 @@ import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.Constants.Dimensions;
 import frc.robot.Constants.Mode;
+import frc.robot.commands.AgitateCommand;
 import frc.robot.commands.AnotherShooterRampupCommand;
 import frc.robot.commands.AnotherShooterStopCommand;
+import frc.robot.commands.CollectCommand;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IndexerStartCommand;
 import frc.robot.commands.IndexerStopCommand;
@@ -53,6 +55,10 @@ import frc.robot.subsystems.anotherShooter.AnotherShooterConstants;
 import frc.robot.subsystems.anotherShooter.AnotherShooterIO;
 import frc.robot.subsystems.anotherShooter.AnotherShooterIOSim;
 import frc.robot.subsystems.anotherShooter.AnotherShooterIOSparkFlex;
+import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberIO;
+import frc.robot.subsystems.climber.ClimberIOSim;
+import frc.robot.subsystems.climber.ClimberIOSpark;
 import frc.robot.subsystems.drive.AkitDrive;
 import frc.robot.subsystems.drive.CommandSwerveDrivetrain;
 import frc.robot.subsystems.drive.DriveConstants.Rebuilt_SwerveConstants;
@@ -74,6 +80,7 @@ import frc.robot.subsystems.intakeLinkage.IntakeLinkageIO;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkageIOSim;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkageIOSpark;
 import frc.robot.subsystems.intakeRoller.IntakeRoller;
+import frc.robot.subsystems.intakeRoller.IntakeRollerConstants;
 import frc.robot.subsystems.intakeRoller.IntakeRollerIO;
 import frc.robot.subsystems.intakeRoller.IntakeRollerIOSpark;
 import frc.robot.subsystems.vision.Vision;
@@ -102,7 +109,7 @@ public class RobotContainer {
 
   public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-  //   private final Climber climber;
+  private final Climber climber;
 
   private final Vision vision;
 
@@ -123,14 +130,13 @@ public class RobotContainer {
 
   private static final Trigger collectTrigger = controller.leftBumper();
   private static final Trigger collectTriggerHold = controller.leftTrigger();
+  private static final Trigger plowTriggerHold = controller.x();
+  private static final Trigger agitateTrigger = controller.y();
 
   private static final Trigger dumpHopperTrigger = controller.rightTrigger();
   private static final Trigger dumpHopperAutoTrigger = controller.rightBumper();
 
   private static final Trigger driverAimTrigger = controller.a();
-
-  private static final Trigger climberReleaseTrigger = operator.povUp();
-  private static final Trigger climberPullrigger = operator.povDown();
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -155,7 +161,7 @@ public class RobotContainer {
       intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
       hopper = new Hopper(new HopperIOSim());
       anotherShooter = new AnotherShooter(new AnotherShooterIOSim());
-      //   climber = new Climber(new ClimberIOSim() {})`;
+      climber = new Climber(new ClimberIOSim() {});
       vision =
           new Vision(
               akitDrive::addVisionMeasurement,
@@ -181,7 +187,7 @@ public class RobotContainer {
       intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
       hopper = new Hopper(new HopperIO() {});
       anotherShooter = new AnotherShooter(new AnotherShooterIO() {});
-      //   climber = new Climber(new ClimberIO() {});
+      climber = new Climber(new ClimberIO() {});
 
       vision =
           new Vision(
@@ -205,7 +211,7 @@ public class RobotContainer {
           intakeRoller = new IntakeRoller(new IntakeRollerIOSpark() {});
           hopper = new Hopper(new HopperIO() {});
           anotherShooter = new AnotherShooter(new AnotherShooterIOSparkFlex());
-          //   climber = new Climber(new ClimberIO() {});
+          climber = new Climber(new ClimberIOSpark() {});
 
           vision =
               new Vision(
@@ -233,7 +239,7 @@ public class RobotContainer {
           intakeRoller = new IntakeRoller(new IntakeRollerIOSpark() {});
           hopper = new Hopper(new HopperIO() {});
           anotherShooter = new AnotherShooter(new AnotherShooterIOSparkFlex());
-          //   climber = new Climber(new ClimberIO() {});
+          climber = new Climber(new ClimberIOSpark() {});
 
           vision =
               new Vision(
@@ -321,43 +327,39 @@ public class RobotContainer {
     }
 
     // Switch to X pattern when X button is pressed
-    controller.x().onTrue(Commands.runOnce(akitDrive::stopWithX, akitDrive));
+    // controller.x().onTrue(Commands.runOnce(akitDrive::stopWithX, akitDrive));
 
-    collectTrigger
-        .onTrue(
-            Commands.sequence(
-                Commands.runOnce(
-                    () -> intakeLinkage.setPosition(IntakeLinkageConstants.DEPLOY_ANGLE)),
-                Commands.runOnce(() -> intakeRoller.start(RPM.of(750)), intakeRoller)))
-        .onFalse(
-            Commands.sequence(
-                Commands.runOnce(
-                    () -> intakeLinkage.setPosition(IntakeLinkageConstants.STOW_ANGLE),
-                    intakeLinkage),
-                Commands.waitSeconds(0.25),
-                Commands.runOnce(() -> intakeRoller.stop(), intakeRoller)));
+    collectTrigger.toggleOnTrue(new CollectCommand(intakeLinkage, intakeRoller));
 
-    collectTriggerHold
-        .whileTrue(
-            Commands.runOnce(
-                    () -> intakeLinkage.setPosition(IntakeLinkageConstants.DEPLOY_ANGLE),
-                    intakeLinkage)
-                .alongWith(Commands.runOnce(() -> intakeRoller.start(RPM.of(1000)), intakeRoller)))
-        .onFalse(
-            Commands.sequence(
-                Commands.runOnce(
-                    () -> intakeLinkage.setPosition(IntakeLinkageConstants.STOW_ANGLE),
-                    intakeLinkage),
-                Commands.waitSeconds(0.25),
-                Commands.runOnce(() -> anotherShooter.stop(), anotherShooter)));
+    collectTriggerHold.whileTrue(new CollectCommand(intakeLinkage, intakeRoller));
+
+    plowTriggerHold.whileTrue(
+        Commands.defer(
+            () ->
+                new CollectCommand(
+                    () -> IntakeLinkageConstants.PLOW_ANGLE,
+                    () -> IntakeRollerConstants.PLOW_VELOCITY,
+                    intakeLinkage,
+                    intakeRoller),
+            Set.of(intakeLinkage, intakeRoller)));
+
+    agitateTrigger.whileTrue(new AgitateCommand(intakeLinkage));
 
     dumpHopperTrigger
         .whileTrue(
-            Commands.runOnce(() -> anotherShooter.start(RPM.of(2500)), anotherShooter)
-                .alongWith(Commands.runOnce(() -> index.start(), index)))
-        .onFalse(
-            Commands.runOnce(() -> anotherShooter.stop(), anotherShooter)
-                .alongWith(Commands.runOnce(() -> index.stop(), index)));
+            Commands.sequence(
+                new AnotherShooterRampupCommand(anotherShooter),
+                Commands.parallel(
+                    new IndexerStartCommand(index), new AgitateCommand(intakeLinkage))))
+        .onFalse(Commands.runOnce(() -> anotherShooter.stop(), anotherShooter));
+
+    // dumpHopperTrigger
+    //     .whileTrue(
+    //         Commands.runOnce(() -> anotherShooter.start(RPM.of(2500)), anotherShooter)
+    //             .alongWith(Commands.runOnce(() -> index.start(), index)))
+    //     .onFalse(
+    //         Commands.runOnce(() -> anotherShooter.stop(), anotherShooter)
+    //             .alongWith(Commands.runOnce(() -> index.stop(), index)));
 
     // Align to camera's best AprilTag: POV Left = front left, POV Up = front right, POV Right =
     // rear right
