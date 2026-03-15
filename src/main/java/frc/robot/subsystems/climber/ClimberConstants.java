@@ -28,6 +28,7 @@ public class ClimberConstants {
   public static final Voltage STOW_SLOW_VOLTAGE = Volts.of(-1);
   public static final Voltage EXTEND_VOLTAGE = Volts.of(3);
   public static final Voltage ZERO_VOLTAGE = Volts.of(-1);
+  public static final Voltage CLIMB_LOCK_VOLTAGE = Volts.of(-0.5);
 
   public static final Current STALL_CURRENT = Amps.of(20);
   public static final AngularVelocity STALL_ANGULAR_VELOCITY = RadiansPerSecond.of(6);
