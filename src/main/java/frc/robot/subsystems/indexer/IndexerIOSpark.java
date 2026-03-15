@@ -105,7 +105,7 @@ public class IndexerIOSpark implements IndexerIO {
     sparkStickyFault = false;
 
     inputs.motorVelocity = RPM.of(encoder.getVelocity());
-    inputs.currentVelocity = inputs.motorVelocity.divide(FLYWHEEL_CONFIG.REDUCTION());
+    inputs.currentVelocity = inputs.motorVelocity.div(FLYWHEEL_CONFIG.REDUCTION());
 
     inputs.current = Amps.of(spark.getOutputCurrent());
     inputs.appliedVoltage = Volts.of(spark.getAppliedOutput());
