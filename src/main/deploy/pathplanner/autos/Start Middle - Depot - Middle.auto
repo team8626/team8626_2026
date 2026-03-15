@@ -1,0 +1,43 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Start Middle - Backup"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AimAndDumpMedium"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Middle to Depot"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Depot Right to Middle"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AimAndDumpLong"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
