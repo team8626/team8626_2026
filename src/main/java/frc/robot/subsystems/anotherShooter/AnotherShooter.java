@@ -76,11 +76,15 @@ public class AnotherShooter extends SubsystemBase {
   }
 
   public AngularVelocity getVelocity() {
-    return inputs.currentVelocity;
+    return RPM.of(inputs.currentVelocityRPM);
   }
 
   public void setPID(double new_kP, double new_kI, double new_kD) {
     anotherShooterInterface.setPID(new_kP, new_kI, new_kD);
+  }
+
+  public boolean isAtGoal() {
+    return inputs.isAtGoal;
   }
 
   @Override
@@ -110,7 +114,7 @@ public class AnotherShooter extends SubsystemBase {
   }
 
   public double getCharacterizationVelocity() {
-    return inputs.currentVelocity.in(RPM);
+    return inputs.currentVelocityRPM;
   }
 
   /** Returns a command to run a quasistatic test in the specified direction. */
