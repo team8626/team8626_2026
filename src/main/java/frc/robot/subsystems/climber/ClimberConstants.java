@@ -65,8 +65,8 @@ public class ClimberConstants {
   // Motor Config
   public static final MotorConfig MOTOR_CONFIG =
       switch (Constants.robot) {
-        case REBUILT_PHOENIX, REBUILT_AKIT -> new MotorConfig(4, 5, false, Amps.of(50), 1.0 / 1.0);
-        default -> new MotorConfig(4, 5, false, Amps.of(50), 1.0 / 1.0);
+        case REBUILT_PHOENIX, REBUILT_AKIT -> new MotorConfig(4, 5, true, Amps.of(50), 1.0 / 1.0);
+        default -> new MotorConfig(4, 5, true, Amps.of(50), 1.0 / 1.0);
       };
 
   public record MotorConfig(
