@@ -13,45 +13,62 @@
 
 package frc.robot.subsystems.climber;
 
+import static edu.wpi.first.units.Units.*;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.*;
+import frc.robot.Constants;
+
 public class ClimberConstants {
-  // Hardware configuration
-  public static final int indexCanId = 4;
-  public static final boolean motorInverted = false; // TODO: Verify direction
-  public static final int motorCurrentLimit = 40; // Amps
 
-  // Mechanical configuration
-  public static final double gearReduction = 16.0; // TODO: Set actual gear ratio (motor:mechanism)
-  public static final double poleRadiusForRope = 0.6 / 2; // TODO: find actual diameter
-  // Encoder conversion factors (motor rotations/RPM -> mechanism radians/rad/sec)
-  public static final double encoderPositionFactor = (2.0 * Math.PI) / gearReduction;
-  public static final double encoderVelocityFactor = (2.0 * Math.PI) / 60.0 / gearReduction; // RPS
+  // Inputs Values
+  public static final Voltage CLIMB_VOLTAGE = Volts.of(-12);
+  public static final Voltage STOW_VOLTAGE = Volts.of(-10);
+  public static final Voltage STOW_SLOW_VOLTAGE = Volts.of(-1);
+  public static final Voltage EXTEND_VOLTAGE = Volts.of(3);
+  public static final Voltage ZERO_VOLTAGE = Volts.of(-1);
 
-  // Velocity control: PID + feedforward (used in closed-loop velocity mode)
-  //
-  // velocityKp — Proportional gain. Output = Kp * (setpoint - actual). Drives the motor harder when
-  //   velocity error is large. Tune up if response is sluggish or never reaches setpoint; tune down
-  //   if the  overshoots (goes past the target speed then back), oscillates (keeps speeding
-  //   up and slowing down around the target), or sounds rough.
-  public static final double velocityKp = 0.1;
-  //
-  // velocityKd — Derivative gain. Responds to rate of change of error; dampens overshoot (going
-  // past
-  //   the target). Tune up if there is noticeable overshoot or oscillation after a step change
-  //   (speed shoots past then wobbles); tune down (or to 0) if the response becomes noisy or
-  // twitchy
-  //   from derivative kick or encoder noise (small bumps in the feedback make the output jump).
-  public static final double velocityKd = 0.0;
-  //
-  // velocityKs — Feedforward: voltage to overcome static friction (same sign as velocity). Added so
-  //   the motor can start moving at low speeds. Tune up if the  barely moves or stalls at
-  //   low speed; tune down if it creeps when it should be stopped or feels too aggressive at low
-  //   speed.
-  public static final double velocityKs = 0.05;
-  //
-  // velocityKv — Feedforward: volts per (rad/s). Approximate linear relationship between velocity
-  // and
-  //   voltage (e.g. 12V / 100 rad/s ≈ 0.12). Tune up if the  runs slow for a given setpoint;
-  //   tune down if it runs too fast or the PID is fighting the feedforward (e.g. once settled, the
-  //   controller keeps adding a big correction in the wrong direction).
-  public static final double velocityKv = 0.12;
+  public static final Current STALL_CURRENT = Amps.of(20);
+  public static final AngularVelocity STALL_ANGULAR_VELOCITY = RadiansPerSecond.of(6);
+
+  // TODO: Tuned Values
+  public static final Angle CLIMB_POSITION = Rotations.of(25);
+  public static final Angle AUTO_CLIMB_POSITION = Rotations.of(30);
+  public static final Angle STOW_POSITION = Rotations.of(0.2);
+  public static final Angle STOW_SLOW_POSITION = Rotations.of(15);
+  public static final Angle EXTEND_POSITION_LEFT = Rotations.of(40);
+  public static final Angle EXTEND_POSITION_RIGHT = Rotations.of(43);
+
+  // Positions for auto climb
+  public static enum ClimbPosition {
+    FRONT_LEFT(new Pose2d(1.54, 3.91, Rotation2d.kCW_90deg)),
+    FRONT_RIGHT(new Pose2d(1.54, 3.50, Rotation2d.kCW_90deg)),
+    BACK_LEFT(new Pose2d(0.67, 3.91, Rotation2d.kCCW_90deg)),
+    BACK_RIGHT(new Pose2d(0.67, 3.50, Rotation2d.kCCW_90deg));
+
+    private Pose2d pose;
+
+    private ClimbPosition(Pose2d pose) {
+      this.pose = pose;
+    }
+
+    public Pose2d getPose() {
+      return pose;
+    }
+  }
+
+  // Physical Constants
+  public static final Current MAX_CURRENT = Amps.of(80);
+  public static final Current ZERO_CURRENT = Amps.of(80);
+
+  // Motor Config
+  public static final MotorConfig MOTOR_CONFIG =
+      switch (Constants.robot) {
+        case REBUILT_PHOENIX, REBUILT_AKIT -> new MotorConfig(4, 5, false, Amps.of(50), 1.0 / 1.0);
+        default -> new MotorConfig(4, 5, false, Amps.of(50), 1.0 / 1.0);
+      };
+
+  public record MotorConfig(
+      int CANID_LEFT, int CANID_RIGHT, boolean INVERTED, Current MAX_CURRENT, double REDUCTION) {}
 }
