@@ -498,9 +498,11 @@ public class RobotContainer {
    * commands that need to be triggered by events in the middle of paths.
    */
   private void configurePPEventTriggers() {
-    new EventTrigger("CollectStart")
-        .whileTrue(Commands.print("--- PP Event Trigger - CollectStart"));
-    new EventTrigger("CollectDone").whileTrue(Commands.print("--- PP Event Trigger - CollectDone"));
+    new EventTrigger("CollectStart").whileTrue(new CollectCommand(intakeLinkage, intakeRoller));
+    new EventTrigger("CollectDone")
+        .whileTrue(
+            Commands.runOnce(() -> intakeRoller.stop(), intakeRoller)
+                .alongWith(Commands.runOnce(() -> intakeLinkage.stow())));
     new EventTrigger("RampUp").whileTrue(new AnotherShooterRampupCommand(anotherShooter));
     new EventTrigger("StopDump")
         .whileTrue(
