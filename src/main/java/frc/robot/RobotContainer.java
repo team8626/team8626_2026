@@ -488,9 +488,16 @@ public class RobotContainer {
         Commands.defer(
                 () ->
                     Commands.sequence(
-                        new AnotherShooterRampupCommand(anotherShooter),
-                        Commands.parallel(
-                            new IndexerStartCommand(index), new AgitateCommand(intakeLinkage))),
+                            new AnotherShooterRampupCommand(anotherShooter),
+                            Commands.parallel(
+                                new IndexerStartCommand(index), new AgitateCommand(intakeLinkage)))
+                        .handleInterrupt(
+                            () ->
+                                new AnotherShooterStopCommand(anotherShooter)
+                                    .andThen(new IndexerStopCommand(index))
+                                    .andThen(
+                                        Commands.runOnce(
+                                            () -> intakeLinkage.stow(), intakeLinkage))),
                 Set.of(index, anotherShooter, intakeLinkage))
             .withTimeout(AutoConstants.DUMP_DURATION_LONG.in(Seconds)));
 
