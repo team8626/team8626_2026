@@ -38,8 +38,9 @@ public class ClimberConstants {
   public static final Angle AUTO_CLIMB_POSITION = Rotations.of(30);
   public static final Angle STOW_POSITION = Rotations.of(0.2);
   public static final Angle STOW_SLOW_POSITION = Rotations.of(15);
-  public static final Angle EXTEND_POSITION_LEFT = Rotations.of(40);
-  public static final Angle EXTEND_POSITION_RIGHT = Rotations.of(43);
+  private static final double EXTEND_POSITION = 40;
+  public static final Angle EXTEND_POSITION_LEFT = Rotations.of(EXTEND_POSITION);
+  public static final Angle EXTEND_POSITION_RIGHT = Rotations.of(EXTEND_POSITION);
 
   // Positions for auto climb
   public static enum ClimbPosition {
