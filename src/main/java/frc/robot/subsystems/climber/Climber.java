@@ -1,120 +1,157 @@
-// Copyright 2025-2026 FRC 8626
-// https://github.com/team8626
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// version 3 as published by the Free Software Foundation or
-// available in the root directory of this project.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
-
 package frc.robot.subsystems.climber;
 
-import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import org.littletonrobotics.junction.AutoLogOutput;
+import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
-/**
- * subsystem: runs a single motor at a set velocity (closed-loop) or open-loop voltage. Use {@link
- * #runVelocity(double)} for normal operation; use {@link #runOpenLoop(double)} for testing. Call
- * {@link #stop()} to stop the motor.
- */
 public class Climber extends SubsystemBase {
-  /** Hardware IO implementation (Spark or Simulated). */
   private final ClimberIO io;
 
-  /** Cached inputs from IO, logged each period via AdvantageKit. */
-  private final IndexIOInputsAutoLogged inputs = new IndexIOInputsAutoLogged();
+  private final ClimberIOInputsAutoLogged inputs = new ClimberIOInputsAutoLogged();
 
-  /** Shown on the dashboard when the index motor is not connected. */
-  private final Alert motorDisconnectedAlert =
-      new Alert("Index motor disconnected.", AlertType.kError);
+  // private final ClimberVisualizer visualizer = new ClimberVisualizer();
+
+  private boolean disabled = false;
+
+  private final Alert leftDisconnectedAlert =
+      new Alert("Climber Left Motor Disconnected", AlertType.kError);
+  private final Alert rightDisconnectedAlert =
+      new Alert("Climber Right Motor Disconnected", AlertType.kError);
 
   public Climber(ClimberIO io) {
     this.io = io;
+
+    // VirtualPD.registerMotor(() -> inputs.leftSupplyCurrent, "Climb");
+    // VirtualPD.registerMotor(() -> inputs.rightSupplyCurrent, "Climb");
+
+    SmartDashboard.putData("Climb/Climb", climb());
+    SmartDashboard.putData("Climb/AutoClimb", autoClimb());
+    SmartDashboard.putData("Climb/Stow", stow());
+    SmartDashboard.putData("Climb/Extend", extend());
+    SmartDashboard.putData("Climb/Zero", zero());
+
+    SmartDashboard.putData("Overrides/Climber", disable());
   }
 
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("", inputs);
+    Logger.processInputs("Climber", inputs);
+    // visualizer.update(inputs.leftPosition, inputs.rightPosition);
 
-    // Show alert if the index motor is not connected.
-    motorDisconnectedAlert.set(!inputs.connected);
+    leftDisconnectedAlert.set(!inputs.leftConnected && Constants.currentMode != Constants.simMode);
+    rightDisconnectedAlert.set(
+        !inputs.rightConnected && Constants.currentMode != Constants.simMode);
   }
 
-  /**
-   * Run the index motor at a constant velocity.
-   *
-   * @param velocityRadPerSec Velocity in radians per second
-   */
-  public void runVelocity(AngularVelocity velocity) {
-    io.setVelocity(velocity);
+  private Command setVoltage(Voltage out) {
+    return this.runOnce(() -> io.setVoltage(out));
   }
 
-  /**
-   * Run the index motor at open-loop voltage (for testing).
-   *
-   * @param output Voltage output (-12.0 to 12.0)
-   */
-  public void runOpenLoop(Voltage output) {
-    io.setOpenLoop(output);
+  private Command stop() {
+    return this.runOnce(io::stop);
   }
 
-  /** Stop the index motor. */
-  public void stop() {
-    io.stop();
+  public boolean isExtended() {
+    return inputs.leftPosition.gte(ClimberConstants.EXTEND_POSITION_LEFT)
+        && inputs.rightPosition.gte(ClimberConstants.EXTEND_POSITION_RIGHT);
   }
 
-  @AutoLogOutput
-  public Angle getPosition() {
-    return inputs.position;
+  public Command climb() {
+    return Commands.sequence(
+            setVoltage(ClimberConstants.CLIMB_VOLTAGE),
+            Commands.waitUntil(() -> inputs.averagePosition.lte(ClimberConstants.CLIMB_POSITION)),
+            setVoltage(Volts.of(-0.5)),
+            Commands.idle())
+        .finallyDo(io::stop)
+        .unless(() -> disabled);
   }
 
-  @AutoLogOutput
-  public Rotation2d getAngle() {
-    return new Rotation2d(inputs.position.in(Radians));
+  public Command autoClimb() {
+    return Commands.sequence(
+            setVoltage(ClimberConstants.CLIMB_VOLTAGE),
+            Commands.waitUntil(
+                () -> inputs.averagePosition.lte(ClimberConstants.AUTO_CLIMB_POSITION)),
+            setVoltage(Volts.of(-0.5)),
+            Commands.idle())
+        .finallyDo(io::stop)
+        .unless(() -> disabled);
   }
 
-  @AutoLogOutput
-  public AngularVelocity getVelocity() {
-    return inputs.velocity;
+  public Command stow() {
+    return Commands.sequence(
+            setVoltage(ClimberConstants.STOW_VOLTAGE),
+            Commands.waitUntil(
+                () ->
+                    inputs.leftPosition.lte(ClimberConstants.STOW_SLOW_POSITION)
+                        || inputs.rightPosition.lte(ClimberConstants.STOW_SLOW_POSITION)),
+            setVoltage(ClimberConstants.STOW_SLOW_VOLTAGE),
+            Commands.parallel(
+                Commands.waitUntil(() -> inputs.leftPosition.lte(ClimberConstants.STOW_POSITION))
+                    .finallyDo(io::stopLeft),
+                Commands.waitUntil(() -> inputs.rightPosition.lte(ClimberConstants.STOW_POSITION))
+                    .finallyDo(io::stopRight)),
+            stop())
+        .finallyDo(io::stop)
+        .unless(() -> disabled);
   }
 
-  public boolean isConnected() {
-    return inputs.connected;
+  public Command extend() {
+    return Commands.sequence(
+            setVoltage(ClimberConstants.EXTEND_VOLTAGE),
+            Commands.parallel(
+                Commands.waitUntil(
+                        () -> inputs.leftPosition.gte(ClimberConstants.EXTEND_POSITION_LEFT))
+                    .finallyDo(io::stopLeft),
+                Commands.waitUntil(
+                        () -> inputs.rightPosition.gte(ClimberConstants.EXTEND_POSITION_RIGHT))
+                    .finallyDo(io::stopRight)),
+            stop())
+        .finallyDo(io::stop)
+        .unless(() -> disabled);
   }
 
-  public Voltage getAppliedVoltage() {
-    return inputs.appliedVoltage;
+  public Command zero() {
+    return Commands.sequence(
+            this.runOnce(
+                () -> {
+                  io.setLeftVoltage(ClimberConstants.ZERO_VOLTAGE);
+                  io.setRightVoltage(ClimberConstants.ZERO_VOLTAGE);
+                }),
+            Commands.waitSeconds(0.1),
+            Commands.parallel(
+                Commands.waitUntil(
+                        () ->
+                            inputs.leftCurrent.abs(Amps) > ClimberConstants.STALL_CURRENT.abs(Amps)
+                                && inputs.leftVelocity.abs(RadiansPerSecond)
+                                    < ClimberConstants.STALL_ANGULAR_VELOCITY.abs(RadiansPerSecond))
+                    .finallyDo(() -> io.stopLeft()),
+                Commands.waitUntil(
+                        () ->
+                            inputs.rightCurrent.abs(Amps) > ClimberConstants.STALL_CURRENT.abs(Amps)
+                                && inputs.rightVelocity.abs(RadiansPerSecond)
+                                    < ClimberConstants.STALL_ANGULAR_VELOCITY.abs(RadiansPerSecond))
+                    .finallyDo(() -> io.stopRight())),
+            Commands.waitSeconds(0.4),
+            this.runOnce(io::zeroPosition))
+        .finallyDo(io::stop)
+        .unless(() -> disabled);
   }
 
-  public Current getCurrent() {
-    return inputs.current;
-  }
-
-  public Distance getLength() {
-    return inputs.extension;
-  }
-
-  public double getNumOfRotations() {
-    return inputs.numOfRotations;
-  }
-
-  public double getHookPosition() {
-    return inputs.hookPosition;
+  public Command disable() {
+    return this.runOnce(() -> disabled = true)
+        .andThen(Commands.idle())
+        .finallyDo(() -> disabled = false)
+        .withName("Disable Climber");
   }
 }
