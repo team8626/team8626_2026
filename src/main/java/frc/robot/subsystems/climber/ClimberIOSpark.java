@@ -96,13 +96,13 @@ public class ClimberIOSpark implements ClimberIO {
     inputs.leftPosition = Rotations.of(encoderleft.getPosition());
     inputs.leftVelocity = RotationsPerSecond.of(encoderleft.getVelocity());
     inputs.leftCurrent = Amps.of(motorleft.getOutputCurrent());
-    inputs.leftAppliedVoltage = Volts.of(motorleft.getAppliedOutput());
+    inputs.leftAppliedVoltage = Volts.of(motorleft.getAppliedOutput() * 12.0);
 
     inputs.rightConnected = connectedDebounce.calculate(!sparkStickyFault);
     inputs.rightPosition = Rotations.of(encoderright.getPosition());
     inputs.rightVelocity = RPM.of(encoderright.getVelocity());
     inputs.rightCurrent = Amps.of(motorright.getOutputCurrent());
-    inputs.rightAppliedVoltage = Volts.of(motorright.getAppliedOutput());
+    inputs.rightAppliedVoltage = Volts.of(motorright.getAppliedOutput() * 12.0);
 
     inputs.averagePosition = inputs.leftPosition.plus(inputs.rightPosition).div(2.0);
   }
@@ -115,12 +115,12 @@ public class ClimberIOSpark implements ClimberIO {
 
   @Override
   public void setLeftVoltage(Voltage out) {
-    controllerleft.setSetpoint(out.in(Volts), ControlType.kDutyCycle);
+    controllerleft.setSetpoint(out.in(Volts), ControlType.kVoltage);
   }
 
   @Override
   public void setRightVoltage(Voltage out) {
-    controllerright.setSetpoint(out.in(Volts), ControlType.kDutyCycle);
+    controllerright.setSetpoint(out.in(Volts), ControlType.kVoltage);
   }
 
   @Override
@@ -131,12 +131,12 @@ public class ClimberIOSpark implements ClimberIO {
 
   @Override
   public void stopLeft() {
-    controllerleft.setSetpoint(0, ControlType.kDutyCycle);
+    controllerleft.setSetpoint(0, ControlType.kVoltage);
   }
 
   @Override
   public void stopRight() {
-    controllerright.setSetpoint(0, ControlType.kDutyCycle);
+    controllerright.setSetpoint(0, ControlType.kVoltage);
   }
 
   @Override
