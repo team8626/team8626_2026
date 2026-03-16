@@ -1,263 +1,198 @@
-// Copyright 2025-2026 FRC 8626
-// https://github.com/team8626
+// Copyright (c) 2021-2026 Littleton Robotics
+// http://github.com/Mechanical-Advantage
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// version 3 as published by the Free Software Foundation or
-// available in the root directory of this project.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// Use of this source code is governed by a BSD
+// license that can be found in the LICENSE file
+// at the root directory of this project.
 
 package frc.robot.subsystems.vision;
 
-import static frc.robot.subsystems.vision.VisionConstants.NUM_CAMERAS;
-import static frc.robot.subsystems.vision.VisionConstants.maxDistanceMeters;
-import static frc.robot.subsystems.vision.VisionConstants.maxPoseAmbiguity;
-import static frc.robot.subsystems.vision.VisionConstants.minTagsForMultiTag;
-import static frc.robot.subsystems.vision.VisionConstants.thetaStdDevBase;
-import static frc.robot.subsystems.vision.VisionConstants.xyStdDevBase;
-import static frc.robot.subsystems.vision.VisionConstants.xyStdDevMultiTagDivisor;
-import static frc.robot.subsystems.vision.VisionConstants.xyStdDevPerMeter;
+import static edu.wpi.first.units.Units.Meters;
+import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
-import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import org.littletonrobotics.junction.Logger;
 
-/** Vision subsystem for AprilTag detection and pose estimation. */
 public class Vision extends SubsystemBase {
-  private final VisionIO io;
-  private final VisionIOInputsAutoLogged inputs = new VisionIOInputsAutoLogged();
+  private final VisionConsumer consumer;
+  private final VisionIO[] io;
+  private final VisionIOInputsAutoLogged[] inputs;
+  private final Alert[] disconnectedAlerts;
 
-  // Consumer for sending vision measurements to Drive subsystem
-  private final Consumer<VisionMeasurement> visionConsumer;
+  private boolean disabled = false;
+  private boolean climbing = false;
 
-  // Alerts for camera disconnections (0=front left, 1=front right, 2=rear right)
-  private static final String[] CAMERA_ALERT_MESSAGES =
-      new String[] {
-        "Front left camera disconnected.",
-        "Front right camera disconnected.",
-        "Rear right camera disconnected."
-      };
-  private final Alert[] cameraDisconnectedAlerts = new Alert[NUM_CAMERAS];
-
-  {
-    for (int i = 0; i < NUM_CAMERAS; i++) {
-      cameraDisconnectedAlerts[i] = new Alert(CAMERA_ALERT_MESSAGES[i], AlertType.kWarning);
-    }
-  }
-
-  /** Container for vision measurement data. */
-  public static class VisionMeasurement {
-    public final Pose2d pose;
-    public final double timestamp;
-    public final Matrix<N3, N1> stdDevs;
-
-    public VisionMeasurement(Pose2d pose, double timestamp, Matrix<N3, N1> stdDevs) {
-      this.pose = pose;
-      this.timestamp = timestamp;
-      this.stdDevs = stdDevs;
-    }
-  }
-
-  // Supplier for getting current robot pose (for simulation)
-  private java.util.function.Supplier<Pose2d> poseSupplier = null;
-
-  /**
-   * Create Vision subsystem.
-   *
-   * @param io Vision IO implementation
-   * @param visionConsumer Consumer accepting vision measurements for pose fusion
-   */
-  public Vision(VisionIO io, Consumer<VisionMeasurement> visionConsumer) {
+  public Vision(VisionConsumer consumer, VisionIO... io) {
+    this.consumer = consumer;
     this.io = io;
-    this.visionConsumer = visionConsumer;
+
+    // Initialize inputs
+    this.inputs = new VisionIOInputsAutoLogged[io.length];
+    for (int i = 0; i < inputs.length; i++) {
+      inputs[i] = new VisionIOInputsAutoLogged();
+    }
+
+    // Initialize disconnected alerts
+    this.disconnectedAlerts = new Alert[io.length];
+    for (int i = 0; i < inputs.length; i++) {
+      disconnectedAlerts[i] =
+          new Alert("Vision camera " + io[i].getName() + " is disconnected.", AlertType.kWarning);
+    }
+
+    SmartDashboard.putData("Overrides/Vision", disable());
   }
 
   /**
-   * Set pose supplier for simulation. This is used to update the simulation with the current robot
-   * pose.
+   * Returns the X angle to the best target, which can be used for simple servoing with vision.
    *
-   * @param poseSupplier Supplier providing current robot pose
+   * @param cameraIndex The index of the camera to use.
    */
-  public void setPoseSupplier(java.util.function.Supplier<Pose2d> poseSupplier) {
-    this.poseSupplier = poseSupplier;
+  public Rotation2d getTargetX(int cameraIndex) {
+    return inputs[cameraIndex].latestTargetObservation.tx();
   }
 
   @Override
   public void periodic() {
-    io.updateInputs(inputs);
-    Logger.processInputs("Vision", inputs);
-
-    // Update simulation with current robot pose if needed
-    if (Constants.currentMode == Constants.Mode.SIM
-        && io instanceof VisionIOSim
-        && poseSupplier != null) {
-      ((VisionIOSim) io).updateRobotPose(poseSupplier.get());
+    for (int i = 0; i < io.length; i++) {
+      io[i].updateInputs(inputs[i]);
+      Logger.processInputs("Vision/" + io[i].getName(), inputs[i]);
     }
 
-    // Update camera connection alerts
-    for (int i = 0; i < cameraDisconnectedAlerts.length && i < inputs.connected.length; i++) {
-      cameraDisconnectedAlerts[i].set(!inputs.connected[i]);
-    }
+    // Initialize logging values
+    List<Pose3d> allTagPoses = new LinkedList<>();
+    List<Pose3d> allRobotPoses = new LinkedList<>();
+    List<Pose3d> allRobotPosesAccepted = new LinkedList<>();
+    List<Pose3d> allRobotPosesRejected = new LinkedList<>();
 
-    // Process pose estimates from each camera
-    for (int i = 0; i < inputs.connected.length; i++) {
-      if (!inputs.connected[i] || !inputs.hasTargets[i]) {
-        continue;
+    boolean isBlue = DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue;
+    Set<Integer> hubTags = isBlue ? BLUE_HUB_TAG_IDS : RED_HUB_TAG_IDS;
+    Set<Integer> climbTags = isBlue ? BLUE_CLIMB_TAG_IDS : RED_CLIMB_TAG_IDS;
+
+    // Loop over cameras
+    for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
+      // Update disconnected alert
+      disconnectedAlerts[cameraIndex].set(!inputs[cameraIndex].connected);
+
+      // Initialize logging values
+      List<Pose3d> tagPoses = new LinkedList<>();
+      List<Pose3d> robotPoses = new LinkedList<>();
+      List<Pose3d> robotPosesAccepted = new LinkedList<>();
+      List<Pose3d> robotPosesRejected = new LinkedList<>();
+
+      // Loop over pose observations
+      for (var observation : inputs[cameraIndex].poseObservations) {
+        // Check whether to reject pose
+        boolean rejectPose =
+            observation.tagCount() == 0 // Must have at least one tag
+                || (observation.tagCount() == 1
+                    && observation.ambiguity() > MAX_AMBIGUITY) // Cannot be high ambiguity
+                || observation.pose().getZ() > MAX_Z_HEIGHT.in(Meters)
+                // Must be within the field boundaries
+                || observation.pose().getX() < 0.0
+                || observation.pose().getX() > APRIL_TAGS.getFieldLength()
+                || observation.pose().getY() < 0.0
+                || observation.pose().getY() > APRIL_TAGS.getFieldWidth();
+
+        // Add pose to log
+        robotPoses.add(observation.pose());
+        if (rejectPose) {
+          robotPosesRejected.add(observation.pose());
+        } else {
+          robotPosesAccepted.add(observation.pose());
+        }
+
+        // Skip if rejected
+        if (rejectPose) {
+          continue;
+        }
+
+        // Calculate standard deviations
+        double stdDevFactor =
+            Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
+
+        // Add tag poses
+        for (int tagId : inputs[cameraIndex].tagIds) {
+          var tagPose = APRIL_TAGS.getTagPose(tagId);
+          if (tagPose.isPresent()) {
+            tagPoses.add(tagPose.get());
+          }
+          if (climbing && !climbTags.contains(tagId)) {
+            stdDevFactor += CLIMB_TAG_STD_DEV_BIAS; // Non-climb tags are less accurate
+          } else if (!climbing && !hubTags.contains(tagId)) {
+            stdDevFactor += HUB_TAG_STD_DEV_BIAS; // Non-hub tags are less accurate
+          }
+        }
+        double linearStdDev = LINEAR_STD_DEV_BASELINES[cameraIndex] * stdDevFactor;
+        double angularStdDev = ANGULAR_STD_DEV_BASELINE * stdDevFactor;
+
+        // Send vision observation
+        if (!disabled) {
+          consumer.accept(
+              observation.pose().toPose2d(),
+              observation.timestamp(),
+              VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
+        }
       }
 
-      // Quality filtering
-      if (inputs.poseAmbiguity[i] > maxPoseAmbiguity) {
-        Logger.recordOutput("Vision/Camera" + i + "/RejectedAmbiguity", true);
-        continue;
-      }
-
-      if (inputs.avgTagDistance[i] > maxDistanceMeters) {
-        Logger.recordOutput("Vision/Camera" + i + "/RejectedDistance", true);
-        continue;
-      }
-
-      if (inputs.tagCount[i] < minTagsForMultiTag && inputs.poseAmbiguity[i] > 0.15) {
-        Logger.recordOutput("Vision/Camera" + i + "/RejectedSingleTag", true);
-        continue;
-      }
-
-      // Create pose from inputs
-      Pose2d visionPose =
-          new Pose2d(
-              inputs.poseX[i], inputs.poseY[i], Rotation2d.fromDegrees(inputs.poseRotationDeg[i]));
-
-      // Calculate standard deviations based on distance and tag count
-      Matrix<N3, N1> stdDevs = calculateStdDevs(inputs.avgTagDistance[i], inputs.tagCount[i]);
-
-      // Send measurement to Drive subsystem
-      visionConsumer.accept(new VisionMeasurement(visionPose, inputs.timestampSeconds[i], stdDevs));
-
-      // Log accepted measurement
-      Logger.recordOutput("Vision/Camera" + i + "/AcceptedPose", visionPose);
+      // Log camera metadata
       Logger.recordOutput(
-          "Vision/Camera" + i + "/StdDevs",
-          new double[] {stdDevs.get(0, 0), stdDevs.get(1, 0), stdDevs.get(2, 0)});
-
-      // Log best target for AdvantageScope visualization
-      if (inputs.bestTargetId[i] >= 0) {
-        Pose3d bestTargetFieldPose =
-            new Pose3d(
-                inputs.bestTargetFieldX[i],
-                inputs.bestTargetFieldY[i],
-                inputs.bestTargetFieldZ[i],
-                new Rotation3d(
-                    inputs.bestTargetFieldRotRoll[i],
-                    inputs.bestTargetFieldRotPitch[i],
-                    inputs.bestTargetFieldRotYaw[i]));
-
-        Logger.recordOutput("Vision/Camera" + i + "/BestTarget/FieldPose", bestTargetFieldPose);
-        Logger.recordOutput("Vision/Camera" + i + "/BestTarget/TagID", inputs.bestTargetId[i]);
-        Logger.recordOutput(
-            "Vision/Camera" + i + "/BestTarget/Ambiguity", inputs.bestTargetAmbiguity[i]);
-
-        // Distance for debugging
-        double distance =
-            Math.sqrt(
-                inputs.bestTargetTransformX[i] * inputs.bestTargetTransformX[i]
-                    + inputs.bestTargetTransformY[i] * inputs.bestTargetTransformY[i]
-                    + inputs.bestTargetTransformZ[i] * inputs.bestTargetTransformZ[i]);
-        Logger.recordOutput("Vision/Camera" + i + "/BestTarget/Distance", distance);
-      }
-    }
-  }
-
-  /**
-   * Calculate standard deviations for vision measurement.
-   *
-   * <p>Standard deviation increases with distance and decreases with more tags.
-   *
-   * @param avgDistance Average distance to visible tags in meters
-   * @param tagCount Number of tags in view
-   * @return Standard deviation matrix [x, y, theta]
-   */
-  private Matrix<N3, N1> calculateStdDevs(double avgDistance, int tagCount) {
-    // Base std dev increases with distance
-    double xyStdDev = xyStdDevBase + (avgDistance * xyStdDevPerMeter);
-    double thetaStdDev = thetaStdDevBase + (avgDistance * xyStdDevPerMeter);
-
-    // Multi-tag is more accurate - divide by factor
-    if (tagCount >= minTagsForMultiTag) {
-      xyStdDev /= xyStdDevMultiTagDivisor;
-      thetaStdDev /= xyStdDevMultiTagDivisor;
+          "Vision/" + io[cameraIndex].getName() + "/TagPoses", tagPoses.toArray(new Pose3d[0]));
+      Logger.recordOutput(
+          "Vision/" + io[cameraIndex].getName() + "/RobotPoses", robotPoses.toArray(new Pose3d[0]));
+      Logger.recordOutput(
+          "Vision/" + io[cameraIndex].getName() + "/RobotPosesAccepted",
+          robotPosesAccepted.toArray(new Pose3d[0]));
+      Logger.recordOutput(
+          "Vision/" + io[cameraIndex].getName() + "/RobotPosesRejected",
+          robotPosesRejected.toArray(new Pose3d[0]));
+      allTagPoses.addAll(tagPoses);
+      allRobotPoses.addAll(robotPoses);
+      allRobotPosesAccepted.addAll(robotPosesAccepted);
+      allRobotPosesRejected.addAll(robotPosesRejected);
     }
 
-    return VecBuilder.fill(xyStdDev, xyStdDev, thetaStdDev);
-  }
-
-  /**
-   * Get best target's field-relative Pose3d.
-   *
-   * @param cameraIndex Camera index (0=front left, 1=front right, 2=rear right)
-   * @return Optional with Pose3d if valid target exists
-   */
-  public Optional<Pose3d> getBestTargetFieldPose(int cameraIndex) {
-    if (cameraIndex < 0
-        || cameraIndex >= inputs.bestTargetId.length
-        || inputs.bestTargetId[cameraIndex] < 0) {
-      return Optional.empty();
-    }
-
-    Pose3d bestTargetFieldPose =
-        new Pose3d(
-            inputs.bestTargetFieldX[cameraIndex],
-            inputs.bestTargetFieldY[cameraIndex],
-            inputs.bestTargetFieldZ[cameraIndex],
-            new Rotation3d(
-                inputs.bestTargetFieldRotRoll[cameraIndex],
-                inputs.bestTargetFieldRotPitch[cameraIndex],
-                inputs.bestTargetFieldRotYaw[cameraIndex]));
-
+    // Log summary data
+    Logger.recordOutput("Vision/Summary/TagPoses", allTagPoses.toArray(new Pose3d[0]));
+    Logger.recordOutput("Vision/Summary/RobotPoses", allRobotPoses.toArray(new Pose3d[0]));
     Logger.recordOutput(
-        "Vision/Camera" + cameraIndex + "/BestTarget/FieldPose", bestTargetFieldPose);
+        "Vision/Summary/RobotPosesAccepted", allRobotPosesAccepted.toArray(new Pose3d[0]));
     Logger.recordOutput(
-        "Vision/Camera" + cameraIndex + "/BestTarget/TagID", inputs.bestTargetId[cameraIndex]);
-
-    return Optional.of(bestTargetFieldPose);
+        "Vision/Summary/RobotPosesRejected", allRobotPosesRejected.toArray(new Pose3d[0]));
   }
 
-  /**
-   * Check if camera has valid best target.
-   *
-   * @param cameraIndex Camera index (0=front left, 1=front right, 2=rear right)
-   * @return true if camera has valid best target
-   */
-  public boolean hasBestTarget(int cameraIndex) {
-    return cameraIndex >= 0
-        && cameraIndex < inputs.bestTargetId.length
-        && inputs.bestTargetId[cameraIndex] >= 0;
+  public Command disable() {
+    return this.runOnce(() -> disabled = true)
+        .andThen(Commands.idle())
+        .finallyDo(() -> disabled = false)
+        .withName("Disable Vision");
   }
 
-  /**
-   * Get the best target's AprilTag ID for the given camera.
-   *
-   * @param cameraIndex Camera index (0=front left, 1=front right, 2=rear right)
-   * @return AprilTag ID, or -1 if no valid best target
-   */
-  public int getBestTargetId(int cameraIndex) {
-    if (cameraIndex < 0 || cameraIndex >= inputs.bestTargetId.length) {
-      return -1;
-    }
-    return inputs.bestTargetId[cameraIndex];
+  public void setClimbing(boolean climbing) {
+    this.climbing = climbing;
+  }
+
+  @FunctionalInterface
+  public static interface VisionConsumer {
+    public void accept(
+        Pose2d visionRobotPoseMeters,
+        double timestampSeconds,
+        Matrix<N3, N1> visionMeasurementStdDevs);
   }
 }

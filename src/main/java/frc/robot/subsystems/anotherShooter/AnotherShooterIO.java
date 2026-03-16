@@ -16,8 +16,9 @@ public interface AnotherShooterIO {
     public boolean connected = false;
 
     public boolean isEnabled = false;
+    public boolean isAtGoal = false;
 
-    public AngularVelocity currentVelocity = RPM.of(0);
+    public double currentVelocityRPM = 0;
     public AngularVelocity velocityLeft = RPM.of(0);
     public AngularVelocity velocityRight = RPM.of(0);
 
@@ -30,7 +31,7 @@ public interface AnotherShooterIO {
     public double appliedOutputLeft = 0;
     public double appliedOutputRight = 0;
 
-    public AngularVelocity desiredRPM = RPM.of(0);
+    public double desiredRPM = 0;
 
     public double kP = GAINS.kP();
     public double kI = GAINS.kI();

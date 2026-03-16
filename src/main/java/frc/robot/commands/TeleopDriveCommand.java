@@ -4,7 +4,6 @@
 
 package frc.robot.commands;
 
-import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
@@ -25,7 +24,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.RobotContainer;
-import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.AkitDrive;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.util.SlewRateLimiter2d;
 import frc.robot.util.TunableControls.TunablePIDController;
@@ -37,7 +36,7 @@ import org.littletonrobotics.junction.Logger;
 
 /** Default drive command to run that drives based on controller input */
 public class TeleopDriveCommand extends Command {
-  private final Drive drive;
+  private final AkitDrive drive;
   private final DoubleSupplier xSupplier;
   private final DoubleSupplier ySupplier;
   private final DoubleSupplier omegaSupplier;
@@ -65,7 +64,7 @@ public class TeleopDriveCommand extends Command {
   @AutoLogOutput private double trenchLockAngle = 9999;
 
   /** Creates a new TeleopDrive. */
-  public TeleopDriveCommand(Drive drive, CommandXboxController controller) {
+  public TeleopDriveCommand(AkitDrive drive, CommandXboxController controller) {
     this.drive = drive;
     this.xSupplier = () -> -controller.getLeftY() * flipFactor;
     this.ySupplier = () -> -controller.getLeftX() * flipFactor;
@@ -182,7 +181,7 @@ public class TeleopDriveCommand extends Command {
     linearVelocity = driveLimiter.calculate(linearVelocity);
 
     switch (currentDriveMode) {
-      case NORMAL:
+      case NORMAL, TRENCH_LOCK, BUMP_LOCK:
         double omega =
             MathUtil.applyDeadband(omegaSupplier.getAsDouble(), ControllerConstants.DEADBAND);
         omega = Math.copySign(omega * omega, omega); // square for more precise rotation control
@@ -191,27 +190,6 @@ public class TeleopDriveCommand extends Command {
             MetersPerSecond.of(linearVelocity.getX()),
             MetersPerSecond.of(linearVelocity.getY()),
             maxRotSpeed.times(omega));
-        break;
-      case TRENCH_LOCK:
-        double yVel = trenchYController.calculate(drive.getPose().getY(), getTrenchY().in(Meters));
-        double rotSpeedToStraight =
-            rotationController.calculate(
-                drive.getRotation().getRadians(),
-                getTrenchLockAngle(drive.getRotation()).getRadians());
-        drive.driveFieldCentric(
-            MetersPerSecond.of(linearVelocity.getX()),
-            MetersPerSecond.of(yVel),
-            RadiansPerSecond.of(rotSpeedToStraight));
-        break;
-      case BUMP_LOCK:
-        double rotSpeedToDiagonal =
-            rotationController.calculate(
-                drive.getRotation().getRadians(),
-                getBumpLockAngle(drive.getRotation()).getRadians());
-        drive.driveFieldCentric(
-            MetersPerSecond.of(linearVelocity.getX()),
-            MetersPerSecond.of(linearVelocity.getY()),
-            RadiansPerSecond.of(rotSpeedToDiagonal));
         break;
       case HUB_LOCK:
         double rotSpeedToHub =
@@ -241,8 +219,20 @@ public class TeleopDriveCommand extends Command {
           setRotSpeed(DriveConstants.FAST_ROT_SPEED);
         },
         () -> {
-          setDriveSpeed(DriveConstants.DEFAULT_DRIVE_SPEED);
-          setRotSpeed(DriveConstants.DEFAULT_ROT_SPEED);
+          setDriveSpeed(DriveConstants.SLOW_DRIVE_SPEED);
+          setRotSpeed(DriveConstants.SLOW_ROT_SPEED);
+        });
+  }
+
+  public Command slowDownCommand() {
+    return Commands.startEnd(
+        () -> {
+          setDriveSpeed(DriveConstants.SLOW_DRIVE_SPEED);
+          setRotSpeed(DriveConstants.SLOW_ROT_SPEED);
+        },
+        () -> {
+          setDriveSpeed(DriveConstants.FAST_DRIVE_SPEED);
+          setRotSpeed(DriveConstants.SLOW_ROT_SPEED);
         });
   }
 

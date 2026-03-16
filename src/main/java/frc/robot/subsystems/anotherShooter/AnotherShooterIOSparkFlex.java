@@ -37,6 +37,7 @@ public class AnotherShooterIOSparkFlex implements AnotherShooterIO {
       new SimpleMotorFeedforward(GAINS.kS(), GAINS.kV(), GAINS.kA());
 
   private boolean shooterIsEnabled = false;
+  private AngularVelocity desiredRPM = RPM.of(0);
 
   public AnotherShooterIOSparkFlex() {
     // Setup configuration for the left motor
@@ -92,8 +93,11 @@ public class AnotherShooterIOSparkFlex implements AnotherShooterIO {
   public void updateInputs(AnotherShooterIOInputs inputs) {
 
     inputs.isEnabled = shooterIsEnabled;
+    inputs.isAtGoal = leftController.isAtSetpoint();
 
-    inputs.currentVelocity = RPM.of(leftEncoder.getVelocity() * FLYWHEEL_CONFIG.REDUCTION());
+    inputs.desiredRPM = desiredRPM.in(RPM);
+
+    inputs.currentVelocityRPM = leftEncoder.getVelocity() * FLYWHEEL_CONFIG.REDUCTION();
 
     inputs.velocityLeft = RPM.of(leftEncoder.getVelocity());
     inputs.velocityRight = RPM.of(rightMotor.getEncoder().getVelocity());
@@ -110,6 +114,7 @@ public class AnotherShooterIOSparkFlex implements AnotherShooterIO {
 
   @Override
   public void start(AngularVelocity new_RPM) {
+    desiredRPM = new_RPM;
     leftController.setSetpoint(new_RPM.in(RPM), ControlType.kVelocity, ClosedLoopSlot.kSlot0);
 
     shooterIsEnabled = true;
@@ -123,6 +128,7 @@ public class AnotherShooterIOSparkFlex implements AnotherShooterIO {
 
   @Override
   public void setVelocity(AngularVelocity new_RPM) {
+    desiredRPM = new_RPM;
     if (shooterIsEnabled) {
       leftController.setSetpoint(new_RPM.in(RPM), ControlType.kVelocity, ClosedLoopSlot.kSlot0);
     }

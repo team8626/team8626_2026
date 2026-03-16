@@ -21,7 +21,8 @@ import frc.robot.Constants;
 public class IntakeRollerConstants {
 
   // Tuned Values
-  public static final AngularVelocity DEFAULT_VELOCITY = RPM.of(500);
+  public static final AngularVelocity DEFAULT_VELOCITY = RPM.of(750);
+  public static final AngularVelocity PLOW_VELOCITY = RPM.of(-1000);
 
   public static final Current MAX_CURRENT = Amps.of(50);
 
@@ -32,14 +33,15 @@ public class IntakeRollerConstants {
   // Flywheel Config
   public static final RollerConfig ROLLER_CONFIG =
       switch (Constants.robot) {
-        case REBUILT_COMPBOT -> new RollerConfig(1, false, Amps.of(50), 1.0 / 1.0, 2 * MOI);
+        case REBUILT_PHOENIX, REBUILT_AKIT -> new RollerConfig(
+            1, false, Amps.of(50), 1.0 / 1.0, 2 * MOI);
         default -> new RollerConfig(1, false, Amps.of(50), 1.0 / 1.0, 2 * MOI);
       };
 
   // PID Constants
   public static final Gains GAINS =
       switch (Constants.robot) {
-        case REBUILT_COMPBOT -> new Gains(0.0001, 0.0, 0.0, 0.00015, 0.01, 0.0);
+        case REBUILT_PHOENIX, REBUILT_AKIT -> new Gains(0.0001, 0.0, 0.0, 0.00015, 0.01, 0.0);
         default -> new Gains(0.05, 0.0, 0.0, 0.10395, 0.00296, 0.0);
       };
 

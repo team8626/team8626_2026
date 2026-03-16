@@ -39,7 +39,7 @@ public class AnotherShooterIOSim implements AnotherShooterIO {
 
     inputs.isEnabled = isEnabled;
 
-    inputs.currentVelocity = RPM.of(leftSim.getAngularVelocityRPM() * FLYWHEEL_CONFIG.REDUCTION());
+    inputs.currentVelocityRPM = leftSim.getAngularVelocityRPM() * FLYWHEEL_CONFIG.REDUCTION();
 
     inputs.velocityLeft = RPM.of(leftSim.getAngularVelocityRPM());
     inputs.velocityRight = RPM.of(rightSim.getAngularVelocityRPM());

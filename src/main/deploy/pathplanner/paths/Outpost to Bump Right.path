@@ -8,30 +8,42 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.4175854705913302,
-        "y": 0.6715056818181824
+        "x": -0.3454410445601853,
+        "y": 0.24560555555555524
       },
       "isLocked": false,
       "linkedName": "Outpost"
     },
     {
       "anchor": {
-        "x": 3.3,
-        "y": 0.65
+        "x": 3.570874803795662,
+        "y": 2.031362193207763
       },
       "prevControl": {
-        "x": 2.6057007575757574,
-        "y": 0.6632007575757565
+        "x": 3.247374803795662,
+        "y": 1.471043756959231
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Dump Right"
+      "linkedName": null
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.67,
+      "rotationDegrees": 59.99999999999999
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "RampUp",
+      "waypointRelativePos": 0.7621859426910295,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
@@ -42,7 +54,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": 59.99999999999999
   },
   "reversed": false,
   "folder": null,

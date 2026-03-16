@@ -19,8 +19,11 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.EventTrigger;
@@ -37,23 +40,31 @@ import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.Constants.Dimensions;
 import frc.robot.Constants.Mode;
-import frc.robot.commands.AlignToTargetCommand;
+import frc.robot.commands.AgitateCommand;
+import frc.robot.commands.AnotherShooterRampupCommand;
+import frc.robot.commands.AnotherShooterStopCommand;
+import frc.robot.commands.CollectCommand;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IndexerStartCommand;
+import frc.robot.commands.IndexerStopCommand;
 import frc.robot.commands.TeleopDriveCommand;
+import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.anotherShooter.AnotherShooter;
 import frc.robot.subsystems.anotherShooter.AnotherShooterConstants;
 import frc.robot.subsystems.anotherShooter.AnotherShooterIO;
 import frc.robot.subsystems.anotherShooter.AnotherShooterIOSim;
 import frc.robot.subsystems.anotherShooter.AnotherShooterIOSparkFlex;
-import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberIO;
+import frc.robot.subsystems.climber.ClimberIOSim;
+import frc.robot.subsystems.climber.ClimberIOSpark;
+import frc.robot.subsystems.drive.AkitDrive;
+import frc.robot.subsystems.drive.CommandSwerveDrivetrain;
 import frc.robot.subsystems.drive.DriveConstants.Rebuilt_SwerveConstants;
 import frc.robot.subsystems.drive.GyroIO;
-import frc.robot.subsystems.drive.GyroIOADIS16470;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSimTalonFX;
-import frc.robot.subsystems.drive.ModuleIOSpark;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.hopper.HopperIO;
@@ -68,13 +79,13 @@ import frc.robot.subsystems.intakeLinkage.IntakeLinkageIO;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkageIOSim;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkageIOSpark;
 import frc.robot.subsystems.intakeRoller.IntakeRoller;
+import frc.robot.subsystems.intakeRoller.IntakeRollerConstants;
 import frc.robot.subsystems.intakeRoller.IntakeRollerIO;
-import frc.robot.subsystems.intakeRoller.IntakeRollerIOSim;
 import frc.robot.subsystems.intakeRoller.IntakeRollerIOSpark;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
-import frc.robot.subsystems.vision.VisionIOSim;
 import frc.robot.util.FuelSim;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
@@ -88,34 +99,44 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  */
 public class RobotContainer {
   // Subsystems
-  public final Drive drive;
+  public final AkitDrive akitDrive;
   private final Indexer index;
   private final IntakeLinkage intakeLinkage;
   private final IntakeRoller intakeRoller;
   private final Hopper hopper;
   private final AnotherShooter anotherShooter;
-  //   private final Climber climber;
+
+  public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+
+  private final Climber climber;
 
   private final Vision vision;
 
   // Controller
   private static final CommandXboxController controller =
       new CommandXboxController(ControllerConstants.DRIVERPORT);
+  private static final CommandXboxController operator =
+      new CommandXboxController(ControllerConstants.OPERATORPORT);
   // Commands
   private final TeleopDriveCommand teleopDrive;
 
   // Triggers for Bindings
-  private static final Trigger indexTrigger = controller.a();
-  private static final Trigger intakeRollerTrigger = controller.b();
+  private static final Trigger testIndexTrigger = operator.a();
+  private static final Trigger testIntakeRollerTrigger = operator.b();
+  private static final Trigger testShootTrigger = operator.leftTrigger();
+  //   private static final Trigger testIndexAndShootTrigger = operator.rightTrigger();
+  private static final Trigger testIntakeDeployTrigger = operator.leftBumper();
 
-  private static final Trigger shootTrigger = controller.leftTrigger();
-  private static final Trigger indexAndShootTrigger = controller.rightTrigger();
-  private static final Trigger intakeDeployTrigger = controller.leftBumper();
+  private static final Trigger collectTrigger = controller.leftBumper();
+  // private static final Trigger collectTriggerHold = controller.leftTrigger();
+  private static final Trigger plowTrigger = controller.x();
+  private static final Trigger plowTriggerHold = controller.leftTrigger();
+  private static final Trigger agitateTrigger = controller.y();
 
-  private static final Trigger driverAimTrigger = controller.y();
+  private static final Trigger dumpHopperTrigger = controller.rightTrigger();
+  private static final Trigger dumpHopperAutoTrigger = controller.rightBumper();
 
-  private static final Trigger climberReleaseTrigger = controller.povUp();
-  private static final Trigger climberPullrigger = controller.povDown();
+  private static final Trigger driverAimTrigger = controller.a();
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -128,8 +149,8 @@ public class RobotContainer {
 
     if (Constants.currentMode == Mode.SIM) {
       // Simulation: use physics sim IO (automatically detected via RobotBase.isReal())
-      drive =
-          new Drive(
+      akitDrive =
+          new AkitDrive(
               new GyroIO() {},
               new ModuleIOSimTalonFX(Rebuilt_SwerveConstants.FrontLeft.MODULE_CONSTANTS),
               new ModuleIOSimTalonFX(Rebuilt_SwerveConstants.FrontRight.MODULE_CONSTANTS),
@@ -140,21 +161,21 @@ public class RobotContainer {
       intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
       hopper = new Hopper(new HopperIOSim());
       anotherShooter = new AnotherShooter(new AnotherShooterIOSim());
-      //   climber = new Climber(new ClimberIOSim() {});
-
+      climber = new Climber(new ClimberIOSim() {});
       vision =
           new Vision(
-              new VisionIOSim(),
-              (measurement) ->
-                  drive.addVisionMeasurement(
-                      measurement.pose, measurement.timestamp, measurement.stdDevs));
-      vision.setPoseSupplier(drive::getPose);
+              akitDrive::addVisionMeasurement,
+              new VisionIO() {},
+              new VisionIO() {},
+              new VisionIO() {});
+
+      //   vision.setPoseSupplier(drive::getPose);
       configureFuelSim();
       configureFuelSimRobot(hopper::ableToIntake, hopper::pushFuel);
     } else if (Constants.currentMode == Mode.REPLAY) {
       // Replay: no hardware IO
-      drive =
-          new Drive(
+      akitDrive =
+          new AkitDrive(
               new GyroIO() {},
               new ModuleIO() {},
               new ModuleIO() {},
@@ -166,39 +187,47 @@ public class RobotContainer {
       intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
       hopper = new Hopper(new HopperIO() {});
       anotherShooter = new AnotherShooter(new AnotherShooterIO() {});
-      //   climber = new Climber(new ClimberIO() {});
+      climber = new Climber(new ClimberIO() {});
 
-      vision = new Vision(new VisionIO() {}, (measurement) -> {});
+      vision =
+          new Vision(
+              akitDrive::addVisionMeasurement,
+              new VisionIO() {},
+              new VisionIO() {},
+              new VisionIO() {});
     } else {
       switch (Constants.robot) {
-        case TSUNAMI:
-          // DEV bot on Spark
-          drive =
-              new Drive(
-                  new GyroIOADIS16470(),
-                  new ModuleIOSpark(0),
-                  new ModuleIOSpark(1),
-                  new ModuleIOSpark(2),
-                  new ModuleIOSpark(3));
+        case REBUILT_PHOENIX:
+          akitDrive =
+              new AkitDrive(
+                  new GyroIO() {},
+                  new ModuleIO() {},
+                  new ModuleIO() {},
+                  new ModuleIO() {},
+                  new ModuleIO() {});
 
-          index = new Indexer(new IndexerIOSim());
-          intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSim());
-          intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
-          hopper = new Hopper(new HopperIOSim());
-          anotherShooter = new AnotherShooter(new AnotherShooterIOSim());
+          index = new Indexer(new IndexerIOSpark() {});
+          intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSpark() {});
+          intakeRoller = new IntakeRoller(new IntakeRollerIOSpark() {});
+          hopper = new Hopper(new HopperIO() {});
+          anotherShooter = new AnotherShooter(new AnotherShooterIOSparkFlex());
+          climber = new Climber(new ClimberIOSpark() {});
 
-          //   climber = new Climber(new ClimberIO() {});
           vision =
               new Vision(
-                  new VisionIOPhotonVision(),
-                  (measurement) ->
-                      drive.addVisionMeasurement(
-                          measurement.pose, measurement.timestamp, measurement.stdDevs));
+                  akitDrive::addVisionMeasurement,
+                  new VisionIOPhotonVision(
+                      VisionConstants.CAMERA_NAMES[0], VisionConstants.CAMERA_TRANSFORMS[0]),
+                  new VisionIOPhotonVision(
+                      VisionConstants.CAMERA_NAMES[1], VisionConstants.CAMERA_TRANSFORMS[1]),
+                  new VisionIOPhotonVision(
+                      VisionConstants.CAMERA_NAMES[2], VisionConstants.CAMERA_TRANSFORMS[2]));
+
           break;
-        case REBUILT_COMPBOT:
+        case REBUILT_AKIT:
           // Real robot, full hardware IO
-          drive =
-              new Drive(
+          akitDrive =
+              new AkitDrive(
                   new GyroIOPigeon2(),
                   new ModuleIOTalonFX(Rebuilt_SwerveConstants.FrontLeft.MODULE_CONSTANTS),
                   new ModuleIOTalonFX(Rebuilt_SwerveConstants.FrontRight.MODULE_CONSTANTS),
@@ -210,37 +239,20 @@ public class RobotContainer {
           intakeRoller = new IntakeRoller(new IntakeRollerIOSpark() {});
           hopper = new Hopper(new HopperIO() {});
           anotherShooter = new AnotherShooter(new AnotherShooterIOSparkFlex());
-          //   climber = new Climber(new ClimberIO() {});
+          climber = new Climber(new ClimberIOSpark() {});
 
           vision =
               new Vision(
-                  new VisionIOPhotonVision(),
-                  (measurement) ->
-                      drive.addVisionMeasurement(
-                          measurement.pose, measurement.timestamp, measurement.stdDevs));
+                  akitDrive::addVisionMeasurement,
+                  new VisionIOPhotonVision(
+                      VisionConstants.CAMERA_NAMES[0], VisionConstants.CAMERA_TRANSFORMS[0]),
+                  new VisionIOPhotonVision(
+                      VisionConstants.CAMERA_NAMES[1], VisionConstants.CAMERA_TRANSFORMS[1]),
+                  new VisionIOPhotonVision(
+                      VisionConstants.CAMERA_NAMES[2], VisionConstants.CAMERA_TRANSFORMS[2]));
 
           break;
 
-        case REBUILT_DRIVE_ONLY:
-          // Real robot, drive only
-          drive =
-              new Drive(
-                  new GyroIOPigeon2(),
-                  new ModuleIOTalonFX(Rebuilt_SwerveConstants.FrontLeft.MODULE_CONSTANTS),
-                  new ModuleIOTalonFX(Rebuilt_SwerveConstants.FrontRight.MODULE_CONSTANTS),
-                  new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackLeft.MODULE_CONSTANTS),
-                  new ModuleIOTalonFX(Rebuilt_SwerveConstants.BackRight.MODULE_CONSTANTS));
-
-          index = new Indexer(new IndexerIO() {});
-          intakeLinkage = new IntakeLinkage(new IntakeLinkageIO() {});
-          intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
-          hopper = new Hopper(new HopperIO() {});
-          anotherShooter = new AnotherShooter(new AnotherShooterIOSparkFlex());
-          //   climber = new Climber(new ClimberIO() {});
-
-          vision = new Vision(new VisionIO() {}, (measurement) -> {});
-
-          break;
         default:
           throw new IllegalStateException("Unexpected robot: " + Constants.robot);
       }
@@ -255,7 +267,7 @@ public class RobotContainer {
     configureSysIdRoutines();
 
     // Set up commands
-    teleopDrive = new TeleopDriveCommand(drive, controller);
+    teleopDrive = new TeleopDriveCommand(akitDrive, controller);
 
     // Configure the button bindings
     configureButtonBindings();
@@ -273,21 +285,100 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     // Default command, normal field-relative drive
-    drive.setDefaultCommand(teleopDrive);
+
+    double MaxSpeed =
+        1.0
+            * TunerConstants.kSpeedAt12Volts.in(
+                MetersPerSecond); // kSpeedAt12Volts desired top speed
+    double MaxAngularRate =
+        RotationsPerSecond.of(0.75)
+            .in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+
+    SwerveRequest.FieldCentric drive =
+        new SwerveRequest.FieldCentric()
+            .withDeadband(MaxSpeed * 0.1)
+            .withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+            .withDriveRequestType(
+                DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+
+    switch (Constants.robot) {
+      case REBUILT_PHOENIX:
+        drivetrain.setDefaultCommand(
+            // Drivetrain will execute this command periodically
+            drivetrain.applyRequest(
+                () ->
+                    drive
+                        .withVelocityX(
+                            -controller.getLeftY()
+                                * MaxSpeed) // Drive forward with negative Y (forward)
+                        .withVelocityY(
+                            -controller.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                        .withRotationalRate(
+                            -controller.getRightX()
+                                * MaxAngularRate) // Drive counterclockwise with negative X (left)
+                ));
+        break;
+
+      case REBUILT_AKIT:
+        akitDrive.setDefaultCommand(teleopDrive);
+        break;
+
+      default:
+    }
 
     // Switch to X pattern when X button is pressed
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    // controller.x().onTrue(Commands.runOnce(akitDrive::stopWithX, akitDrive));
+
+    collectTrigger.toggleOnTrue(new CollectCommand(intakeLinkage, intakeRoller));
+
+    plowTrigger.toggleOnTrue(
+        Commands.defer(
+            () ->
+                new CollectCommand(
+                    () -> IntakeLinkageConstants.PLOW_ANGLE,
+                    () -> IntakeRollerConstants.PLOW_VELOCITY,
+                    intakeLinkage,
+                    intakeRoller),
+            Set.of(intakeLinkage, intakeRoller)));
+
+    plowTriggerHold.whileTrue(
+        Commands.defer(
+            () ->
+                new CollectCommand(
+                    () -> IntakeLinkageConstants.PLOW_ANGLE,
+                    () -> IntakeRollerConstants.PLOW_VELOCITY,
+                    intakeLinkage,
+                    intakeRoller),
+            Set.of(intakeLinkage, intakeRoller)));
+
+    agitateTrigger.whileTrue(new AgitateCommand(intakeLinkage));
+
+    dumpHopperTrigger
+        .whileTrue(
+            Commands.sequence(
+                new AnotherShooterRampupCommand(anotherShooter),
+                Commands.parallel(
+                    new IndexerStartCommand(index), new AgitateCommand(intakeLinkage))))
+        .onFalse(Commands.runOnce(() -> anotherShooter.stop(), anotherShooter));
+
+    // dumpHopperTrigger
+    //     .whileTrue(
+    //         Commands.runOnce(() -> anotherShooter.start(RPM.of(2500)), anotherShooter)
+    //             .alongWith(Commands.runOnce(() -> index.start(), index)))
+    //     .onFalse(
+    //         Commands.runOnce(() -> anotherShooter.stop(), anotherShooter)
+    //             .alongWith(Commands.runOnce(() -> index.stop(), index)));
 
     // Align to camera's best AprilTag: POV Left = front left, POV Up = front right, POV Right =
     // rear right
-    controller.povLeft().whileTrue(AlignToTargetCommand.alignToFrontLeftCamera(drive, vision));
-    controller.povRight().whileTrue(AlignToTargetCommand.alignToFrontRightCamera(drive, vision));
-    controller.povDown().whileTrue(AlignToTargetCommand.alignToRearRightCamera(drive, vision));
+    // controller.povLeft().whileTrue(AlignToTargetCommand.alignToFrontLeftCamera(drive, vision));
+    // controller.povRight().whileTrue(AlignToTargetCommand.alignToFrontRightCamera(drive, vision));
+    // controller.povDown().whileTrue(AlignToTargetCommand.alignToRearRightCamera(drive, vision));
 
     // Run the intake roller at 500 RPM while the B button is held, stop when released
     // TODO: Should be replace with a proper command ("Start/Stop CollectCommand"), this is just for
     // testing
-    intakeRollerTrigger
+    testIntakeRollerTrigger
         .whileTrue(Commands.runOnce(() -> intakeRoller.start(RPM.of(1000)), intakeRoller))
         .onFalse(Commands.runOnce(intakeRoller::stop, intakeRoller));
 
@@ -295,7 +386,7 @@ public class RobotContainer {
     // back to stowed position when released
     // TODO: Should be replace with a proper command ("Start/Stop CollectCommand"), this is just for
     // testing
-    intakeDeployTrigger
+    testIntakeDeployTrigger
         .whileTrue(
             Commands.runOnce(
                 () -> intakeLinkage.setPosition(IntakeLinkageConstants.STOW_ANGLE), intakeLinkage))
@@ -310,16 +401,12 @@ public class RobotContainer {
     // climberPullrigger.whileTrue(
     //     Commands.runOnce(() -> climber.runOpenLoop(Volts.of(-6.0)), climber));
 
-    // TODO: This is for testing only, replace with proper commands once anotherShooter and indexer
-    // functionality are tested
-    indexTrigger
+    testIndexTrigger
         .onTrue(Commands.runOnce(() -> index.start(), index))
         .onFalse(Commands.runOnce(() -> index.stop(), index));
 
     // shootTrigger.whileTrue(new IndexAndShootCommand(anotherShooter, hopper, index, drive));
-    // shootUpdateVelocityTrigger.onTrue(anotherShooter.updateVelocityCommand());
-
-    shootTrigger
+    testShootTrigger
         .whileTrue(Commands.runOnce(() -> anotherShooter.start(RPM.of(2500)), anotherShooter))
         .onFalse(Commands.runOnce(() -> anotherShooter.stop(), anotherShooter));
   }
@@ -344,8 +431,8 @@ public class RobotContainer {
         Dimensions.FULL_WIDTH.in(Meters),
         Dimensions.FULL_LENGTH.in(Meters),
         Dimensions.BUMPER_HEIGHT.in(Meters),
-        drive::getPose,
-        drive::getFieldSpeeds);
+        akitDrive::getPose,
+        akitDrive::getFieldSpeeds);
 
     fuelSim.registerIntake(
         Dimensions.FULL_LENGTH.div(2).in(Meters),
@@ -379,17 +466,57 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "AimAndDumpShort",
         Commands.defer(
-                () -> new IndexerStartCommand(index), Set.of(index, /* anotherShooter, */ drive))
+                () ->
+                    Commands.sequence(
+                        new AnotherShooterRampupCommand(anotherShooter),
+                        Commands.parallel(
+                            new IndexerStartCommand(index), new AgitateCommand(intakeLinkage))),
+                Set.of(index, anotherShooter, intakeLinkage))
             .withTimeout(AutoConstants.DUMP_DURATION_SHORT.in(Seconds)));
     NamedCommands.registerCommand(
         "AimAndDumpMedium",
         Commands.defer(
-                () -> new IndexerStartCommand(index), Set.of(index, /* anotherShooter, */ drive))
+                () ->
+                    Commands.sequence(
+                        new AnotherShooterRampupCommand(anotherShooter),
+                        Commands.parallel(
+                            new IndexerStartCommand(index), new AgitateCommand(intakeLinkage))),
+                Set.of(index, anotherShooter, intakeLinkage))
             .withTimeout(AutoConstants.DUMP_DURATION_MEDIUM.in(Seconds)));
     NamedCommands.registerCommand(
         "AimAndDumpLong",
         Commands.defer(
-                () -> new IndexerStartCommand(index), Set.of(index, /* anotherShooter, */ drive))
+                () ->
+                    Commands.sequence(
+                            new AnotherShooterRampupCommand(anotherShooter),
+                            Commands.parallel(
+                                new IndexerStartCommand(index), new AgitateCommand(intakeLinkage)))
+                        .handleInterrupt(
+                            () ->
+                                new AnotherShooterStopCommand(anotherShooter)
+                                    .andThen(new IndexerStopCommand(index))
+                                    .andThen(
+                                        Commands.runOnce(
+                                            () -> intakeLinkage.stow(), intakeLinkage))),
+                Set.of(index, anotherShooter, intakeLinkage))
+            .withTimeout(AutoConstants.DUMP_DURATION_LONG.in(Seconds)));
+
+    //     (index), Set.of(index, /* anotherShooter, */ drive))
+    // .withTimeout(AutoConstants.DUMP_DURATION_LONG.in(Seconds)));
+
+    // dumpHopperTrigger
+    //     .whileTrue(
+    //         Commands.runOnce(() -> anotherShooter.start(RPM.of(2500)), anotherShooter)
+    //             .alongWith(Commands.runOnce(() -> index.start(), index)))
+    //     .onFalse(
+    //         Commands.runOnce(() -> anotherShooter.stop(), anotherShooter)
+    //             .alongWith(Commands.runOnce(() -> index.stop(), index)));
+
+    NamedCommands.registerCommand(
+        "AutoAimAndDumpLong",
+        Commands.defer(
+                () -> new IndexerStartCommand(index),
+                Set.of(index, /* anotherShooter, */ akitDrive))
             .withTimeout(AutoConstants.DUMP_DURATION_LONG.in(Seconds)));
   }
 
@@ -398,10 +525,15 @@ public class RobotContainer {
    * commands that need to be triggered by events in the middle of paths.
    */
   private void configurePPEventTriggers() {
-    new EventTrigger("CollectStart")
-        .whileTrue(Commands.print("--- PP Event Trigger - CollectStart"));
-    new EventTrigger("CollectDone").whileTrue(Commands.print("--- PP Event Trigger - CollectDone"));
-    new EventTrigger("RampUp").whileTrue(Commands.print("--- PP Event Trigger - RampUp"));
+    new EventTrigger("CollectStart").whileTrue(new CollectCommand(intakeLinkage, intakeRoller));
+    new EventTrigger("CollectDone")
+        .whileTrue(
+            Commands.runOnce(() -> intakeRoller.stop(), intakeRoller)
+                .alongWith(Commands.runOnce(() -> intakeLinkage.stow())));
+    new EventTrigger("RampUp").whileTrue(new AnotherShooterRampupCommand(anotherShooter));
+    new EventTrigger("StopDump")
+        .whileTrue(
+            new IndexerStopCommand(index).alongWith(new AnotherShooterStopCommand(anotherShooter)));
   }
 
   /**
@@ -410,25 +542,25 @@ public class RobotContainer {
    */
   private void configureSysIdRoutines() {
     SmartDashboard.putData(
-        DriveCommands.wheelRadiusCharacterization(drive)
+        DriveCommands.wheelRadiusCharacterization(akitDrive)
             .withName("Characterization/Drive Wheel Radius"));
     SmartDashboard.putData(
-        DriveCommands.feedforwardCharacterization(drive)
+        DriveCommands.feedforwardCharacterization(akitDrive)
             .withName("Characterization/Drive Simple FF"));
     SmartDashboard.putData(
-        drive
+        akitDrive
             .sysIdQuasistatic(SysIdRoutine.Direction.kForward)
             .withName("Characterization/Drive Quasistatic Forward"));
     SmartDashboard.putData(
-        drive
+        akitDrive
             .sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
             .withName("Characterization/Drive Quasistatic Reverse"));
     SmartDashboard.putData(
-        drive
+        akitDrive
             .sysIdDynamic(SysIdRoutine.Direction.kForward)
             .withName("Characterization/Drive Dynamic Forward"));
     SmartDashboard.putData(
-        drive
+        akitDrive
             .sysIdDynamic(SysIdRoutine.Direction.kReverse)
             .withName("Characterization/Drive Dynamic Reverse"));
     SmartDashboard.putData(

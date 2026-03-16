@@ -21,7 +21,7 @@ import frc.robot.Constants;
 public class IndexerConstants {
 
   // Tuned Values
-  public static final AngularVelocity DEFAULT_VELOCITY = RevolutionsPerSecond.of(15);
+  public static final AngularVelocity DEFAULT_VELOCITY = RevolutionsPerSecond.of(30);
 
   public static final Current MAX_CURRENT = Amps.of(50);
 
@@ -32,14 +32,15 @@ public class IndexerConstants {
   // Flywheel Config
   public static final FlywheelConfig FLYWHEEL_CONFIG =
       switch (Constants.robot) {
-        case REBUILT_COMPBOT -> new FlywheelConfig(3, false, Amps.of(50), 3.0 / 1.0, 2 * MOI);
+        case REBUILT_PHOENIX, REBUILT_AKIT -> new FlywheelConfig(
+            3, false, Amps.of(50), 3.0 / 1.0, 2 * MOI);
         default -> new FlywheelConfig(0, false, Amps.of(50), 3.0 / 1.0, 2 * MOI);
       };
 
   // PID Constants
   public static final Gains GAINS =
       switch (Constants.robot) {
-        case REBUILT_COMPBOT -> new Gains(2.0e-7, 0.0, 1.0e-3, 9.0e-4, 8.5e-4, 0.0);
+        case REBUILT_PHOENIX, REBUILT_AKIT -> new Gains(2.0e-7, 0.0, 1.0e-3, 9.0e-4, 8.5e-4, 0.0);
         default -> new Gains(0.05, 0.0, 0.0, 0.10395, 0.00296, 0.0);
       };
 

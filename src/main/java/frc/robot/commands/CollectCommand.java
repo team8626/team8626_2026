@@ -1,0 +1,60 @@
+package frc.robot.commands;
+
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.intakeLinkage.IntakeLinkage;
+import frc.robot.subsystems.intakeLinkage.IntakeLinkageConstants;
+import frc.robot.subsystems.intakeRoller.IntakeRoller;
+import frc.robot.subsystems.intakeRoller.IntakeRollerConstants;
+import java.util.function.Supplier;
+
+public class CollectCommand extends Command {
+
+  private final IntakeLinkage linkage;
+  private final IntakeRoller roller;
+
+  private Supplier<AngularVelocity> targetVelocitySupplier;
+  private Supplier<Angle> targetAngleSupplier;
+
+  public CollectCommand(IntakeLinkage linkage, IntakeRoller roller) {
+    this(() -> IntakeRollerConstants.DEFAULT_VELOCITY, linkage, roller);
+  }
+
+  public CollectCommand(
+      Supplier<AngularVelocity> velocitySupplier, IntakeLinkage linkage, IntakeRoller roller) {
+    this(() -> IntakeLinkageConstants.DEPLOY_ANGLE, velocitySupplier, linkage, roller);
+  }
+
+  public CollectCommand(
+      Supplier<Angle> angleSupplier,
+      Supplier<AngularVelocity> velocitySupplier,
+      IntakeLinkage linkage,
+      IntakeRoller roller) {
+    this.linkage = linkage;
+    this.roller = roller;
+    this.targetVelocitySupplier = velocitySupplier;
+    this.targetAngleSupplier = angleSupplier;
+    addRequirements(linkage, roller);
+  }
+
+  @Override
+  public void initialize() {
+    linkage.setPosition(targetAngleSupplier.get());
+    roller.start(targetVelocitySupplier.get());
+  }
+
+  @Override
+  public void execute() {}
+
+  @Override
+  public void end(boolean interrupted) {
+    linkage.stow();
+    roller.stop();
+  }
+
+  @Override
+  public boolean isFinished() {
+    return false; // Runs until interrupted
+  }
+}

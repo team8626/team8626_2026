@@ -5,15 +5,27 @@
     "data": {
       "commands": [
         {
+          "type": "path",
+          "data": {
+            "pathName": "Start Middle - Backup"
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "AimAndDumpLong"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Middle to Start"
           }
         }
       ]
     }
   },
-  "resetOdom": false,
+  "resetOdom": true,
   "folder": null,
   "choreoAuto": false
 }

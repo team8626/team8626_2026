@@ -8,19 +8,19 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.8131111111111102,
-        "y": 2.013027777777778
+        "x": 2.768688078703704,
+        "y": 1.9727953559027775
       },
       "isLocked": false,
       "linkedName": "Bump Start Right"
     },
     {
       "anchor": {
-        "x": 0.75,
+        "x": 0.45847562210648196,
         "y": 0.65
       },
       "prevControl": {
-        "x": 1.3638999999999994,
+        "x": 1.0723756221064815,
         "y": 0.8546333333333326
       },
       "nextControl": null,
@@ -31,7 +31,14 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "StopDump",
+      "waypointRelativePos": 0.11766767026578075,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,

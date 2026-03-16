@@ -51,7 +51,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class Drive extends SubsystemBase {
+public class AkitDrive extends SubsystemBase {
   static final Lock odometryLock = new ReentrantLock();
   private final GyroIO gyroIO;
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
@@ -72,7 +72,7 @@ public class Drive extends SubsystemBase {
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
-  public Drive(
+  public AkitDrive(
       GyroIO gyroIO,
       ModuleIO flModuleIO,
       ModuleIO frModuleIO,
@@ -88,7 +88,7 @@ public class Drive extends SubsystemBase {
     HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_AdvantageKit);
 
     // Start odometry thread
-    SparkOdometryThread.getInstance().start();
+    PhoenixOdometryThread.getInstance().start();
 
     // Configure AutoBuilder for PathPlanner (only if not already configured)
     if (!AutoBuilder.isConfigured()) {
