@@ -24,19 +24,16 @@ public class IntakeLinkageConstants {
   public static final boolean MOTOR_INVERTED = false;
   public static final Current MOTOR_CURRENT_LIMIT = Amps.of(40);
 
-  public static final Angle MIN_ANGLE =
-      Degrees.of(80); // TODO: Set actual min angle (fully retracted)
-  public static final Angle MAX_ANGLE = Degrees.of(180);
-  public static final Angle STARTING_ANGLE =
-      Degrees.of(
-          90); // TODO: Set actual starting angle (where the intake starts at the beginning of a
-  // match)
+  public static final Angle MIN_ANGLE = Degrees.of(80);
+  public static final Angle MAX_ANGLE = Degrees.of(220);
+
   public static final Angle STOW_ANGLE = Degrees.of(120);
   public static final Angle AGITAGE_ANGLE = Degrees.of(110);
   public static final Angle DEPLOY_ANGLE = Degrees.of(192);
   public static final Angle PLOW_ANGLE = Degrees.of(210);
-  public static final Angle HOPPER_OPEN_ANGLE =
-      Degrees.of(175); // TODO: Set actual score angle (where the intake should be when scoring)
+  public static final Angle HOPPER_OPEN_ANGLE = Degrees.of(175);
+
+  public static final Angle STARTING_ANGLE = STOW_ANGLE;
 
   public static final Time AGITATE_PERIOD = Seconds.of(.4);
 
@@ -48,12 +45,11 @@ public class IntakeLinkageConstants {
 
   public static final Angle TOLERANCE = Degrees.of(4);
 
-  public static final Distance ARM_LENGTH =
-      Inches.of(14); // TODO: Set actual arm length (center of rotation to center of intake)
-  public static final Mass ARM_MASS = Pounds.of(5.595);
-  public static final MomentOfInertia ARM_INERTIA = KilogramSquareMeters.of(0.16995);
   // Mechanical configuration
   public static final double GEAR_REDUCTION = 80.0 / 1.0;
+  public static final Distance ARM_LENGTH = Inches.of(14);
+  public static final Mass ARM_MASS = Pounds.of(5.595);
+  public static final MomentOfInertia ARM_INERTIA = KilogramSquareMeters.of(0.16995);
 
   // Encoder conversion factors
   public static final double ENCODER_POSITION_FACTOR = 360.0;

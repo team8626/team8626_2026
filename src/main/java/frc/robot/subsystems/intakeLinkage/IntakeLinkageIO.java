@@ -22,14 +22,14 @@ public interface IntakeLinkageIO {
   @AutoLog
   public static class IntakeLinkageIOInputs {
     public boolean connected = false;
-    public Angle position = Degrees.of(0.0);
-    public Angle desiredAngle = IntakeLinkageConstants.MIN_ANGLE;
-    public Voltage appliedVoltage = Volts.of(0.0);
-    public Current current = Amps.of(0.0);
-    public Temperature temperature = Celsius.of(0.0);
+    public double positionDeg = 0;
+    public double desiredDeg = IntakeLinkageConstants.MIN_ANGLE.in(Degree);
+    public double appliedVoltage = 0;
+    public double amps = 0;
+    public double tempCelsius = 0;
     public boolean atGoal = false;
     public boolean isEnabled = false;
-    public AngularVelocity velocity = AngularVelocity.ofBaseUnits(0.0, DegreesPerSecond);
+    public double velocityDegPerSec = 0;
 
     public double positionRad = 0.0;
     public double velocityRadPerSec = 0.0;
@@ -55,5 +55,5 @@ public interface IntakeLinkageIO {
 
   public default void setPID(double kP, double kI, double kD, double kV, double kG, double kS) {}
 
-  public default void runCharacterization(double input) {}
+  public default void setVoltage(double input) {}
 }
