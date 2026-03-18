@@ -45,10 +45,11 @@ public class AnotherShooterConstants {
   // PID Constants
   public static final Gains GAINS =
       switch (Constants.robot) {
-        case REBUILT_PHOENIX, REBUILT_AKIT -> new Gains(0.001, 0.0, 0.0006, 0.10395, 0.0019, 0);
+        case REBUILT_PHOENIX, REBUILT_AKIT -> new Gains(
+            0.0005, 0.0, 0.00015, 0.079702, 0.0018007, 0.00014799);
           // All other case use the same as simbot for now, but this should be changed when we have
           // another real to test on
-        default -> new Gains(0.05, 0.0, 0.0, 0.10395, 0.00296, 0.0);
+        default -> new Gains(0.0, 0.0, 0.0, 0, 0, 0.0);
       };
 
   public static final AngularVelocity MAX_VELOCITY = RPM.of(6700 / FLYWHEEL_CONFIG.REDUCTION());

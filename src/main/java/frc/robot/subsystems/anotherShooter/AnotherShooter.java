@@ -76,7 +76,7 @@ public class AnotherShooter extends SubsystemBase {
   }
 
   public AngularVelocity getVelocity() {
-    return RPM.of(inputs.currentVelocityRPM);
+    return RPM.of(inputs.velocityRPMFlyWheel);
   }
 
   public void setPID(double new_kP, double new_kI, double new_kD) {
@@ -111,10 +111,6 @@ public class AnotherShooter extends SubsystemBase {
   // Characterization methods
   public void runCharacterization(double input) {
     io.runCharacterization(input);
-  }
-
-  public double getCharacterizationVelocity() {
-    return inputs.currentVelocityRPM;
   }
 
   /** Returns a command to run a quasistatic test in the specified direction. */
