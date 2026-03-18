@@ -105,8 +105,9 @@ public class IntakeRollerIOSpark implements IntakeRollerIO {
   public void updateInputs(IntakeRollerIOInputs inputs) {
     sparkStickyFault = false;
 
-    inputs.motorVelocity = RPM.of(encoder.getVelocity());
-    inputs.currentVelocity = inputs.motorVelocity.divide(ROLLER_CONFIG.REDUCTION());
+    inputs.velocityRPMMotor = encoder.getVelocity();
+    inputs.velocityRPMRollers = inputs.velocityRPMMotor / (ROLLER_CONFIG.REDUCTION());
+    inputs.velocityRPMDesired = desiredWheelVelocity.in(RPM);
 
     inputs.current = Amps.of(spark.getOutputCurrent());
     inputs.appliedVoltage = Volts.of(spark.getAppliedOutput());
@@ -116,7 +117,6 @@ public class IntakeRollerIOSpark implements IntakeRollerIO {
     inputs.isEnabled = isEnabled;
 
     inputs.connected = connectedDebounce.calculate(!sparkStickyFault);
-    inputs.desiredVelocity = desiredWheelVelocity;
     inputs.atGoal = controller.isAtSetpoint();
   }
 
@@ -166,5 +166,10 @@ public class IntakeRollerIOSpark implements IntakeRollerIO {
         () ->
             spark.configure(
                 config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
+  }
+
+  @Override
+  public void setVoltage(double input) {
+    spark.setVoltage(input);
   }
 }

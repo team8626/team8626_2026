@@ -22,14 +22,16 @@ public interface IntakeRollerIO {
   @AutoLog
   public static class IntakeRollerIOInputs {
     public boolean connected = false;
-    public AngularVelocity currentVelocity = RPM.of(0.0);
-    public AngularVelocity motorVelocity = RPM.of(0.0);
-    public AngularVelocity desiredVelocity = RPM.of(0.0);
+    public boolean atGoal = true;
+    public boolean isEnabled = false;
+
+    public double velocityRPMRollers = 0;
+    public double velocityRPMMotor = 0;
+    public double velocityRPMDesired = 0;
+
     public Voltage appliedVoltage = Volts.of(0.0);
     public Current current = Amps.of(0.0);
     public Temperature temperature = Celsius.of(0.0);
-    public boolean atGoal = true;
-    public boolean isEnabled = false;
   }
 
   /** Updates the set of loggable inputs. */
@@ -46,4 +48,6 @@ public interface IntakeRollerIO {
 
   /** Set the PID constants for the motor controller. */
   public default void setPID(double kP, double kI, double kD, double kV, double kS) {}
+
+  public default void setVoltage(double input) {}
 }
