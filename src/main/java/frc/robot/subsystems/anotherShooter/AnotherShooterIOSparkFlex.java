@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.RPM;
 import static frc.robot.subsystems.anotherShooter.AnotherShooterConstants.FLYWHEEL_CONFIG;
 import static frc.robot.subsystems.anotherShooter.AnotherShooterConstants.GAINS;
+import static frc.robot.util.SparkUtil.sparkStickyFault;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
@@ -20,7 +21,6 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.measure.AngularVelocity;
 import frc.robot.subsystems.anotherShooter.AnotherShooterIO.AnotherShooterIOInputs;
-import static frc.robot.util.SparkUtil.sparkStickyFault;
 
 public class AnotherShooterIOSparkFlex implements AnotherShooterIO {
 
@@ -165,12 +165,7 @@ public class AnotherShooterIOSparkFlex implements AnotherShooterIO {
   }
 
   @Override
-  public void runCharacterization(double input) {
+  public void setVoltage(double input) {
     leftMotor.setVoltage(input);
-  }
-
-  @Override
-  public void setVoltage(double voltage) {
-    leftMotor.setVoltage(voltage);
   }
 }
