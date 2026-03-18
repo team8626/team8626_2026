@@ -104,8 +104,11 @@ public class IndexerIOSpark implements IndexerIO {
   public void updateInputs(IndexIOInputs inputs) {
     sparkStickyFault = false;
 
-    inputs.velocityRPSMotor = encoder.getVelocity() / 60;
-    inputs.velocityRPSFlywheel = inputs.velocityRPSMotor / FLYWHEEL_CONFIG.REDUCTION();
+    inputs.velocityRPMDesired = desiredWheelVelocity.in(RPM);
+    inputs.velocityRPMMotor = encoder.getVelocity();
+    inputs.velocityRPMFlywheel = inputs.velocityRPMMotor / FLYWHEEL_CONFIG.REDUCTION();
+
+    inputs.positionRotations = encoder.getPosition();
 
     inputs.amps = spark.getOutputCurrent();
     inputs.appliedVoltage = spark.getAppliedOutput() * spark.getBusVoltage();
@@ -115,7 +118,6 @@ public class IndexerIOSpark implements IndexerIO {
     inputs.isEnabled = isEnabled;
 
     inputs.connected = connectedDebounce.calculate(!sparkStickyFault);
-    inputs.velocityRPSDesired = desiredWheelVelocity.in(RotationsPerSecond);
     inputs.atGoal = controller.isAtSetpoint();
   }
 
@@ -136,10 +138,10 @@ public class IndexerIOSpark implements IndexerIO {
     AngularVelocity motorAngularVelocity = desiredWheelVelocity.times(FLYWHEEL_CONFIG.REDUCTION());
 
     controller.setSetpoint(
-        motorAngularVelocity.in(RotationsPerSecond),
+        motorAngularVelocity.in(RPM),
         ControlType.kVelocity,
         ClosedLoopSlot.kSlot0,
-        indexerFF.calculate(motorAngularVelocity.in(RotationsPerSecond)),
+        indexerFF.calculate(motorAngularVelocity.in(RPM)),
         ArbFFUnits.kVoltage);
 
     isEnabled = true;
@@ -164,5 +166,10 @@ public class IndexerIOSpark implements IndexerIO {
         () ->
             spark.configure(
                 config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
+  }
+
+  @Override
+  public void setVoltage(double input) {
+    spark.setVoltage(input);
   }
 }

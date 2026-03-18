@@ -97,15 +97,15 @@ public class IndexerIOSim implements IndexerIO {
     motorSim.update(0.02);
 
     inputs.connected = connected;
-    inputs.velocityRPSFlywheel =
-        motorSim.getAngularVelocity().in(RotationsPerSecond) / FLYWHEEL_CONFIG.REDUCTION();
-    inputs.velocityRPSDesired = desiredWheelVelocity.in(RotationsPerSecond);
+    inputs.velocityRPMFlywheel =
+        motorSim.getAngularVelocity().in(RPM) / FLYWHEEL_CONFIG.REDUCTION();
+    inputs.velocityRPMDesired = desiredWheelVelocity.in(RPM);
     inputs.appliedVoltage = appliedVolts;
     inputs.amps = Math.abs(motorSim.getCurrentDrawAmps());
     inputs.atGoal =
         velocityClosedLoop
-            || Math.abs(inputs.velocityRPSDesired - inputs.velocityRPSFlywheel)
-                < IndexerConstants.VELOCITY_TOLERANCE.in(RotationsPerSecond);
+            || Math.abs(inputs.velocityRPMDesired - inputs.velocityRPMFlywheel)
+                < IndexerConstants.VELOCITY_TOLERANCE.in(RPM);
   }
 
   @Override
