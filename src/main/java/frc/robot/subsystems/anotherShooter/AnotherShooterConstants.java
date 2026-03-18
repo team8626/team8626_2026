@@ -46,7 +46,12 @@ public class AnotherShooterConstants {
   public static final Gains GAINS =
       switch (Constants.robot) {
         case REBUILT_PHOENIX, REBUILT_AKIT -> new Gains(
-            0.0005, 0.0, 0.00015, 0.079702, 0.0018007, 0.00014799);
+            // Characterizarion Runs
+            // kp= <NaN>,     ks= 0.079702, kv= 0.0018007, ka= 0.00014799)
+            // kp= 1.6088e-7, ks= 0.099766, kv= 0.0017934, ka= 0.00014058
+            // kp= 1.0364e-6, ks= 0.10757,  kv= 0.0017894, ka= 0.00014797
+
+            0.0005, 0.0, 0.00015, 0.0957, 0.00179, 0.000146);
           // All other case use the same as simbot for now, but this should be changed when we have
           // another real to test on
         default -> new Gains(0.0, 0.0, 0.0, 0, 0, 0.0);
