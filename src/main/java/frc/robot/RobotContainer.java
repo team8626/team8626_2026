@@ -120,8 +120,8 @@ public class RobotContainer {
   private final TeleopDriveCommand teleopDrive;
 
   // Triggers for Bindings
-  private static final Trigger testIndexTrigger = operator.rightTrigger();
-  private static final Trigger testShootTrigger = operator.leftTrigger();
+  private static final Trigger testIndexTrigger = operator.leftTrigger();
+  private static final Trigger testShootTrigger = operator.rightTrigger();
   private static final Trigger testIntakeRollerTrigger = operator.rightBumper();
   private static final Trigger testIntakeDeployTrigger = operator.leftBumper();
 
