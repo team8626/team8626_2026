@@ -1,12 +1,16 @@
 package frc.robot.commands;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.Feet;
+import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
+import frc.robot.subsystems.anotherShooter.AnotherShooterConstants;
+import frc.robot.subsystems.drive.AkitDrive;
 import frc.robot.subsystems.shooter.ShooterConstants;
 import org.littletonrobotics.frc2026.FieldConstants;
 import org.littletonrobotics.frc2026.util.geometry.AllianceFlipUtil;
@@ -92,5 +96,21 @@ public class ShooterCommandsUtil {
     Logger.recordOutput("getShooterVelocityToTarget/Velocity Flywheel", vRPM, "RPM");
 
     return RPM.of(vRPM);
+  }
+
+  public static double getDistToHub(AkitDrive drive) {
+    return getDistToTarget(drive, FieldConstants.Hub.topCenterPoint);
+  }
+
+  public static double getDistToTarget(AkitDrive drive, Translation3d target) {
+    return Units.metersToFeet(
+        drive
+            .getPose()
+            .getTranslation()
+            .getDistance(AllianceFlipUtil.apply(target.toTranslation2d())));
+  }
+
+  public static AngularVelocity calculateTreemapRPM(double distToHub) {
+    return RPM.of(AnotherShooterConstants.RPMMap.get(distToHub));
   }
 }
