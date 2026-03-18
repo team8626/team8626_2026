@@ -103,6 +103,10 @@ public class ShooterCommandsUtil {
   }
 
   public static double getDistToTarget(AkitDrive drive, Translation3d target) {
+    Logger.recordOutput("AnotherShooter/DistanceToHub", ShooterCommandsUtil.getDistToHub(drive));
+    Logger.recordOutput(
+        "AnotherShooter/RPMMapOutput", ShooterCommandsUtil.calculateTreemapRPM(drive, target));
+
     return Units.metersToFeet(
         drive
             .getPose()
@@ -110,7 +114,14 @@ public class ShooterCommandsUtil {
             .getDistance(AllianceFlipUtil.apply(target.toTranslation2d())));
   }
 
-  public static AngularVelocity calculateTreemapRPM(double distToHub) {
-    return RPM.of(AnotherShooterConstants.RPMMap.get(distToHub));
+  public static AngularVelocity calculateTreemapRPM(AkitDrive drive, Translation3d target) {
+    double distToTarget =
+        Units.metersToFeet(
+            drive
+                .getPose()
+                .getTranslation()
+                .getDistance(AllianceFlipUtil.apply(target.toTranslation2d())));
+
+    return RPM.of(AnotherShooterConstants.RPMMap.get(distToTarget));
   }
 }
