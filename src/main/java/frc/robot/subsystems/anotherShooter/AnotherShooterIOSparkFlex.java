@@ -17,8 +17,10 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.measure.AngularVelocity;
 import frc.robot.subsystems.anotherShooter.AnotherShooterIO.AnotherShooterIOInputs;
+import static frc.robot.util.SparkUtil.sparkStickyFault;
 
 public class AnotherShooterIOSparkFlex implements AnotherShooterIO {
 
@@ -29,6 +31,8 @@ public class AnotherShooterIOSparkFlex implements AnotherShooterIO {
 
   private final SparkFlex rightMotor;
   private final SparkFlexConfig rightConfig;
+
+  private final Debouncer connectedDebounce = new Debouncer(0.5);
 
   SimpleMotorFeedforward shooterFFLeft =
       new SimpleMotorFeedforward(GAINS.kS(), GAINS.kV(), GAINS.kA());
@@ -90,9 +94,11 @@ public class AnotherShooterIOSparkFlex implements AnotherShooterIO {
 
   @Override
   public void updateInputs(AnotherShooterIOInputs inputs) {
+    sparkStickyFault = false;
 
     inputs.isEnabled = shooterIsEnabled;
     inputs.isAtGoal = leftController.isAtSetpoint();
+    inputs.connected = connectedDebounce.calculate(!sparkStickyFault);
 
     inputs.velocityRPMDesired = desiredRPM.in(RPM);
 
