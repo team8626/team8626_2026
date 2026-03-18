@@ -16,7 +16,6 @@ package frc.robot.subsystems.intakeLinkage;
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.intakeLinkage.IntakeLinkageConstants.GAINS;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.*;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -56,12 +55,11 @@ public class IntakeLinkage extends SubsystemBase {
   private SysIdRoutine sysId =
       new SysIdRoutine(
           new SysIdRoutine.Config(
-              null,
-              null,
-              null,
+              Volts.of(0.25).per(Second),
+              Volts.of(1.0),
+              Seconds.of(3.0),
               (state) -> Logger.recordOutput("Linkage/SysIdState", state.toString())),
-          new SysIdRoutine.Mechanism(
-              (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
+          new SysIdRoutine.Mechanism((voltage) -> setVoltage(voltage.in(Volts)), null, this));
 
   public IntakeLinkage(IntakeLinkageIO io) {
     this.io = io;
@@ -79,12 +77,7 @@ public class IntakeLinkage extends SubsystemBase {
 
   @AutoLogOutput
   public Angle getPosition() {
-    return inputs.position;
-  }
-
-  @AutoLogOutput
-  public Rotation2d getAngle() {
-    return new Rotation2d(inputs.position.in(Degrees));
+    return Degrees.of(inputs.positionDeg);
   }
 
   public void setPosition(Angle position) {
@@ -96,11 +89,11 @@ public class IntakeLinkage extends SubsystemBase {
   }
 
   public Voltage getAppliedVoltage() {
-    return inputs.appliedVoltage;
+    return Volts.of(inputs.appliedVoltage);
   }
 
   public Current getCurrent() {
-    return inputs.current;
+    return Amps.of(inputs.amps);
   }
 
   public void stow() {
@@ -127,17 +120,15 @@ public class IntakeLinkage extends SubsystemBase {
   }
 
   // Characterization methods
-  public void runCharacterization(double input) {
-    io.runCharacterization(input);
+  public void setVoltage(double input) {
+    io.setVoltage(input);
   }
 
   public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-    return run(() -> runCharacterization(0.0)).withTimeout(1.0).andThen(sysId.dynamic(direction));
+    return run(() -> setVoltage(0.0)).withTimeout(1.0).andThen(sysId.dynamic(direction));
   }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-    return run(() -> runCharacterization(0.0))
-        .withTimeout(1.0)
-        .andThen(sysId.quasistatic(direction));
+    return run(() -> setVoltage(0.0)).withTimeout(1.0).andThen(sysId.quasistatic(direction));
   }
 }
