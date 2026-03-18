@@ -81,8 +81,10 @@ public class Indexer extends SubsystemBase {
     // Check if the velocity is in bounds before setting it.
     // otherwise set it to the max velocity with the same sign.
     // This prevents the controller from trying to reach an invalid setpoint.
-    if ((velocity.abs(RPM)) > IndexerConstants.MAX_VELOCITY.in(RPM)) {
-      new_velocity = RPM.of(IndexerConstants.MAX_VELOCITY.copySign(new_velocity, RPM));
+    if ((velocity.abs(RotationsPerSecond)) > IndexerConstants.MAX_VELOCITY.in(RotationsPerSecond)) {
+      new_velocity =
+          RotationsPerSecond.of(
+              IndexerConstants.MAX_VELOCITY.copySign(new_velocity, RotationsPerSecond));
     }
     io.start(new_velocity);
   }
@@ -107,11 +109,11 @@ public class Indexer extends SubsystemBase {
 
   @AutoLogOutput
   public AngularVelocity getVelocity() {
-    return inputs.currentVelocity;
+    return RotationsPerSecond.of(inputs.velocityRPSFlywheel);
   }
 
   public AngularVelocity getDesiredVelocity() {
-    return inputs.desiredVelocity;
+    return RotationsPerSecond.of(inputs.velocityRPSDesired);
   }
 
   public boolean isConnected() {
@@ -119,11 +121,11 @@ public class Indexer extends SubsystemBase {
   }
 
   public Voltage getAppliedVoltage() {
-    return inputs.appliedVoltage;
+    return Volts.of(inputs.appliedVoltage);
   }
 
   public Current getCurrent() {
-    return inputs.current;
+    return Amps.of(inputs.amps);
   }
 
   private void updateTunables() {

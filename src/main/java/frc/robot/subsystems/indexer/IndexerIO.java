@@ -22,12 +22,12 @@ public interface IndexerIO {
   @AutoLog
   public static class IndexIOInputs {
     public boolean connected = false;
-    public AngularVelocity currentVelocity = RPM.of(0.0);
-    public AngularVelocity motorVelocity = RPM.of(0.0);
-    public AngularVelocity desiredVelocity = RPM.of(0.0);
-    public Voltage appliedVoltage = Volts.of(0.0);
-    public Current current = Amps.of(0.0);
-    public Temperature temperature = Celsius.of(0.0);
+    public double velocityRPSFlywheel = 0;
+    public double velocityRPSMotor = 0;
+    public double velocityRPSDesired = 0;
+    public double appliedVoltage = 0;
+    public double amps = 0;
+    public double tempCelsius = 0;
     public boolean atGoal = true;
     public boolean isEnabled = false;
   }

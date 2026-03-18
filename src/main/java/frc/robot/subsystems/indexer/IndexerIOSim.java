@@ -74,7 +74,7 @@ public class IndexerIOSim implements IndexerIO {
   private double appliedVolts = 0.0;
 
   /** Target velocity for closed-loop control. */
-  private AngularVelocity desiredWheelVelocity = RPM.of(0.0);
+  private AngularVelocity desiredWheelVelocity = RotationsPerSecond.of(0.0);
 
   public IndexerIOSim() {
     motorSim =
@@ -97,14 +97,15 @@ public class IndexerIOSim implements IndexerIO {
     motorSim.update(0.02);
 
     inputs.connected = connected;
-    inputs.currentVelocity = motorSim.getAngularVelocity().divide(FLYWHEEL_CONFIG.REDUCTION());
-    inputs.desiredVelocity = desiredWheelVelocity;
-    inputs.appliedVoltage = Volts.of(appliedVolts);
-    inputs.current = Amps.of(Math.abs(motorSim.getCurrentDrawAmps()));
+    inputs.velocityRPSFlywheel =
+        motorSim.getAngularVelocity().in(RotationsPerSecond) / FLYWHEEL_CONFIG.REDUCTION();
+    inputs.velocityRPSDesired = desiredWheelVelocity.in(RotationsPerSecond);
+    inputs.appliedVoltage = appliedVolts;
+    inputs.amps = Math.abs(motorSim.getCurrentDrawAmps());
     inputs.atGoal =
         velocityClosedLoop
-            || Math.abs(inputs.desiredVelocity.in(RPM) - inputs.currentVelocity.in(RPM))
-                < IndexerConstants.VELOCITY_TOLERANCE.in(RPM);
+            || Math.abs(inputs.velocityRPSDesired - inputs.velocityRPSFlywheel)
+                < IndexerConstants.VELOCITY_TOLERANCE.in(RotationsPerSecond);
   }
 
   @Override
@@ -129,7 +130,7 @@ public class IndexerIOSim implements IndexerIO {
   @Override
   public void stop() {
     velocityClosedLoop = false;
-    desiredWheelVelocity = RPM.of(0.0);
+    desiredWheelVelocity = RotationsPerSecond.of(0.0);
     appliedVolts = 0.0;
   }
 
