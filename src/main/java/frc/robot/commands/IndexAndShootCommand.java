@@ -43,9 +43,9 @@ public class IndexAndShootCommand extends Command {
     }
     shooter.start(ShooterCommandsUtil.calculateTreemapRPM(ShooterCommandsUtil.getDistToHub(drive)));
 
-    Logger.recordOutput("Shooter/Distance", drive.getPose());
+    Logger.recordOutput("AnotherShooter/DistanceToHub", ShooterCommandsUtil.getDistToHub(drive));
     Logger.recordOutput(
-        "Shooter/RPMMapOutput",
+        "AnotherShooter/RPMMapOutput",
         ShooterCommandsUtil.calculateTreemapRPM(ShooterCommandsUtil.getDistToHub(drive)));
   }
 
