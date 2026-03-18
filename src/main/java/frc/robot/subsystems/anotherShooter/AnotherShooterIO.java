@@ -43,16 +43,12 @@ public interface AnotherShooterIO {
   }
 
   public default void start(AngularVelocity new_RPM) {}
-  ;
 
   public default void setVelocity(AngularVelocity new_RPM) {}
-  ;
 
   public default void stop() {}
-  ;
 
   public default void startBySetpoint(double new_Setpoint) {}
-  ;
 
   public default void runCharacterization(double input) {}
 
