@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
@@ -46,13 +47,12 @@ public class IndexAndFerryCommand extends Command {
               ? depotFerryTarget
               : outpostFerryTarget;
     }
-    shooter.start(
-        ShooterCommandsUtil.calculateTreemapRPM(
-            ShooterCommandsUtil.getDistToTarget(drive, FerryTarget)));
+    shooter.start(ShooterCommandsUtil.calculateTreemapRPM(drive, FerryTarget));
   }
 
   @Override
   public void execute() {
+    AngularVelocity TreemapRPM = ShooterCommandsUtil.calculateTreemapRPM(drive, FerryTarget);
     // If shooter is fast enough, run indexer to feed balls into shooter
     if (drive.getPose().getY() > 4) {
       FerryTarget = depotFerryTarget;
@@ -65,14 +65,10 @@ public class IndexAndFerryCommand extends Command {
     if (Constants.currentMode == Constants.Mode.SIM) {
       // In simulation, we can just pop fuel immediately when the indexer is running
       if (hopper.popFuel()) {
-        RobotContainer.launchFuel(
-            ShooterCommandsUtil.calculateTreemapRPM(
-                ShooterCommandsUtil.getDistToTarget(drive, FerryTarget)));
+        RobotContainer.launchFuel(TreemapRPM);
       }
     }
-    shooter.start(
-        ShooterCommandsUtil.calculateTreemapRPM(
-            ShooterCommandsUtil.getDistToTarget(drive, FerryTarget)));
+    shooter.start(TreemapRPM);
   }
 
   @Override
