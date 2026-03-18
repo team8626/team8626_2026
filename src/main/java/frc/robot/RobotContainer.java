@@ -17,7 +17,6 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
@@ -121,10 +120,9 @@ public class RobotContainer {
   private final TeleopDriveCommand teleopDrive;
 
   // Triggers for Bindings
-  private static final Trigger testIndexTrigger = operator.a();
-  private static final Trigger testIntakeRollerTrigger = operator.b();
+  private static final Trigger testIndexTrigger = operator.rightTrigger();
   private static final Trigger testShootTrigger = operator.leftTrigger();
-  //   private static final Trigger testIndexAndShootTrigger = operator.rightTrigger();
+  private static final Trigger testIntakeRollerTrigger = operator.rightBumper();
   private static final Trigger testIntakeDeployTrigger = operator.leftBumper();
 
   private static final Trigger collectTrigger = controller.leftBumper();
@@ -378,22 +376,20 @@ public class RobotContainer {
     // Run the intake roller at 500 RPM while the B button is held, stop when released
     // TODO: Should be replace with a proper command ("Start/Stop CollectCommand"), this is just for
     // testing
-    testIntakeRollerTrigger
-        .whileTrue(Commands.runOnce(() -> intakeRoller.start(RPM.of(1000)), intakeRoller))
-        .onFalse(Commands.runOnce(intakeRoller::stop, intakeRoller));
+    testIntakeRollerTrigger.toggleOnTrue(
+        Commands.startEnd(() -> intakeRoller.start(), () -> intakeRoller.stop(), index)
+            .withName("Start intakeRoller (Dashboard RPM)"));
 
     // Toggle the intake linkage between deployed and stowed positions when the left bumper held
     // back to stowed position when released
     // TODO: Should be replace with a proper command ("Start/Stop CollectCommand"), this is just for
     // testing
-    testIntakeDeployTrigger
-        .whileTrue(
-            Commands.runOnce(
-                () -> intakeLinkage.setPosition(IntakeLinkageConstants.STOW_ANGLE), intakeLinkage))
-        .onFalse(
-            Commands.runOnce(
+    testIntakeDeployTrigger.toggleOnTrue(
+        Commands.startEnd(
                 () -> intakeLinkage.setPosition(IntakeLinkageConstants.DEPLOY_ANGLE),
-                intakeLinkage));
+                () -> intakeLinkage.setPosition(IntakeLinkageConstants.STOW_ANGLE),
+                intakeLinkage)
+            .withName("Deploy intakeLinkage (Dashboard RPM)"));
 
     // Run the climber motors
     // climberReleaseTrigger.whileTrue(
@@ -401,14 +397,12 @@ public class RobotContainer {
     // climberPullrigger.whileTrue(
     //     Commands.runOnce(() -> climber.runOpenLoop(Volts.of(-6.0)), climber));
 
-    testIndexTrigger
-        .onTrue(Commands.runOnce(() -> index.start(), index))
-        .onFalse(Commands.runOnce(() -> index.stop(), index));
-
-    // shootTrigger.whileTrue(new IndexAndShootCommand(anotherShooter, hopper, index, drive));
-    testShootTrigger
-        .whileTrue(Commands.runOnce(() -> anotherShooter.start(RPM.of(2500)), anotherShooter))
-        .onFalse(Commands.runOnce(() -> anotherShooter.stop(), anotherShooter));
+    testIndexTrigger.toggleOnTrue(
+        Commands.startEnd(() -> index.start(), () -> index.stop(), index)
+            .withName("Start Indexer (Dashboard RPM)"));
+    testShootTrigger.toggleOnTrue(
+        Commands.startEnd(() -> anotherShooter.start(), () -> anotherShooter.stop(), anotherShooter)
+            .withName("Start Shooter (Dashboard RPM)"));
   }
 
   private void configureFuelSim() {
@@ -547,6 +541,7 @@ public class RobotContainer {
     SmartDashboard.putData(
         DriveCommands.feedforwardCharacterization(akitDrive)
             .withName("Characterization/Drive Simple FF"));
+
     SmartDashboard.putData(
         akitDrive
             .sysIdQuasistatic(SysIdRoutine.Direction.kForward)
@@ -563,6 +558,7 @@ public class RobotContainer {
         akitDrive
             .sysIdDynamic(SysIdRoutine.Direction.kReverse)
             .withName("Characterization/Drive Dynamic Reverse"));
+
     SmartDashboard.putData(
         anotherShooter
             .sysIdQuasistatic(SysIdRoutine.Direction.kForward)
@@ -579,6 +575,40 @@ public class RobotContainer {
         anotherShooter
             .sysIdDynamic(SysIdRoutine.Direction.kReverse)
             .withName("Characterization/AnotherShooter Dynamic Reverse"));
+
+    SmartDashboard.putData(
+        index
+            .sysIdQuasistatic(SysIdRoutine.Direction.kForward)
+            .withName("Characterization/Indexer Quasistatic Forward"));
+    SmartDashboard.putData(
+        index
+            .sysIdDynamic(SysIdRoutine.Direction.kForward)
+            .withName("Characterization/Indexer Dynamic Forward"));
+    SmartDashboard.putData(
+        index
+            .sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
+            .withName("Characterization/Indexer Quasistatic Reverse"));
+    SmartDashboard.putData(
+        index
+            .sysIdDynamic(SysIdRoutine.Direction.kReverse)
+            .withName("Characterization/Indexer Dynamic Reverse"));
+
+    SmartDashboard.putData(
+        intakeRoller
+            .sysIdQuasistatic(SysIdRoutine.Direction.kForward)
+            .withName("Characterization/Rollers Quasistatic Forward"));
+    SmartDashboard.putData(
+        intakeRoller
+            .sysIdDynamic(SysIdRoutine.Direction.kForward)
+            .withName("Characterization/Rollers Dynamic Forward"));
+    SmartDashboard.putData(
+        intakeRoller
+            .sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
+            .withName("Characterization/Rollers Quasistatic Reverse"));
+    SmartDashboard.putData(
+        intakeRoller
+            .sysIdDynamic(SysIdRoutine.Direction.kReverse)
+            .withName("Characterization/Rollers Dynamic Reverse"));
 
     SmartDashboard.putData(
         intakeLinkage
