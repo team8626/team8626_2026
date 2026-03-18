@@ -50,8 +50,6 @@ public interface AnotherShooterIO {
 
   public default void startBySetpoint(double new_Setpoint) {}
 
-  public default void runCharacterization(double input) {}
-
   public default void setPID(double kP, double kI, double kD) {}
 
   public default void setPID(double kP, double kI, double kD, double kV, double kS) {}
