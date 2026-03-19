@@ -18,6 +18,7 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.CANBus;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Time;
@@ -156,5 +157,10 @@ public final class Constants {
     public static final Time DUMP_DURATION_SHORT = Seconds.of(1.0);
     public static final Time DUMP_DURATION_MEDIUM = Seconds.of(4.5);
     public static final Time DUMP_DURATION_LONG = Seconds.of(10);
+  }
+
+  public static class ShooterTargetConstants {
+    public static final Translation3d TARGET_PASSING_DEPOT_SIDE = new Translation3d(2.5, 6, 0);
+    public static final Translation3d TARGET_PASSING_OUTPOST_SIDE = new Translation3d(2.5, 1.75, 0);
   }
 }
