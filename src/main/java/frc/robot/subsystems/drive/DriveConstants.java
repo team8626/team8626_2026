@@ -44,6 +44,7 @@ import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.*;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotConstants;
+import frc.robot.util.LoggedTunableNumber;
 import frc.robot.util.TunableControls.ControlConstants;
 import frc.robot.util.TunableControls.TunableControlConstants;
 import java.util.function.Supplier;
@@ -443,4 +444,7 @@ public class DriveConstants {
       new TunableControlConstants("Swerve/Trench Translation", TRENCH_TRANSLATION_BASE_CONSTANTS);
   public static final TunableControlConstants ROTATION_CONSTANTS =
       new TunableControlConstants("Swerve/Rotation", ROTATION_BASE_CONSTANTS);
+
+  public static final LoggedTunableNumber AIM_TOLERANCE_DEG =
+      new LoggedTunableNumber("Swerve/AimToleranceDeg", 1.0);
 }
