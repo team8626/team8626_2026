@@ -17,8 +17,9 @@ public class AnotherShooterConstants {
 
   public static final AngularVelocity DEFAULT_VELOCITY = RPM.of(2500);
   public static final AngularVelocity VELOCITY_TOLERANCE = RPM.of(25);
+  public static final AngularVelocity UNJAM_VELOCITY = RPM.of(-300);
 
-  public static final Angle ANOTHERSHOOTER_ANGLE = Degrees.of(55);
+  public static final Angle ANOTHERSHOOTER_ANGLE = Degrees.of(67);
   public static final Transform3d ANOTHERSHOOTER_OFFSET =
       new Transform3d(
           Inches.of(-8),

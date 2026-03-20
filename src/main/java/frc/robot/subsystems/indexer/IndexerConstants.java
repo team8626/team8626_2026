@@ -22,6 +22,7 @@ public class IndexerConstants {
 
   // Tuned Values
   public static final AngularVelocity DEFAULT_VELOCITY = RevolutionsPerSecond.of(30);
+  public static final AngularVelocity UNJAM_VELOCITY = RevolutionsPerSecond.of(-5);
 
   public static final Current MAX_CURRENT = Amps.of(50);
 
