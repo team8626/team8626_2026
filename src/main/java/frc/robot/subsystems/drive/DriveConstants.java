@@ -447,4 +447,6 @@ public class DriveConstants {
 
   public static final LoggedTunableNumber AIM_TOLERANCE_DEG =
       new LoggedTunableNumber("Swerve/AimToleranceDeg", 1.0);
+  public static final LoggedTunableNumber AIM_MAX_ANGULAR_VEL_DEG_PER_SEC =
+      new LoggedTunableNumber("Swerve/AimMaxAngularVelDeg", 5.0);
 }
