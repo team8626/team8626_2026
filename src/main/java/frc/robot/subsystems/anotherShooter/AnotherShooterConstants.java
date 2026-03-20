@@ -70,10 +70,25 @@ public class AnotherShooterConstants {
       double MAX_ACCELERATION_RPM_PER_SEC) {}
 
   public static final InterpolatingDoubleTreeMap RPMMap = new InterpolatingDoubleTreeMap();
+  public static final InterpolatingDoubleTreeMap IndexerMap = new InterpolatingDoubleTreeMap();
 
   static {
-    RPMMap.put(
-        0.0, 0.0); // format is (distance to target in feet, required shooter velocity in RPM)
-    // TODO: fill in actual values
+    // format is (distance to target in feet, required shooter velocity in RPM)
+    RPMMap.put(4.68, 2150.0);
+    RPMMap.put(6.85, 2400.0);
+    RPMMap.put(8.63, 2575.0);
+    RPMMap.put(9.92, 2700.0);
+    RPMMap.put(11.20, 2870.0);
+    RPMMap.put(17.33, 4100.0);
+  }
+
+  static {
+    // format is (distance to target in feet, required shooter velocity in RPM)
+    IndexerMap.put(4.68, 42.0);
+    IndexerMap.put(6.85, 42.0);
+    IndexerMap.put(8.63, 42.0);
+    IndexerMap.put(9.92, 42.0);
+    IndexerMap.put(11.20, 15.0);
+    IndexerMap.put(17.33, 12.0);
   }
 }
