@@ -57,10 +57,20 @@ public class DriveConstants {
   public static final LinearVelocity FAST_DRIVE_SPEED = MetersPerSecond.of(5);
   public static final AngularVelocity FAST_ROT_SPEED = RotationsPerSecond.of(2.5);
 
+  public static final LinearVelocity INTAKE_DRIVE_SPEED = MetersPerSecond.of(1.5);
+  public static final AngularVelocity INTAKE_ROT_SPEED = RotationsPerSecond.of(0.75);
+
   public static final LinearVelocity DEFAULT_DRIVE_SPEED = FAST_DRIVE_SPEED;
   public static final AngularVelocity DEFAULT_ROT_SPEED = FAST_ROT_SPEED;
 
   public static final LinearAcceleration MAX_TELEOP_ACCEL = MetersPerSecondPerSecond.of(25);
+
+  public static enum DriveSpeed {
+    SLOW,
+    FAST,
+    INTAKE,
+    DEFAULT
+  }
 
   public static final Frequency ODOMETRY_UPDATE_FREQ;
   public static final Distance MODULE_DISTANCE_Y; // left to right
