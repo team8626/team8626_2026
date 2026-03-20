@@ -4,9 +4,7 @@
 
 package frc.robot.commands;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -26,6 +24,7 @@ import frc.robot.Constants.ControllerConstants;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.AkitDrive;
 import frc.robot.subsystems.drive.DriveConstants;
+import frc.robot.subsystems.drive.DriveConstants.DriveSpeed;
 import frc.robot.util.SlewRateLimiter2d;
 import frc.robot.util.TunableControls.TunablePIDController;
 import java.util.function.DoubleSupplier;
@@ -45,6 +44,8 @@ public class TeleopDriveCommand extends Command {
 
   private LinearVelocity maxDriveSpeed = DriveConstants.DEFAULT_DRIVE_SPEED;
   private AngularVelocity maxRotSpeed = DriveConstants.DEFAULT_ROT_SPEED;
+
+  @AutoLogOutput private DriveSpeed driveSpeed = DriveSpeed.DEFAULT;
 
   @AutoLogOutput
   private final Trigger inTrenchZoneTrigger = new Trigger(this::inTrenchZone).debounce(0.1);
@@ -212,28 +213,29 @@ public class TeleopDriveCommand extends Command {
     maxRotSpeed = speed;
   }
 
-  public Command speedUpCommand() {
-    return Commands.startEnd(
-        () -> {
-          setDriveSpeed(DriveConstants.FAST_DRIVE_SPEED);
-          setRotSpeed(DriveConstants.FAST_ROT_SPEED);
-        },
-        () -> {
-          setDriveSpeed(DriveConstants.SLOW_DRIVE_SPEED);
-          setRotSpeed(DriveConstants.SLOW_ROT_SPEED);
-        });
+  private void setSpeed(DriveSpeed new_driveSpeed) {
+    switch (new_driveSpeed) {
+      case SLOW -> {
+        maxDriveSpeed = DriveConstants.SLOW_DRIVE_SPEED;
+        maxRotSpeed = DriveConstants.SLOW_ROT_SPEED;
+      }
+      case FAST -> {
+        maxDriveSpeed = DriveConstants.FAST_DRIVE_SPEED;
+        maxRotSpeed = DriveConstants.FAST_ROT_SPEED;
+      }
+      case INTAKE -> {
+        maxDriveSpeed = DriveConstants.INTAKE_DRIVE_SPEED;
+        maxRotSpeed = DriveConstants.INTAKE_ROT_SPEED;
+      }
+      default -> {
+        maxDriveSpeed = DriveConstants.DEFAULT_DRIVE_SPEED;
+        maxRotSpeed = DriveConstants.DEFAULT_ROT_SPEED;
+      }
+    }
   }
 
-  public Command slowDownCommand() {
-    return Commands.startEnd(
-        () -> {
-          setDriveSpeed(DriveConstants.SLOW_DRIVE_SPEED);
-          setRotSpeed(DriveConstants.SLOW_ROT_SPEED);
-        },
-        () -> {
-          setDriveSpeed(DriveConstants.FAST_DRIVE_SPEED);
-          setRotSpeed(DriveConstants.SLOW_ROT_SPEED);
-        });
+  public Command withSpeed(DriveSpeed speed) {
+    return Commands.startEnd(() -> setSpeed(speed), () -> setSpeed(DriveSpeed.DEFAULT));
   }
 
   private Rotation2d getHubLockAngle(Rotation2d currentRotation) {
@@ -244,7 +246,7 @@ public class TeleopDriveCommand extends Command {
             .toTranslation2d();
     Rotation2d angleToHub =
         new Rotation2d(Math.atan2(hubTranslation.getY(), hubTranslation.getX()))
-            .plus(Rotation2d.k180deg);
+            .plus(Rotation2d.kZero);
     return angleToHub;
   }
 

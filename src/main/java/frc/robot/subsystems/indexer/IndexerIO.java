@@ -22,14 +22,18 @@ public interface IndexerIO {
   @AutoLog
   public static class IndexIOInputs {
     public boolean connected = false;
-    public AngularVelocity currentVelocity = RPM.of(0.0);
-    public AngularVelocity motorVelocity = RPM.of(0.0);
-    public AngularVelocity desiredVelocity = RPM.of(0.0);
-    public Voltage appliedVoltage = Volts.of(0.0);
-    public Current current = Amps.of(0.0);
-    public Temperature temperature = Celsius.of(0.0);
     public boolean atGoal = true;
     public boolean isEnabled = false;
+
+    public double velocityRPMFlywheel = 0;
+    public double velocityRPMMotor = 0;
+    public double velocityRPMDesired = 0;
+
+    public double positionRotations = 0;
+
+    public double appliedVoltage = 0;
+    public double amps = 0;
+    public double tempCelsius = 0;
   }
 
   /** Updates the set of loggable inputs. */
@@ -46,4 +50,6 @@ public interface IndexerIO {
 
   /** Set the PID constants for the motor controller. */
   public default void setPID(double kP, double kI, double kD, double kV, double kS) {}
+
+  public default void setVoltage(double input) {}
 }

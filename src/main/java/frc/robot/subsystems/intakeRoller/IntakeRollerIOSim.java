@@ -97,13 +97,16 @@ public class IntakeRollerIOSim implements IntakeRollerIO {
     motorSim.update(0.02);
 
     inputs.connected = connected;
-    inputs.currentVelocity = motorSim.getAngularVelocity().divide(ROLLER_CONFIG.REDUCTION());
-    inputs.desiredVelocity = desiredWheelVelocity;
+
+    inputs.velocityRPMMotor = motorSim.getAngularVelocityRPM(); // (ROLLER_CONFIG.REDUCTION());
+    inputs.velocityRPMRollers = inputs.velocityRPMMotor / ROLLER_CONFIG.REDUCTION();
+    inputs.velocityRPMDesired = desiredWheelVelocity.in(RPM);
+
     inputs.appliedVoltage = Volts.of(appliedVolts);
     inputs.current = Amps.of(Math.abs(motorSim.getCurrentDrawAmps()));
     inputs.atGoal =
         velocityClosedLoop
-            || Math.abs(inputs.desiredVelocity.in(RPM) - inputs.currentVelocity.in(RPM))
+            || Math.abs(inputs.velocityRPMDesired - inputs.velocityRPMRollers)
                 < IntakeRollerConstants.VELOCITY_TOLERANCE.in(RPM);
   }
 

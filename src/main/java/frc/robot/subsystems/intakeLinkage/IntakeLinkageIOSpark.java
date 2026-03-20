@@ -34,6 +34,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 
 /** Hardware IO for IntakeLinkage using a SPARK Flex. Position control (closed-loop). */
@@ -42,7 +43,7 @@ public class IntakeLinkageIOSpark implements IntakeLinkageIO {
   private final AbsoluteEncoder encoder;
   private final SparkClosedLoopController controller;
   private final Debouncer connectedDebounce = new Debouncer(0.5);
-  private Angle desiredAngle = IntakeLinkageConstants.STOW_ANGLE;
+  private Angle desiredAngle = IntakeLinkageConstants.STARTING_ANGLE;
   private SparkFlexConfig config;
   private ArmFeedforward armFF = new ArmFeedforward(GAINS.kS(), GAINS.kG(), GAINS.kV());
 
@@ -109,22 +110,24 @@ public class IntakeLinkageIOSpark implements IntakeLinkageIO {
   public void updateInputs(IntakeLinkageIOInputs inputs) {
     sparkStickyFault = false;
 
-    inputs.position = Degrees.of(encoder.getPosition());
-    inputs.appliedVoltage = Volts.of(motor.getBusVoltage());
-    inputs.current = Amps.of(motor.getOutputCurrent());
-    inputs.desiredAngle = desiredAngle;
+    inputs.positionDeg = encoder.getPosition();
+    inputs.appliedVoltage = motor.getAppliedOutput() * motor.getBusVoltage();
+    inputs.amps = motor.getOutputCurrent();
+    inputs.desiredDeg = desiredAngle.in(Degree);
     inputs.atGoal = controller.isAtSetpoint();
     inputs.isEnabled = !inputs.atGoal && controller.getControlType() == ControlType.kPosition;
+    inputs.velocityDegPerSec = encoder.getVelocity();
 
-    inputs.positionRad = inputs.position.in(Radians);
-    inputs.velocityRadPerSec = inputs.velocity.in(RadiansPerSecond);
+    // Use Radians for Characterization
+    inputs.positionRad = Units.degreesToRadians(inputs.positionDeg);
+    inputs.velocityRadPerSec = Units.degreesToRadians(inputs.velocityDegPerSec);
 
     inputs.connected = connectedDebounce.calculate(!sparkStickyFault);
     controller.setSetpoint(
         desiredAngle.in(Degrees),
         ControlType.kPosition,
         ClosedLoopSlot.kSlot0,
-        armFF.calculate(desiredAngle.in(Degrees), inputs.velocity.in(DegreesPerSecond)),
+        armFF.calculate(desiredAngle.in(Degrees), inputs.velocityDegPerSec),
         ArbFFUnits.kVoltage);
   }
 
@@ -153,7 +156,17 @@ public class IntakeLinkageIOSpark implements IntakeLinkageIO {
   }
 
   @Override
-  public void runCharacterization(double input) {
+  public void setVoltage(double input) {
+    double currentAngleDeg = encoder.getPosition();
+
+    // Prevent the motor from trying to move beyond the physical limits of the mechanism
+    // Assuming the motor output is positive when moving towards increasing angles and negative when
+    // moving towards decreasing angles
+    if ((currentAngleDeg <= IntakeLinkageConstants.MIN_ANGLE.in(Degree) && input < 0.0)
+        || (currentAngleDeg >= IntakeLinkageConstants.MAX_ANGLE.in(Degree) && input > 0.0)) {
+      motor.setVoltage(0.0);
+      return;
+    }
     motor.setVoltage(input);
   }
 }

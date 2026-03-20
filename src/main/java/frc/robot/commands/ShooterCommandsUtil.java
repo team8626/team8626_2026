@@ -4,9 +4,15 @@ import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Distance;
+import frc.robot.Constants.ShooterTargetConstants;
+import frc.robot.subsystems.anotherShooter.AnotherShooterConstants;
+import frc.robot.subsystems.drive.AkitDrive;
 import frc.robot.subsystems.shooter.ShooterConstants;
 import org.littletonrobotics.frc2026.FieldConstants;
 import org.littletonrobotics.frc2026.util.geometry.AllianceFlipUtil;
@@ -14,6 +20,9 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterCommandsUtil {
+  public static record ShooterData(
+      AngularVelocity velocityShooter, AngularVelocity velocityIndexer) {}
+
   private static final double g = 32.174; // ft/s^2
 
   /**
@@ -92,5 +101,70 @@ public class ShooterCommandsUtil {
     Logger.recordOutput("getShooterVelocityToTarget/Velocity Flywheel", vRPM, "RPM");
 
     return RPM.of(vRPM);
+  }
+
+  public static Rotation2d getAngleToTarget(AkitDrive drive, Translation2d target) {
+    Pose2d robotPose = drive.getPose();
+    Pose3d shooterPose3d = new Pose3d(robotPose).plus(ShooterConstants.SHOOTER_OFFSET);
+    // TODO: This is currently calculating the angle to the target from the robot's center need to
+    // calculate from the shooter's position
+    Logger.recordOutput("AnotherShooter/Target/Shooter Pose", shooterPose3d);
+    Translation2d targetTranslation =
+        AllianceFlipUtil.apply(target).minus(robotPose.getTranslation());
+
+    Rotation2d angleToTarget =
+        new Rotation2d(Math.atan2(targetTranslation.getY(), targetTranslation.getX()))
+            .plus(Rotation2d.kZero);
+
+    Logger.recordOutput("AnotherShooter/Target/Target Angle", angleToTarget);
+
+    return angleToTarget;
+  }
+
+  public static Distance getDistToHub(AkitDrive drive) {
+    return getDistToTarget(drive, FieldConstants.Hub.topCenterPoint);
+  }
+
+  public static Distance getDistToTarget(AkitDrive drive, Translation3d target) {
+    double distToTargetMeters =
+        drive
+            .getPose()
+            .getTranslation()
+            .getDistance(AllianceFlipUtil.apply(target.toTranslation2d()));
+
+    return Meters.of(distToTargetMeters);
+  }
+
+  public static ShooterData calculateRPMToHub(AkitDrive drive) {
+    return calculateTreemapRPM(drive, FieldConstants.Hub.topCenterPoint);
+  }
+
+  public static ShooterData calculateRPMToPassingDepotSide(AkitDrive drive) {
+    return calculateTreemapRPM(drive, ShooterTargetConstants.TARGET_PASSING_DEPOT_SIDE);
+  }
+
+  public static ShooterData calculateRPMToPassingOutpostSide(AkitDrive drive) {
+    return calculateTreemapRPM(drive, ShooterTargetConstants.TARGET_PASSING_OUTPOST_SIDE);
+  }
+
+  public static ShooterData calculateTreemapRPM(AkitDrive drive, Translation3d target) {
+    Translation3d targetPose = (AllianceFlipUtil.apply(target));
+
+    double distToTargetFeet = getDistToTarget(drive, targetPose).in(Feet);
+
+    AngularVelocity velocityShooter = RPM.of(AnotherShooterConstants.RPMMap.get(distToTargetFeet));
+    AngularVelocity velocityIndexer =
+        RPM.of(AnotherShooterConstants.IndexerMap.get(distToTargetFeet));
+
+    Logger.recordOutput("AnotherShooter/Target/Pose Robot", drive.getPose());
+    Logger.recordOutput("AnotherShooter/Target/Pose Target", targetPose);
+    Logger.recordOutput("AnotherShooter/Target/Target Distance", distToTargetFeet, "feet");
+    Logger.recordOutput("AnotherShooter/Target/Shooter RPM", velocityShooter.in(RPM), "RPM");
+    Logger.recordOutput(
+        "AnotherShooter/Target/Indexer RPS",
+        velocityIndexer.in(RotationsPerSecond),
+        "rotations per second");
+
+    return new ShooterData(velocityShooter, velocityIndexer);
   }
 }

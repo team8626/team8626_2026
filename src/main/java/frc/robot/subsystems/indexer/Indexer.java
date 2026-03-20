@@ -21,7 +21,9 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.util.LoggedTunableNumber;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -40,6 +42,16 @@ public class Indexer extends SubsystemBase {
   /** Shown on the dashboard when the index motor is not connected. */
   private final Alert motorDisconnectedAlert =
       new Alert("Index motor disconnected.", AlertType.kError);
+
+  // Configure SysId
+  private SysIdRoutine sysId =
+      new SysIdRoutine(
+          new SysIdRoutine.Config(
+              null,
+              null,
+              null,
+              (state) -> Logger.recordOutput("Indexer/SysIdState", state.toString())),
+          new SysIdRoutine.Mechanism((voltage) -> setVoltage(voltage.in(Volts)), null, this));
 
   private final LoggedTunableNumber flywheelKP =
       new LoggedTunableNumber("Indexer/Flywheel/kP", GAINS.kP());
@@ -81,8 +93,10 @@ public class Indexer extends SubsystemBase {
     // Check if the velocity is in bounds before setting it.
     // otherwise set it to the max velocity with the same sign.
     // This prevents the controller from trying to reach an invalid setpoint.
-    if ((velocity.abs(RPM)) > IndexerConstants.MAX_VELOCITY.in(RPM)) {
-      new_velocity = RPM.of(IndexerConstants.MAX_VELOCITY.copySign(new_velocity, RPM));
+    if ((velocity.abs(RotationsPerSecond)) > IndexerConstants.MAX_VELOCITY.in(RotationsPerSecond)) {
+      new_velocity =
+          RotationsPerSecond.of(
+              IndexerConstants.MAX_VELOCITY.copySign(new_velocity, RotationsPerSecond));
     }
     io.start(new_velocity);
   }
@@ -107,11 +121,11 @@ public class Indexer extends SubsystemBase {
 
   @AutoLogOutput
   public AngularVelocity getVelocity() {
-    return inputs.currentVelocity;
+    return RPM.of(inputs.velocityRPMFlywheel);
   }
 
   public AngularVelocity getDesiredVelocity() {
-    return inputs.desiredVelocity;
+    return RPM.of(inputs.velocityRPMDesired);
   }
 
   public boolean isConnected() {
@@ -119,11 +133,11 @@ public class Indexer extends SubsystemBase {
   }
 
   public Voltage getAppliedVoltage() {
-    return inputs.appliedVoltage;
+    return Volts.of(inputs.appliedVoltage);
   }
 
   public Current getCurrent() {
-    return inputs.current;
+    return Amps.of(inputs.amps);
   }
 
   private void updateTunables() {
@@ -135,5 +149,20 @@ public class Indexer extends SubsystemBase {
       io.setPID(
           flywheelKP.get(), flywheelKI.get(), flywheelKD.get(), flywheelKV.get(), flywheelKS.get());
     }
+  }
+
+  // Characterization methods
+  public void setVoltage(double input) {
+    io.setVoltage(input);
+  }
+
+  /** Returns a command to run a quasistatic test in the specified direction. */
+  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    return run(() -> setVoltage(0.0)).withTimeout(1.0).andThen(sysId.quasistatic(direction));
+  }
+
+  /** Returns a command to run a dynamic test in the specified direction. */
+  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    return run(() -> setVoltage(0.0)).withTimeout(1.0).andThen(sysId.dynamic(direction));
   }
 }

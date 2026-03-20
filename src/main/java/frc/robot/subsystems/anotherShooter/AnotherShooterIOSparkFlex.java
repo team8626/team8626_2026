@@ -1,10 +1,10 @@
 package frc.robot.subsystems.anotherShooter;
 
 import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Celsius;
 import static edu.wpi.first.units.Units.RPM;
 import static frc.robot.subsystems.anotherShooter.AnotherShooterConstants.FLYWHEEL_CONFIG;
 import static frc.robot.subsystems.anotherShooter.AnotherShooterConstants.GAINS;
+import static frc.robot.util.SparkUtil.sparkStickyFault;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
@@ -18,6 +18,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.measure.AngularVelocity;
 import frc.robot.subsystems.anotherShooter.AnotherShooterIO.AnotherShooterIOInputs;
 
@@ -30,6 +31,8 @@ public class AnotherShooterIOSparkFlex implements AnotherShooterIO {
 
   private final SparkFlex rightMotor;
   private final SparkFlexConfig rightConfig;
+
+  private final Debouncer connectedDebounce = new Debouncer(0.5);
 
   SimpleMotorFeedforward shooterFFLeft =
       new SimpleMotorFeedforward(GAINS.kS(), GAINS.kV(), GAINS.kA());
@@ -91,25 +94,29 @@ public class AnotherShooterIOSparkFlex implements AnotherShooterIO {
 
   @Override
   public void updateInputs(AnotherShooterIOInputs inputs) {
+    sparkStickyFault = false;
 
     inputs.isEnabled = shooterIsEnabled;
     inputs.isAtGoal = leftController.isAtSetpoint();
+    inputs.connected = connectedDebounce.calculate(!sparkStickyFault);
 
-    inputs.desiredRPM = desiredRPM.in(RPM);
+    inputs.velocityRPMDesired = desiredRPM.in(RPM);
 
-    inputs.currentVelocityRPM = leftEncoder.getVelocity() * FLYWHEEL_CONFIG.REDUCTION();
+    inputs.velocityRPMFlyWheel = leftEncoder.getVelocity() / FLYWHEEL_CONFIG.REDUCTION();
+    inputs.positionRotationsLeft = leftEncoder.getPosition();
+    inputs.positionRotationsRight = inputs.positionRotationsLeft;
 
-    inputs.velocityLeft = RPM.of(leftEncoder.getVelocity());
-    inputs.velocityRight = RPM.of(rightMotor.getEncoder().getVelocity());
+    inputs.velocityRPMLeft = leftEncoder.getVelocity();
+    inputs.velocityRPMRight = rightMotor.getEncoder().getVelocity();
 
     inputs.ampsLeft = Amps.of(leftMotor.getOutputCurrent());
     inputs.ampsRight = Amps.of(rightMotor.getOutputCurrent());
 
-    inputs.tempLeft = Celsius.of(leftMotor.getMotorTemperature());
-    inputs.tempRight = Celsius.of(rightMotor.getMotorTemperature());
+    inputs.tempCelsiusLeft = leftMotor.getMotorTemperature();
+    inputs.tempCelsiusRight = rightMotor.getMotorTemperature();
 
-    inputs.appliedOutputLeft = leftMotor.getAppliedOutput();
-    inputs.appliedOutputRight = rightMotor.getAppliedOutput();
+    inputs.appliedVoltageLeft = leftMotor.getAppliedOutput() * leftMotor.getBusVoltage();
+    inputs.appliedVoltageLeft = rightMotor.getAppliedOutput() * leftMotor.getBusVoltage();
   }
 
   @Override
@@ -158,12 +165,7 @@ public class AnotherShooterIOSparkFlex implements AnotherShooterIO {
   }
 
   @Override
-  public void runCharacterization(double input) {
+  public void setVoltage(double input) {
     leftMotor.setVoltage(input);
-  }
-
-  @Override
-  public void setVoltage(double voltage) {
-    leftMotor.setVoltage(voltage);
   }
 }

@@ -39,18 +39,16 @@ public class AnotherShooterIOSim implements AnotherShooterIO {
 
     inputs.isEnabled = isEnabled;
 
-    inputs.currentVelocityRPM = leftSim.getAngularVelocityRPM() * FLYWHEEL_CONFIG.REDUCTION();
+    inputs.velocityRPMFlyWheel = leftSim.getAngularVelocityRPM() / FLYWHEEL_CONFIG.REDUCTION();
 
-    inputs.velocityLeft = RPM.of(leftSim.getAngularVelocityRPM());
-    inputs.velocityRight = RPM.of(rightSim.getAngularVelocityRPM());
+    inputs.velocityRPMLeft = leftSim.getAngularVelocityRPM();
+    inputs.velocityRPMRight = rightSim.getAngularVelocityRPM();
 
     inputs.ampsLeft = Amps.of(leftSim.getCurrentDrawAmps());
     inputs.ampsRight = Amps.of(rightSim.getCurrentDrawAmps());
 
-    inputs.appliedOutputLeft =
-        leftSim.getInputVoltage() / 12.0; // Convert voltage to a percentage for applied output
-    inputs.appliedOutputRight =
-        rightSim.getInputVoltage() / 12.0; // Convert voltage to a percentage for applied output
+    inputs.appliedVoltageLeft = leftSim.getInputVoltage();
+    inputs.appliedVoltageRight = rightSim.getInputVoltage();
   }
 
   // @Override

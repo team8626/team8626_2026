@@ -35,7 +35,7 @@ public class MockIntakeRollerIO implements IntakeRollerIO {
   @Override
   public void updateInputs(IntakeRollerIOInputs inputs) {
     inputs.connected = connected;
-    inputs.currentVelocity = velocity;
+    inputs.velocityRPMRollers = velocity.in(RPM);
     inputs.appliedVoltage = appliedVolts;
     inputs.current = currentAmps;
   }

@@ -13,7 +13,6 @@ import frc.robot.util.LoggedTunableNumber;
 import org.littletonrobotics.junction.Logger;
 
 public class AnotherShooter extends SubsystemBase {
-  private AnotherShooterIO anotherShooterInterface;
   private final AnotherShooterIO io;
   private final AnotherShooterIOInputsAutoLogged inputs = new AnotherShooterIOInputsAutoLogged();
 
@@ -29,8 +28,7 @@ public class AnotherShooter extends SubsystemBase {
               null,
               null,
               (state) -> Logger.recordOutput("Shooter/SysIdState", state.toString())),
-          new SysIdRoutine.Mechanism(
-              (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
+          new SysIdRoutine.Mechanism((voltage) -> setVoltage(voltage.in(Volts)), null, this));
 
   private final LoggedTunableNumber flywheelKP =
       new LoggedTunableNumber("AnotherShooter/Flywheel/kP", AnotherShooterConstants.GAINS.kP());
@@ -76,11 +74,11 @@ public class AnotherShooter extends SubsystemBase {
   }
 
   public AngularVelocity getVelocity() {
-    return RPM.of(inputs.currentVelocityRPM);
+    return RPM.of(inputs.velocityRPMFlyWheel);
   }
 
   public void setPID(double new_kP, double new_kI, double new_kD) {
-    anotherShooterInterface.setPID(new_kP, new_kI, new_kD);
+    io.setPID(new_kP, new_kI, new_kD);
   }
 
   public boolean isAtGoal() {
@@ -109,27 +107,17 @@ public class AnotherShooter extends SubsystemBase {
   }
 
   // Characterization methods
-  public void runCharacterization(double input) {
-    io.runCharacterization(input);
-  }
-
-  public double getCharacterizationVelocity() {
-    return inputs.currentVelocityRPM;
+  public void setVoltage(double input) {
+    io.setVoltage(input);
   }
 
   /** Returns a command to run a quasistatic test in the specified direction. */
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-    return run(() -> runCharacterization(0.0))
-        .withTimeout(1.0)
-        .andThen(sysId.quasistatic(direction));
+    return run(() -> setVoltage(0.0)).withTimeout(1.0).andThen(sysId.quasistatic(direction));
   }
 
   /** Returns a command to run a dynamic test in the specified direction. */
   public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-    return run(() -> runCharacterization(0.0)).withTimeout(1.0).andThen(sysId.dynamic(direction));
-  }
-
-  public void setVoltage(double voltage) {
-    anotherShooterInterface.setVoltage(voltage);
+    return run(() -> setVoltage(0.0)).withTimeout(1.0).andThen(sysId.dynamic(direction));
   }
 }

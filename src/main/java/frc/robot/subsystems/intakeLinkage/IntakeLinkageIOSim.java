@@ -20,6 +20,7 @@ import static frc.robot.subsystems.intakeLinkage.IntakeLinkageConstants.GAINS;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
@@ -60,15 +61,14 @@ public class IntakeLinkageIOSim implements IntakeLinkageIO {
 
     motorSim.update(0.02);
 
-    inputs.position = Degrees.of(motorSim.getAngleRads() * 180.0 / Math.PI);
-
+    inputs.positionDeg = Units.radiansToDegrees(motorSim.getAngleRads());
+    inputs.positionRad = motorSim.getAngleRads();
     motorSim.setInputVoltage(MathUtil.clamp(appliedVolts, -12.0, 12.0));
 
     inputs.connected = true;
-    inputs.position = Degrees.of(motorSim.getAngleRads() * 180.0 / Math.PI);
-    inputs.velocity = DegreesPerSecond.of(motorSim.getVelocityRadPerSec() * 180.0 / Math.PI);
-    inputs.appliedVoltage = Volts.of(appliedVolts);
-    inputs.current = Amps.of(Math.abs(motorSim.getCurrentDrawAmps()));
+    inputs.velocityDegPerSec = Units.radiansToDegrees(motorSim.getVelocityRadPerSec());
+    inputs.appliedVoltage = appliedVolts;
+    inputs.amps = motorSim.getCurrentDrawAmps();
   }
 
   @Override

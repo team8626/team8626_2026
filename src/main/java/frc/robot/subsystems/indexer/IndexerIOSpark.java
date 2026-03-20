@@ -46,7 +46,7 @@ public class IndexerIOSpark implements IndexerIO {
   private boolean isEnabled = false;
 
   /** Target WHEEL velocity for closed-loop control. */
-  private AngularVelocity desiredWheelVelocity = RPM.of(0.0);
+  private AngularVelocity desiredWheelVelocity = RotationsPerSecond.of(0.0);
 
   /** Feedforward gains for velocity control. */
   SimpleMotorFeedforward indexerFF = new SimpleMotorFeedforward(GAINS.kS(), GAINS.kV(), GAINS.kA());
@@ -104,18 +104,20 @@ public class IndexerIOSpark implements IndexerIO {
   public void updateInputs(IndexIOInputs inputs) {
     sparkStickyFault = false;
 
-    inputs.motorVelocity = RPM.of(encoder.getVelocity());
-    inputs.currentVelocity = inputs.motorVelocity.div(FLYWHEEL_CONFIG.REDUCTION());
+    inputs.velocityRPMDesired = desiredWheelVelocity.in(RPM);
+    inputs.velocityRPMMotor = encoder.getVelocity();
+    inputs.velocityRPMFlywheel = inputs.velocityRPMMotor / FLYWHEEL_CONFIG.REDUCTION();
 
-    inputs.current = Amps.of(spark.getOutputCurrent());
-    inputs.appliedVoltage = Volts.of(spark.getAppliedOutput());
-    inputs.temperature = Celsius.of(spark.getMotorTemperature());
+    inputs.positionRotations = encoder.getPosition();
+
+    inputs.amps = spark.getOutputCurrent();
+    inputs.appliedVoltage = spark.getAppliedOutput() * spark.getBusVoltage();
+    inputs.tempCelsius = spark.getMotorTemperature();
 
     inputs.atGoal = controller.isAtSetpoint();
     inputs.isEnabled = isEnabled;
 
     inputs.connected = connectedDebounce.calculate(!sparkStickyFault);
-    inputs.desiredVelocity = desiredWheelVelocity;
     inputs.atGoal = controller.isAtSetpoint();
   }
 
@@ -146,7 +148,7 @@ public class IndexerIOSpark implements IndexerIO {
   }
 
   public void stop() {
-    desiredWheelVelocity = RPM.of(0.0);
+    desiredWheelVelocity = RotationsPerSecond.of(0.0);
     controller.setSetpoint(0.0, ControlType.kDutyCycle);
     isEnabled = false;
   }
@@ -164,5 +166,10 @@ public class IndexerIOSpark implements IndexerIO {
         () ->
             spark.configure(
                 config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
+  }
+
+  @Override
+  public void setVoltage(double input) {
+    spark.setVoltage(input);
   }
 }

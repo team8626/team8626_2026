@@ -73,8 +73,9 @@ public class VisionConstants {
     new Transform3d(
         new Translation3d(-0.332, -0.3175, 0.367),
         new Rotation3d(Degrees.of(-3.195), Degrees.of(-19.688), Degrees.of(-170.019))),
+
+    // Front left camera
     new Transform3d(
-        // Front left camera
         new Translation3d(0.332, 0.3175, 0.545),
         new Rotation3d(Degrees.of(-3.195), Degrees.of(-19.688), Degrees.of(9.981)))
   };

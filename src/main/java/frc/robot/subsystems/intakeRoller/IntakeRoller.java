@@ -14,13 +14,16 @@
 package frc.robot.subsystems.intakeRoller;
 
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.subsystems.intakeRoller.IntakeRollerConstants.GAINS;
 
 import edu.wpi.first.units.Units.*;
 import edu.wpi.first.units.measure.*;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.util.LoggedTunableNumber;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -53,6 +56,16 @@ public class IntakeRoller extends SubsystemBase {
   private final LoggedTunableNumber rollerRPM =
       new LoggedTunableNumber(
           "IntakeRoller/Roller/WheelRPM", IntakeRollerConstants.DEFAULT_VELOCITY.in(RPM));
+
+  // Configure SysId
+  private SysIdRoutine sysId =
+      new SysIdRoutine(
+          new SysIdRoutine.Config(
+              null,
+              null,
+              null,
+              (state) -> Logger.recordOutput("Rollers/SysIdState", state.toString())),
+          new SysIdRoutine.Mechanism((voltage) -> setVoltage(voltage.in(Volts)), null, this));
 
   public IntakeRoller(IntakeRollerIO io) {
     this.io = io;
@@ -102,11 +115,11 @@ public class IntakeRoller extends SubsystemBase {
 
   @AutoLogOutput
   public AngularVelocity getVelocity() {
-    return inputs.currentVelocity;
+    return RPM.of(inputs.velocityRPMRollers);
   }
 
   public AngularVelocity getDesiredVelocity() {
-    return inputs.desiredVelocity;
+    return RPM.of(inputs.velocityRPMDesired);
   }
 
   public boolean isConnected() {
@@ -129,5 +142,20 @@ public class IntakeRoller extends SubsystemBase {
         || rollerKS.hasChanged(hashCode())) {
       io.setPID(rollerKP.get(), rollerKI.get(), rollerKD.get(), rollerKV.get(), rollerKS.get());
     }
+  }
+
+  // Characterization methods
+  public void setVoltage(double input) {
+    io.setVoltage(input);
+  }
+
+  /** Returns a command to run a quasistatic test in the specified direction. */
+  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    return run(() -> setVoltage(0.0)).withTimeout(1.0).andThen(sysId.quasistatic(direction));
+  }
+
+  /** Returns a command to run a dynamic test in the specified direction. */
+  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    return run(() -> setVoltage(0.0)).withTimeout(1.0).andThen(sysId.dynamic(direction));
   }
 }

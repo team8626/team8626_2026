@@ -1,8 +1,6 @@
 package frc.robot.subsystems.anotherShooter;
 
 import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Celsius;
-import static edu.wpi.first.units.Units.RPM;
 import static frc.robot.subsystems.anotherShooter.AnotherShooterConstants.GAINS;
 
 import edu.wpi.first.units.measure.*;
@@ -18,20 +16,24 @@ public interface AnotherShooterIO {
     public boolean isEnabled = false;
     public boolean isAtGoal = false;
 
-    public double currentVelocityRPM = 0;
-    public AngularVelocity velocityLeft = RPM.of(0);
-    public AngularVelocity velocityRight = RPM.of(0);
+    public double velocityRPMFlyWheel = 0;
+
+    public double positionRotationsLeft = 0;
+    public double positionRotationsRight = 0;
+
+    public double velocityRPMLeft = 0;
+    public double velocityRPMRight = 0;
 
     public Current ampsLeft = Amps.of(0);
     public Current ampsRight = Amps.of(0);
 
-    public Temperature tempLeft = Celsius.of(0);
-    public Temperature tempRight = Celsius.of(0);
+    public double tempCelsiusLeft = 0;
+    public double tempCelsiusRight = 0;
 
-    public double appliedOutputLeft = 0;
-    public double appliedOutputRight = 0;
+    public double appliedVoltageLeft = 0;
+    public double appliedVoltageRight = 0;
 
-    public double desiredRPM = 0;
+    public double velocityRPMDesired = 0;
 
     public double kP = GAINS.kP();
     public double kI = GAINS.kI();
@@ -41,18 +43,12 @@ public interface AnotherShooterIO {
   }
 
   public default void start(AngularVelocity new_RPM) {}
-  ;
 
   public default void setVelocity(AngularVelocity new_RPM) {}
-  ;
 
   public default void stop() {}
-  ;
 
   public default void startBySetpoint(double new_Setpoint) {}
-  ;
-
-  public default void runCharacterization(double input) {}
 
   public default void setPID(double kP, double kI, double kD) {}
 
