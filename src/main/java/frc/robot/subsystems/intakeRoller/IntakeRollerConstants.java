@@ -23,6 +23,7 @@ public class IntakeRollerConstants {
   // Tuned Values
   public static final AngularVelocity DEFAULT_VELOCITY = RPM.of(750);
   public static final AngularVelocity PLOW_VELOCITY = RPM.of(-1000);
+  public static final AngularVelocity BLURP_VELOCITY = RPM.of(-250);
 
   public static final Current MAX_CURRENT = Amps.of(50);
 
