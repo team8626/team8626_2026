@@ -46,6 +46,7 @@ import frc.robot.commands.CollectCommand;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IndexerStartCommand;
 import frc.robot.commands.IndexerStopCommand;
+import frc.robot.commands.ShooterCommandsUtil;
 import frc.robot.commands.TeleopDriveCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.anotherShooter.AnotherShooter;
@@ -132,7 +133,7 @@ public class RobotContainer {
   private static final Trigger agitateTrigger = controller.y();
 
   private static final Trigger dumpHopperTrigger = controller.rightTrigger();
-  private static final Trigger dumpHopperAutoTrigger = controller.rightBumper();
+  private static final Trigger aimAndShootTrigger = controller.rightBumper();
 
   private static final Trigger driverAimTrigger = controller.a();
 
@@ -357,15 +358,29 @@ public class RobotContainer {
                 new AnotherShooterRampupCommand(anotherShooter),
                 Commands.parallel(
                     new IndexerStartCommand(index), new AgitateCommand(intakeLinkage))))
-        .onFalse(Commands.runOnce(() -> anotherShooter.stop(), anotherShooter));
+        .onFalse(Commands.runOnce(anotherShooter::stop, anotherShooter));
 
-    // dumpHopperTrigger
-    //     .whileTrue(
-    //         Commands.runOnce(() -> anotherShooter.start(RPM.of(2500)), anotherShooter)
-    //             .alongWith(Commands.runOnce(() -> index.start(), index)))
-    //     .onFalse(
-    //         Commands.runOnce(() -> anotherShooter.stop(), anotherShooter)
-    //             .alongWith(Commands.runOnce(() -> index.stop(), index)));
+    aimAndShootTrigger
+        .whileTrue(
+            Commands.defer(
+                () ->
+                    Commands.sequence(
+                        // TODO: Start with aligining to the target:
+                        // new AlignToHubCommand(akitDrive).withTimeout(1.0),
+                        Commands.runOnce(akitDrive::stopWithX, akitDrive),
+                        new AnotherShooterRampupCommand(
+                            () ->
+                                ShooterCommandsUtil.calculateRPMToHub(akitDrive).velocityShooter(),
+                            anotherShooter),
+                        Commands.parallel(
+                            new IndexerStartCommand(
+                                () ->
+                                    ShooterCommandsUtil.calculateRPMToHub(akitDrive)
+                                        .velocityIndexer(),
+                                index),
+                            new AgitateCommand(intakeLinkage))),
+                Set.of(anotherShooter, hopper, index, akitDrive)))
+        .onFalse(Commands.runOnce(anotherShooter::stop, anotherShooter));
 
     // Align to camera's best AprilTag: POV Left = front left, POV Up = front right, POV Right =
     // rear right
@@ -373,17 +388,12 @@ public class RobotContainer {
     // controller.povRight().whileTrue(AlignToTargetCommand.alignToFrontRightCamera(drive, vision));
     // controller.povDown().whileTrue(AlignToTargetCommand.alignToRearRightCamera(drive, vision));
 
-    // Run the intake roller at 500 RPM while the B button is held, stop when released
-    // TODO: Should be replace with a proper command ("Start/Stop CollectCommand"), this is just for
-    // testing
+    // Run the intake roller at the dashboard RPM
     testIntakeRollerTrigger.toggleOnTrue(
         Commands.startEnd(() -> intakeRoller.start(), () -> intakeRoller.stop(), index)
             .withName("Start intakeRoller (Dashboard RPM)"));
 
-    // Toggle the intake linkage between deployed and stowed positions when the left bumper held
-    // back to stowed position when released
-    // TODO: Should be replace with a proper command ("Start/Stop CollectCommand"), this is just for
-    // testing
+    // Deploy/Stow the intake
     testIntakeDeployTrigger.toggleOnTrue(
         Commands.startEnd(
                 () -> intakeLinkage.setPosition(IntakeLinkageConstants.DEPLOY_ANGLE),
