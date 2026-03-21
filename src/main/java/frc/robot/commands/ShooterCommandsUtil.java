@@ -103,24 +103,10 @@ public class ShooterCommandsUtil {
     return RPM.of(vRPM);
   }
 
-  public static Rotation2d getAngleToTarget(AkitDrive drive, Translation2d target) {
-    Pose2d robotPose = drive.getPose();
-    Pose3d shooterPose3d = new Pose3d(robotPose).plus(ShooterConstants.SHOOTER_OFFSET);
-    // TODO: This is currently calculating the angle to the target from the robot's center need to
-    // calculate from the shooter's position
-    Logger.recordOutput("AnotherShooter/Target/Shooter Pose", shooterPose3d);
-    Translation2d targetTranslation =
-        AllianceFlipUtil.apply(target).minus(robotPose.getTranslation());
-
-    Rotation2d angleToTarget =
-        new Rotation2d(Math.atan2(targetTranslation.getY(), targetTranslation.getX()))
-            .plus(Rotation2d.kZero);
-
-    Logger.recordOutput("AnotherShooter/Target/Target Angle", angleToTarget);
-
-    return angleToTarget;
-  }
-
+  /**
+   * Helper methods to calculate the distance to the hub or target. This can be used in commands to
+   * determine the appropriate shooter and indexer velocities.
+   */
   public static Distance getDistToHub(AkitDrive drive) {
     return getDistToTarget(drive, FieldConstants.Hub.topCenterPoint);
   }
@@ -135,19 +121,24 @@ public class ShooterCommandsUtil {
     return Meters.of(distToTargetMeters);
   }
 
+  /**
+   * Helper methods for calculating shooter velocities using the treemap. These methods can be used
+   * in commands to calculate the required shooter and indexer velocities based on the robot's
+   * current position and the target position.
+   */
   public static ShooterData calculateRPMToHub(AkitDrive drive) {
-    return calculateTreemapRPM(drive, FieldConstants.Hub.topCenterPoint);
+    return calculateRPMToTarget(drive, FieldConstants.Hub.topCenterPoint);
   }
 
   public static ShooterData calculateRPMToPassingDepotSide(AkitDrive drive) {
-    return calculateTreemapRPM(drive, ShooterTargetConstants.TARGET_PASSING_DEPOT_SIDE);
+    return calculateRPMToTarget(drive, ShooterTargetConstants.TARGET_PASSING_DEPOT_SIDE);
   }
 
   public static ShooterData calculateRPMToPassingOutpostSide(AkitDrive drive) {
-    return calculateTreemapRPM(drive, ShooterTargetConstants.TARGET_PASSING_OUTPOST_SIDE);
+    return calculateRPMToTarget(drive, ShooterTargetConstants.TARGET_PASSING_OUTPOST_SIDE);
   }
 
-  public static ShooterData calculateTreemapRPM(AkitDrive drive, Translation3d target) {
+  public static ShooterData calculateRPMToTarget(AkitDrive drive, Translation3d target) {
     Translation3d targetPose = (AllianceFlipUtil.apply(target));
 
     double distToTargetFeet = getDistToTarget(drive, targetPose).in(Feet);
@@ -158,7 +149,7 @@ public class ShooterCommandsUtil {
 
     Logger.recordOutput("AnotherShooter/Target/Pose Robot", drive.getPose());
     Logger.recordOutput("AnotherShooter/Target/Pose Target", targetPose);
-    Logger.recordOutput("AnotherShooter/Target/Target Distance", distToTargetFeet, "feet");
+    Logger.recordOutput("AnotherShooter/Target/Distance to Target", distToTargetFeet, "feet");
     Logger.recordOutput("AnotherShooter/Target/Shooter RPM", velocityShooter.in(RPM), "RPM");
     Logger.recordOutput(
         "AnotherShooter/Target/Indexer RPS",
@@ -166,5 +157,32 @@ public class ShooterCommandsUtil {
         "rotations per second");
 
     return new ShooterData(velocityShooter, velocityIndexer);
+  }
+
+  /**
+   * Helper method to calculate the angle to lock onto the hub or target. This can be used in
+   * commands to rotate the robot to face the hub or target for shooting.
+   */
+  public static Rotation2d getHubLockAngle(AkitDrive drive) {
+    return getTargetLockAngle(drive, FieldConstants.Hub.topCenterPoint);
+  }
+
+  public static Rotation2d getTargetLockAngle(AkitDrive drive, Translation3d target) {
+    Pose2d robotPose = drive.getPose();
+    Pose3d shooterPose3d =
+        new Pose3d(robotPose).plus(AnotherShooterConstants.ANOTHERSHOOTER_OFFSET);
+
+    Translation2d shooterTranslation = shooterPose3d.getTranslation().toTranslation2d();
+    Translation2d targetTranslation = AllianceFlipUtil.apply(target).toTranslation2d();
+
+    Translation2d delta = targetTranslation.minus(shooterTranslation);
+    Rotation2d angleToTarget = new Rotation2d(Math.atan2(delta.getY(), delta.getX()));
+
+    Logger.recordOutput("AnotherShooter/Target/Pose Shooter", shooterPose3d);
+    Logger.recordOutput("AnotherShooter/Target/Pose Target (Angle Lock)", target);
+    Logger.recordOutput(
+        "AnotherShooter/Target/Angle to Target", angleToTarget.getDegrees(), "degrees");
+
+    return angleToTarget;
   }
 }
