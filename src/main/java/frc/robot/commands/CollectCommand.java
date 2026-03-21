@@ -1,8 +1,10 @@
 package frc.robot.commands;
 
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
+import static edu.wpi.first.units.Units.Second;
+
+import edu.wpi.first.units.measure.*;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkage;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkageConstants;
 import frc.robot.subsystems.intakeRoller.IntakeRoller;
@@ -50,7 +52,12 @@ public class CollectCommand extends Command {
   @Override
   public void end(boolean interrupted) {
     linkage.stow();
-    roller.stop();
+
+    // Keep roller running for 1 second, then stop
+    Commands.sequence(
+            Commands.waitSeconds(IntakeRollerConstants.STOP_DELAY.in(Second)),
+            Commands.runOnce(roller::stop, roller))
+        .schedule();
   }
 
   @Override
