@@ -23,7 +23,9 @@ public class IntakeRollerConstants {
   // Tuned Values
   public static final AngularVelocity DEFAULT_VELOCITY = RPM.of(750);
   public static final AngularVelocity PLOW_VELOCITY = RPM.of(-1000);
-  public static final AngularVelocity BLURP_VELOCITY = RPM.of(-250);
+  public static final AngularVelocity BLURP_VELOCITY = RPM.of(-800);
+
+  public static final Time STOP_DELAY = Seconds.of(0.5);
 
   public static final Current MAX_CURRENT = Amps.of(50);
 
@@ -35,8 +37,8 @@ public class IntakeRollerConstants {
   public static final RollerConfig ROLLER_CONFIG =
       switch (Constants.robot) {
         case REBUILT_PHOENIX, REBUILT_AKIT -> new RollerConfig(
-            1, false, Amps.of(50), 1.0 / 1.0, 2 * MOI);
-        default -> new RollerConfig(1, false, Amps.of(50), 1.0 / 1.0, 2 * MOI);
+            1, false, Amps.of(50), 3.0 / 1.0, 2 * MOI);
+        default -> new RollerConfig(1, false, Amps.of(50), 3.0 / 1.0, 2 * MOI);
       };
 
   // PID Constants
