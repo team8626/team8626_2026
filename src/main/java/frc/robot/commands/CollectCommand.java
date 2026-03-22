@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.units.measure.*;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkage;
 import frc.robot.subsystems.intakeLinkage.IntakeLinkageConstants;
@@ -53,13 +54,11 @@ public class CollectCommand extends Command {
   public void end(boolean interrupted) {
     linkage.stow();
 
-    Commands.defer(
-            () ->
-                Commands.sequence(
-                    Commands.waitSeconds(IntakeRollerConstants.STOP_DELAY.in(Seconds)),
-                    Commands.runOnce(roller::stop, roller)),
-            java.util.Set.of(roller))
-        .schedule();
+    CommandScheduler.getInstance()
+        .schedule(
+            Commands.sequence(
+                Commands.waitSeconds(IntakeRollerConstants.STOP_DELAY.in(Seconds)),
+                Commands.runOnce(roller::stop, roller)));
   }
 
   @Override
