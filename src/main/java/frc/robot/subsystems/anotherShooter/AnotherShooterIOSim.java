@@ -9,12 +9,13 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 
 public class AnotherShooterIOSim implements AnotherShooterIO {
-
   private boolean isEnabled = false;
   private boolean connected = true;
 
   private FlywheelSim leftSim;
   private FlywheelSim rightSim;
+
+  private AngularVelocity desiredRPM = RPM.of(0);
 
   public AnotherShooterIOSim() {
 
@@ -34,13 +35,13 @@ public class AnotherShooterIOSim implements AnotherShooterIO {
 
   @Override
   public void updateInputs(AnotherShooterIOInputs inputs) {
-
     rightSim.update(0.02);
     leftSim.update(0.02);
 
     inputs.isEnabled = isEnabled;
     inputs.connected = connected;
 
+    inputs.velocityRPMDesired = desiredRPM.in(RPM);
     inputs.velocityRPMFlyWheel = leftSim.getAngularVelocityRPM() / FLYWHEEL_CONFIG.REDUCTION();
 
     inputs.velocityRPMLeft = leftSim.getAngularVelocityRPM();
@@ -53,40 +54,19 @@ public class AnotherShooterIOSim implements AnotherShooterIO {
     inputs.appliedVoltageRight = rightSim.getInputVoltage();
   }
 
-  // @Override
-  // public void updateInputs(
-  //     AlgaeShooterValues values) { // what is going on here does this need to be Algae
-  //   rightSim.update(0.02);
-  //   leftSim.update(0.02);
-  //   launchSim.update(0.02);
-
-  //   values.launchIsEnabled = launcherIsEnabled;
-  //   values.shooterIsEnabled = shooterIsEnabled;
-
-  //   values.currentRPMLeft = getShooterRPMLeft();
-  //   values.currentRPMRight = getShooterRPMRight();
-
-  //   values.currentRMPLauncher = getLauncherRPM();
-  //   values.currentLauncherSetpoint = getLauncherSetpoint();
-
-  //   values.ampsLeft = Amps.of(leftSim.getCurrentDrawAmps());
-  //   values.ampsRight = Amps.of(rightSim.getCurrentDrawAmps());
-  //   values.ampsLauncher = Amps.of(launchSim.getCurrentDrawAmps());
-
-  //   values.isLoaded = shooterIsLoaded();
-  // }
-
   @Override
   public void start(AngularVelocity new_RPM) {
+    desiredRPM = new_RPM;
+
     rightSim.setAngularVelocity(new_RPM.in(RadiansPerSecond));
     leftSim.setAngularVelocity(new_RPM.in(RadiansPerSecond));
     isEnabled = true;
-    System.out.printf("Shooter RPM: %f", new_RPM.in(RPM));
   }
 
   @Override
   public void stop() {
-    setVelocity(RPM.of(0));
+    desiredRPM = RPM.of(0);
+    setVelocity(desiredRPM);
     isEnabled = false;
   }
 
@@ -95,7 +75,6 @@ public class AnotherShooterIOSim implements AnotherShooterIO {
     if (isEnabled) {
       rightSim.setAngularVelocity(new_RPM.in(RotationsPerSecond));
       leftSim.setAngularVelocity(new_RPM.in(RotationsPerSecond));
-      System.out.printf("Shooter RPM: %f", new_RPM.in(RPM));
     }
   }
 
