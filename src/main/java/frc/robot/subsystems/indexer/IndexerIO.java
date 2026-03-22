@@ -22,7 +22,6 @@ public interface IndexerIO {
   @AutoLog
   public static class IndexIOInputs {
     public boolean connected = false;
-    public boolean atGoal = true;
     public boolean isEnabled = false;
 
     public double velocityRPMFlywheel = 0;

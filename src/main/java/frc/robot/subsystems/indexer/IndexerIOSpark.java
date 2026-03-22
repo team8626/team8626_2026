@@ -114,11 +114,8 @@ public class IndexerIOSpark implements IndexerIO {
     inputs.appliedVoltage = spark.getAppliedOutput() * spark.getBusVoltage();
     inputs.tempCelsius = spark.getMotorTemperature();
 
-    inputs.atGoal = controller.isAtSetpoint();
     inputs.isEnabled = isEnabled;
-
     inputs.connected = connectedDebounce.calculate(!sparkStickyFault);
-    inputs.atGoal = controller.isAtSetpoint();
   }
 
   @Override
