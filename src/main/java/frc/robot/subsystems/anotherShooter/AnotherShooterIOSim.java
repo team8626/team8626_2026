@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 public class AnotherShooterIOSim implements AnotherShooterIO {
 
   private boolean isEnabled = false;
+  private boolean connected = true;
 
   private FlywheelSim leftSim;
   private FlywheelSim rightSim;
@@ -38,6 +39,7 @@ public class AnotherShooterIOSim implements AnotherShooterIO {
     leftSim.update(0.02);
 
     inputs.isEnabled = isEnabled;
+    inputs.connected = connected;
 
     inputs.velocityRPMFlyWheel = leftSim.getAngularVelocityRPM() / FLYWHEEL_CONFIG.REDUCTION();
 
