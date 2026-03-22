@@ -5,13 +5,13 @@ import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.commands.ShooterCommandsUtil.ShooterData;
 import frc.robot.subsystems.anotherShooter.AnotherShooter;
 import frc.robot.subsystems.anotherShooter.AnotherShooterConstants;
 import frc.robot.subsystems.drive.AkitDrive;
 import frc.robot.subsystems.indexer.Indexer;
-import java.util.Set;
 import java.util.function.Supplier;
 import org.littletonrobotics.frc2026.FieldConstants;
 
@@ -40,6 +40,7 @@ public class TrackTargetAndShootCommand extends Command {
   @Override
   public void initialize() {
     indexer.stop();
+    shooter.stopFeeding();
   }
 
   @Override
@@ -56,22 +57,23 @@ public class TrackTargetAndShootCommand extends Command {
 
     if (shooterAtSpeed) {
       indexer.start(shot.velocityIndexer());
+      shooter.startFeeding();
     } else {
       indexer.stop();
+      shooter.stopFeeding();
     }
   }
 
   @Override
   public void end(boolean interrupted) {
     indexer.stop();
+    shooter.stopFeeding();
 
-    Commands.defer(
-            () ->
-                Commands.sequence(
-                    Commands.waitSeconds(AnotherShooterConstants.STOP_DELAY.in(Seconds)),
-                    Commands.runOnce(shooter::stop, shooter)),
-            Set.of(shooter))
-        .schedule();
+    CommandScheduler.getInstance()
+        .schedule(
+            Commands.sequence(
+                Commands.waitSeconds(AnotherShooterConstants.STOP_DELAY.in(Seconds)),
+                Commands.runOnce(shooter::stop, shooter)));
   }
 
   @Override

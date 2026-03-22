@@ -1,11 +1,13 @@
 package frc.robot.subsystems.anotherShooter;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -15,6 +17,15 @@ import org.littletonrobotics.junction.Logger;
 public class AnotherShooter extends SubsystemBase {
   private final AnotherShooterIO io;
   private final AnotherShooterIOInputsAutoLogged inputs = new AnotherShooterIOInputsAutoLogged();
+
+  private double lastShotTimestampSec = -999.0;
+  private boolean feeding = false;
+  private boolean shotInProgress = false;
+
+  private static final double SHOT_DEBOUNCE_SEC = 0.05;
+  private static final double SHOT_RPM_DROP_THRESHOLD = 120.0;
+  private static final double SHOT_CURRENT_THRESHOLD_AMPS = 20.0;
+  private static final double MIN_TARGET_RPM = 1500.0;
 
   /** Shown on the dashboard when the index motor is not connected. */
   private final Alert motorDisconnectedAlert =
@@ -91,6 +102,9 @@ public class AnotherShooter extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("AnotherShooter", inputs);
 
+    // Shot counting logic
+    updateShotEstimate();
+
     // Update alerts
     motorDisconnectedAlert.set(!inputs.connected);
   }
@@ -104,6 +118,53 @@ public class AnotherShooter extends SubsystemBase {
       io.setPID(
           flywheelKP.get(), flywheelKI.get(), flywheelKD.get(), flywheelKV.get(), flywheelKS.get());
     }
+  }
+
+  public void startFeeding() {
+    feeding = true;
+  }
+
+  public void stopFeeding() {
+    feeding = false;
+  }
+
+  public void resetShotCount() {
+    inputs.shotCount = 0;
+  }
+
+  private void updateShotEstimate() {
+    double now = Timer.getFPGATimestamp();
+
+    double targetRpm = inputs.velocityRPMDesired;
+    double actualRpm = inputs.velocityRPMFlyWheel;
+    double rpmDrop = targetRpm - actualRpm;
+
+    double avgCurrentAmps = (inputs.ampsLeft.in(Amps) + inputs.ampsRight.in(Amps)) / 2.0;
+
+    boolean shotCondition =
+        inputs.isEnabled
+            && feeding
+            && targetRpm > MIN_TARGET_RPM
+            && rpmDrop > SHOT_RPM_DROP_THRESHOLD
+            && avgCurrentAmps > SHOT_CURRENT_THRESHOLD_AMPS
+            && (now - lastShotTimestampSec) > SHOT_DEBOUNCE_SEC;
+
+    if (shotCondition && !shotInProgress) {
+      inputs.shotCount++;
+      lastShotTimestampSec = now;
+      shotInProgress = true;
+    } else if (!shotCondition) {
+      shotInProgress = false;
+    }
+
+    Logger.recordOutput("AnotherShooter/ShotCounter/DesiredRPM", targetRpm);
+    Logger.recordOutput("AnotherShooter/ShotCounter/ActualRPM", actualRpm);
+    Logger.recordOutput("AnotherShooter/ShotCounter/RPMDrop", rpmDrop);
+    Logger.recordOutput("AnotherShooter/ShotCounter/AvgCurrentAmps", avgCurrentAmps);
+    Logger.recordOutput("AnotherShooter/ShotCounter/Feeding", feeding);
+    Logger.recordOutput("AnotherShooter/ShotCounter/ShotCondition", shotCondition);
+    Logger.recordOutput("AnotherShooter/ShotCounter/ShotInProgress", shotInProgress);
+    Logger.recordOutput("AnotherShooter/ShotCounter/Count", inputs.shotCount);
   }
 
   // Characterization methods
