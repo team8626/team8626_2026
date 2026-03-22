@@ -1,6 +1,6 @@
 package frc.robot.commands;
 
-import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.units.measure.*;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -53,10 +53,12 @@ public class CollectCommand extends Command {
   public void end(boolean interrupted) {
     linkage.stow();
 
-    // Keep roller running for 1 second, then stop
-    Commands.sequence(
-            Commands.waitSeconds(IntakeRollerConstants.STOP_DELAY.in(Second)),
-            Commands.runOnce(roller::stop, roller))
+    Commands.defer(
+            () ->
+                Commands.sequence(
+                    Commands.waitSeconds(IntakeRollerConstants.STOP_DELAY.in(Seconds)),
+                    Commands.runOnce(roller::stop, roller)),
+            java.util.Set.of(roller))
         .schedule();
   }
 
