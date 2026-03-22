@@ -18,6 +18,7 @@ import static edu.wpi.first.units.Units.Degrees;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.net.WebServer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -97,6 +98,9 @@ public class Robot extends LoggedRobot {
 
     // In robotInit() or teleopInit()
     SmartDashboard.putData("Field", m_field);
+
+    // Silent DS Warnings (only if FMS is not connected)
+    DriverStation.silenceJoystickConnectionWarning(true);
 
     // Start webserver
     WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
@@ -190,8 +194,6 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {
-    if (Constants.currentMode == Constants.Mode.SIM) {
-      RobotContainer.fuelSim.updateSim();
-    }
+    RobotContainer.fuelSim.updateSim();
   }
 }
