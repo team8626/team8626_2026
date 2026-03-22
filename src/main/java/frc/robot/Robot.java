@@ -141,8 +141,6 @@ public class Robot extends LoggedRobot {
       CommandScheduler.getInstance().schedule(autonomousCommand);
     }
     if (Constants.currentMode == Constants.Mode.SIM) {
-      robotContainer.akitDrive.setPose(
-          AllianceFlipUtil.apply(new Pose2d(3.6, 0.64, new Rotation2d(Degrees.of(72)))));
       RobotContainer.fuelSim.clearFuel();
       RobotContainer.fuelSim.spawnStartingFuel();
     }
