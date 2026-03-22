@@ -16,12 +16,14 @@ public interface ClimberIO {
   @AutoLog
   public static class ClimberIOInputs {
     public boolean leftConnected = false;
+    public boolean leftIsEnabled = false;
     public Angle leftPosition = Radians.of(0);
     public AngularVelocity leftVelocity = RadiansPerSecond.of(0);
     public Current leftCurrent = Amps.of(0);
     public Voltage leftAppliedVoltage = Volts.of(0);
 
     public boolean rightConnected = false;
+    public boolean rightIsEnabled = false;
     public Angle rightPosition = Radians.of(0);
     public AngularVelocity rightVelocity = RadiansPerSecond.of(0);
     public Current rightCurrent = Amps.of(0);

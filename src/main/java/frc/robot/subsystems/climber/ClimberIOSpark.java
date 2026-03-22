@@ -46,7 +46,9 @@ public class ClimberIOSpark implements ClimberIO {
   // private ArmFeedforward armFF = new ArmFeedforward(GAINS.kS(), GAINS.kG(), GAINS.kV());
 
   private double absoluteOffsetRotations = 0.0;
-  private boolean isEnabled = false;
+
+  private boolean leftIsEnabled = false;
+  private boolean rightIsEnabled = false;
 
   public ClimberIOSpark() {
 
@@ -116,11 +118,15 @@ public class ClimberIOSpark implements ClimberIO {
   @Override
   public void setLeftVoltage(Voltage out) {
     controllerleft.setSetpoint(out.in(Volts), ControlType.kVoltage);
+
+    leftIsEnabled = out.in(Volts) != 0;
   }
 
   @Override
   public void setRightVoltage(Voltage out) {
     controllerright.setSetpoint(out.in(Volts), ControlType.kVoltage);
+
+    rightIsEnabled = out.in(Volts) != 0;
   }
 
   @Override
@@ -132,11 +138,13 @@ public class ClimberIOSpark implements ClimberIO {
   @Override
   public void stopLeft() {
     controllerleft.setSetpoint(0, ControlType.kVoltage);
+    leftIsEnabled = false;
   }
 
   @Override
   public void stopRight() {
     controllerright.setSetpoint(0, ControlType.kVoltage);
+    rightIsEnabled = false;
   }
 
   @Override
