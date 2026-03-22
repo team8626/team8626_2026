@@ -63,6 +63,8 @@ public class IndexerIOSim implements IndexerIO {
   private double kV = GAINS.kV();
   private double kS = GAINS.kS();
 
+  private boolean isEnabled = false;
+
   /** True when setVelocity() is active; false for open-loop (setOpenLoop/stop). */
   private boolean velocityClosedLoop = false;
   /** Feedforward voltage (Ks * sign + Kv * setpoint) added to PID output in velocity mode. */
@@ -80,7 +82,7 @@ public class IndexerIOSim implements IndexerIO {
     motorSim =
         new DCMotorSim(
             LinearSystemId.createDCMotorSystem(
-                DCMotor.getNeoVortex(1), 0.0012, 1 /*IndexerConstants.gearReduction*/),
+                DCMotor.getNeoVortex(1), 0.0012, 1 / FLYWHEEL_CONFIG.REDUCTION()),
             DCMotor.getNeoVortex(1));
   }
 
@@ -97,21 +99,24 @@ public class IndexerIOSim implements IndexerIO {
     motorSim.update(0.02);
 
     inputs.connected = connected;
+    inputs.isEnabled = isEnabled;
+
     inputs.velocityRPMFlywheel =
         motorSim.getAngularVelocity().in(RPM) / FLYWHEEL_CONFIG.REDUCTION();
     inputs.velocityRPMDesired = desiredWheelVelocity.in(RPM);
     inputs.appliedVoltage = appliedVolts;
     inputs.amps = Math.abs(motorSim.getCurrentDrawAmps());
-    inputs.atGoal =
-        velocityClosedLoop
-            || Math.abs(inputs.velocityRPMDesired - inputs.velocityRPMFlywheel)
-                < IndexerConstants.VELOCITY_TOLERANCE.in(RPM);
   }
 
   @Override
   public void setOpenLoop(Voltage output) {
     velocityClosedLoop = false;
     appliedVolts = output.in(Volts);
+    if (appliedVolts != 0.0) {
+      isEnabled = true;
+    } else {
+      isEnabled = false;
+    }
   }
 
   @Override
@@ -125,10 +130,13 @@ public class IndexerIOSim implements IndexerIO {
         kS * Math.signum(motorAngularVelocity.in(RadiansPerSecond))
             + kV * motorAngularVelocity.in(RadiansPerSecond);
     velocityController.setSetpoint(motorAngularVelocity.in(RadiansPerSecond));
+    isEnabled = true;
   }
 
   @Override
   public void stop() {
+    isEnabled = false;
+
     velocityClosedLoop = false;
     desiredWheelVelocity = RotationsPerSecond.of(0.0);
     appliedVolts = 0.0;
