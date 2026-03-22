@@ -1,15 +1,17 @@
 package frc.robot.commands;
 
-import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.commands.ShooterCommandsUtil.ShooterData;
 import frc.robot.subsystems.anotherShooter.AnotherShooter;
 import frc.robot.subsystems.anotherShooter.AnotherShooterConstants;
 import frc.robot.subsystems.drive.AkitDrive;
 import frc.robot.subsystems.indexer.Indexer;
+import java.util.Set;
 import java.util.function.Supplier;
 import org.littletonrobotics.frc2026.FieldConstants;
 
@@ -61,8 +63,15 @@ public class TrackTargetAndShootCommand extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    shooter.stop();
     indexer.stop();
+
+    Commands.defer(
+            () ->
+                Commands.sequence(
+                    Commands.waitSeconds(AnotherShooterConstants.STOP_DELAY.in(Seconds)),
+                    Commands.runOnce(shooter::stop, shooter)),
+            Set.of(shooter))
+        .schedule();
   }
 
   @Override

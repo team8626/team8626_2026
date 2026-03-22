@@ -27,6 +27,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.EventTrigger;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -46,7 +47,6 @@ import frc.robot.commands.CollectCommand;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IndexerStartCommand;
 import frc.robot.commands.IndexerStopCommand;
-import frc.robot.commands.ShooterCommandsUtil;
 import frc.robot.commands.TeleopDriveCommand;
 import frc.robot.commands.TrackTargetAndShootCommand;
 import frc.robot.generated.TunerConstants;
@@ -364,7 +364,19 @@ public class RobotContainer {
     fixedRPMShootTrigger.whileTrue(
         Commands.sequence(new AnotherShooterRampupCommand(anotherShooter), feedShooterCommand())
             .withName("Just Shoot Command")
-            .finallyDo(anotherShooter::stop));
+            .finallyDo(
+                () -> {
+                  index.stop();
+
+                  Commands.defer(
+                          () ->
+                              Commands.sequence(
+                                  Commands.waitSeconds(
+                                      AnotherShooterConstants.STOP_DELAY.in(Seconds)),
+                                  Commands.runOnce(anotherShooter::stop, anotherShooter)),
+                          Set.of(anotherShooter))
+                      .schedule();
+                }));
 
     // -------------------------------------------------------------- Aim and Shoot
     //
@@ -527,37 +539,22 @@ public class RobotContainer {
    * that can be triggered by auto builders and path planners.
    */
   private void configurePPNamedCommands() {
-
     NamedCommands.registerCommand(
         "AimAndDumpShort",
         Commands.sequence(new AnotherShooterRampupCommand(anotherShooter), feedShooterCommand())
-            .finallyDo(
-                () -> {
-                  anotherShooter.stop();
-                  index.stop();
-                  intakeLinkage.stow();
-                })
+            .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY))
             .withTimeout(AutoConstants.DUMP_DURATION_SHORT.in(Seconds)));
+
     NamedCommands.registerCommand(
         "AimAndDumpMedium",
         Commands.sequence(new AnotherShooterRampupCommand(anotherShooter), feedShooterCommand())
-            .finallyDo(
-                () -> {
-                  anotherShooter.stop();
-                  index.stop();
-                  intakeLinkage.stow();
-                })
+            .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY))
             .withTimeout(AutoConstants.DUMP_DURATION_MEDIUM.in(Seconds)));
 
     NamedCommands.registerCommand(
         "AimAndDumpLong",
         Commands.sequence(new AnotherShooterRampupCommand(anotherShooter), feedShooterCommand())
-            .finallyDo(
-                () -> {
-                  anotherShooter.stop();
-                  index.stop();
-                  intakeLinkage.stow();
-                })
+            .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY))
             .withTimeout(AutoConstants.DUMP_DURATION_LONG.in(Seconds)));
   }
 
@@ -566,12 +563,17 @@ public class RobotContainer {
    * commands that need to be triggered by events in the middle of paths.
    */
   private void configurePPEventTriggers() {
+    // Start collecting when the "CollectStart" event is triggered
     new EventTrigger("CollectStart").whileTrue(new CollectCommand(intakeLinkage, intakeRoller));
-    new EventTrigger("CollectDone")
-        .whileTrue(
-            Commands.runOnce(() -> intakeRoller.stop(), intakeRoller)
-                .alongWith(Commands.runOnce(() -> intakeLinkage.stow())));
+
+    // Stop collecting when the "CollectDone" event is triggered.
+    // No action is needed, we just need a trigger to end the collect command (interrupt)
+    new EventTrigger("CollectDone").onTrue(Commands.runOnce(() -> {}, intakeLinkage, intakeRoller));
+
+    // Ramp up the shooter when the "RampUp" event is triggered
+    // The shooter will keep running until stopped or interrupted
     new EventTrigger("RampUp").whileTrue(new AnotherShooterRampupCommand(anotherShooter));
+
     new EventTrigger("StopDump")
         .whileTrue(
             new IndexerStopCommand(index).alongWith(new AnotherShooterStopCommand(anotherShooter)));
@@ -694,30 +696,22 @@ public class RobotContainer {
         new IndexerStartCommand(indexVelocitySupplier, index), new AgitateCommand(intakeLinkage));
   }
 
-//   private Command collectAimAndShootCommand() {
-//     return Commands.defer(
-//         () -> {
-//           var shot = ShooterCommandsUtil.calculateRPMToHub(akitDrive);
+  private void stopShooting() {
+    anotherShooter.stop();
+    index.stop();
+    intakeLinkage.stow();
+  }
 
-//           return Commands.parallel(
-//                   new AnotherShooterRampupCommand(() -> shot.velocityShooter(), anotherShooter),
-//                   // new AimToTargetCommand(akitDrive),
-//                   new IndexerStartCommand(() -> shot.velocityIndexer(), index),
-//                   Commands.run(
-//                       () -> intakeRoller.start(IntakeRollerConstants.DEFAULT_VELOCITY),
-//                       intakeRoller),
-//                   Commands.run(
-//                       () -> intakeLinkage.setPosition(IntakeLinkageConstants.DEPLOY_ANGLE),
-//                       intakeLinkage))
-//               .finallyDo(
-//                   () -> {
-//                     anotherShooter.stop();
-//                     index.stop();
-//                     intakeRoller.stop();
-//                     intakeLinkage.stow();
-//                   })
-//               .withName("Collect Aim Shoot Command");
-//         },
-//         Set.of(intakeLinkage, intakeRoller, index, anotherShooter));
-//   }
+  private void stopShooting(Time delay) {
+    index.stop();
+    intakeLinkage.stow();
+
+    Commands.defer(
+            () ->
+                Commands.sequence(
+                    Commands.waitSeconds(delay.in(Seconds)),
+                    Commands.runOnce(anotherShooter::stop, anotherShooter)),
+            Set.of(anotherShooter))
+        .schedule();
+  }
 }
