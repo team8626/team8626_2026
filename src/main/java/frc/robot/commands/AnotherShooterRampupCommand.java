@@ -26,7 +26,9 @@ public class AnotherShooterRampupCommand extends Command {
       Supplier<AngularVelocity> velocitySupplier, AnotherShooter shooter) {
     this.shooter = shooter;
     this.velocitySupplier = velocitySupplier;
-    addRequirements(shooter);
+
+    // DO NOT USE REQUITEMENTS, THIS BLOCKS AUTOs
+    // addRequirements(shooter);
   }
 
   @Override
