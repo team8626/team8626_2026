@@ -54,16 +54,6 @@ public class IntakeRollerTest {
   }
 
   @Test
-  void testRunOpenLoop() {
-    intakeRoller.periodic();
-
-    double voltage = 6.0;
-    intakeRoller.runOpenLoop(Volts.of(voltage));
-
-    assertEquals(voltage, io.lastOpenLoopOutput.in(Volts), DELTA);
-  }
-
-  @Test
   void testStop() {
     intakeRoller.periodic();
 

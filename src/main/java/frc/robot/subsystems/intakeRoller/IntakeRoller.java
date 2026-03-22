@@ -92,20 +92,11 @@ public class IntakeRoller extends SubsystemBase {
     if ((new_velocity.abs(RPM)) > IntakeRollerConstants.MAX_VELOCITY.in(RPM)) {
       velocity = RPM.of(IntakeRollerConstants.MAX_VELOCITY.copySign(velocity, RPM));
     }
-    io.setVelocity(velocity);
+    io.start(velocity);
   }
 
   public void start() {
     start(RPM.of(rollerRPM.get()));
-  }
-
-  /**
-   * Run the index motor at open-loop voltage (for testing).
-   *
-   * @param output Voltage output (-12.0 to 12.0)
-   */
-  public void runOpenLoop(Voltage output) {
-    io.setOpenLoop(output);
   }
 
   /** Stop the index motor. */

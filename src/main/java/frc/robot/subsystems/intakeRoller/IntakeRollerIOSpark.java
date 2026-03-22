@@ -121,18 +121,7 @@ public class IntakeRollerIOSpark implements IntakeRollerIO {
   }
 
   @Override
-  public void setOpenLoop(Voltage output) {
-    controller.setSetpoint(output.in(Volt), ControlType.kDutyCycle);
-
-    if (output.in(Volt) != 0.0) {
-      isEnabled = true;
-    } else {
-      isEnabled = false;
-    }
-  }
-
-  @Override
-  public void setVelocity(AngularVelocity new_velocity) {
+  public void start(AngularVelocity new_velocity) {
     desiredWheelVelocity = new_velocity;
 
     AngularVelocity motorAngularVelocity = desiredWheelVelocity.times(ROLLER_CONFIG.REDUCTION());

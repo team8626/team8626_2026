@@ -83,6 +83,7 @@ import frc.robot.subsystems.intakeLinkage.IntakeLinkageIOSpark;
 import frc.robot.subsystems.intakeRoller.IntakeRoller;
 import frc.robot.subsystems.intakeRoller.IntakeRollerConstants;
 import frc.robot.subsystems.intakeRoller.IntakeRollerIO;
+import frc.robot.subsystems.intakeRoller.IntakeRollerIOSim;
 import frc.robot.subsystems.intakeRoller.IntakeRollerIOSpark;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
@@ -163,7 +164,7 @@ public class RobotContainer {
               new ModuleIOSimTalonFX(Rebuilt_SwerveConstants.BackRight.MODULE_CONSTANTS));
       index = new Indexer(new IndexerIOSim());
       intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSim());
-      intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
+      intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
       hopper = new Hopper(new HopperIOSim());
       anotherShooter = new AnotherShooter(new AnotherShooterIOSim());
       climber = new Climber(new ClimberIOSim() {});

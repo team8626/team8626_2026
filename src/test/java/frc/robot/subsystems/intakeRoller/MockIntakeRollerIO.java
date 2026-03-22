@@ -41,13 +41,7 @@ public class MockIntakeRollerIO implements IntakeRollerIO {
   }
 
   @Override
-  public void setOpenLoop(Voltage output) {
-    lastOpenLoopOutput = output;
-    appliedVolts = output;
-  }
-
-  @Override
-  public void setVelocity(AngularVelocity velocity) {
+  public void start(AngularVelocity velocity) {
     lastVelocitySetpoint = velocity;
   }
 

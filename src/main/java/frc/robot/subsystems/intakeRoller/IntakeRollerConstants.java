@@ -31,14 +31,14 @@ public class IntakeRollerConstants {
 
   public static final AngularVelocity VELOCITY_TOLERANCE = RPM.of(25);
 
-  private static final double MOI = 1;
+  private static final double MOMENT_OF_INERTIA = 1;
 
   // Flywheel Config
   public static final RollerConfig ROLLER_CONFIG =
       switch (Constants.robot) {
         case REBUILT_PHOENIX, REBUILT_AKIT -> new RollerConfig(
-            1, false, Amps.of(50), 3.0 / 1.0, 2 * MOI);
-        default -> new RollerConfig(1, false, Amps.of(50), 3.0 / 1.0, 2 * MOI);
+            1, false, Amps.of(50), 3.0 / 1.0, MOMENT_OF_INERTIA);
+        default -> new RollerConfig(1, false, Amps.of(50), 3.0 / 1.0, MOMENT_OF_INERTIA);
       };
 
   // PID Constants
