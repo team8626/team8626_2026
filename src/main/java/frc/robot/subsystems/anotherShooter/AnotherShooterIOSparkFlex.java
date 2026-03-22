@@ -116,7 +116,8 @@ public class AnotherShooterIOSparkFlex implements AnotherShooterIO {
     inputs.tempCelsiusRight = rightMotor.getMotorTemperature();
 
     inputs.appliedVoltageLeft = leftMotor.getAppliedOutput() * leftMotor.getBusVoltage();
-inputs.appliedVoltageRight = rightMotor.getAppliedOutput() * rightMotor.getBusVoltage();  }
+    inputs.appliedVoltageRight = rightMotor.getAppliedOutput() * rightMotor.getBusVoltage();
+  }
 
   @Override
   public void start(AngularVelocity new_RPM) {
