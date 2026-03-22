@@ -45,12 +45,6 @@ public interface IntakeLinkageIO {
 
   public default void goDown(Angle offset) {}
 
-  public default void stow() {}
-
-  public default void deploy() {}
-
-  public default void hopperOpen() {}
-
   public default void setPID(double kP, double kI, double kD) {}
 
   public default void setPID(double kP, double kI, double kD, double kV, double kG, double kS) {}
