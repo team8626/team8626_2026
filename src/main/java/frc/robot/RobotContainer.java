@@ -541,21 +541,24 @@ public class RobotContainer {
   private void configurePPNamedCommands() {
     NamedCommands.registerCommand(
         "AimAndDumpShort",
-        Commands.sequence(new AnotherShooterRampupCommand(anotherShooter), feedShooterCommand())
-            .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY))
-            .withTimeout(AutoConstants.DUMP_DURATION_SHORT.in(Seconds)));
+        Commands.sequence(
+                new AnotherShooterRampupCommand(anotherShooter).withTimeout(1.0),
+                feedShooterCommand().withTimeout(AutoConstants.DUMP_DURATION_SHORT.in(Seconds)))
+            .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY)));
 
     NamedCommands.registerCommand(
         "AimAndDumpMedium",
-        Commands.sequence(new AnotherShooterRampupCommand(anotherShooter), feedShooterCommand())
-            .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY))
-            .withTimeout(AutoConstants.DUMP_DURATION_MEDIUM.in(Seconds)));
+        Commands.sequence(
+                new AnotherShooterRampupCommand(anotherShooter).withTimeout(1.0),
+                feedShooterCommand().withTimeout(AutoConstants.DUMP_DURATION_MEDIUM.in(Seconds)))
+            .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY)));
 
     NamedCommands.registerCommand(
         "AimAndDumpLong",
-        Commands.sequence(new AnotherShooterRampupCommand(anotherShooter), feedShooterCommand())
-            .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY))
-            .withTimeout(AutoConstants.DUMP_DURATION_LONG.in(Seconds)));
+        Commands.sequence(
+                new AnotherShooterRampupCommand(anotherShooter).withTimeout(1.0),
+                feedShooterCommand().withTimeout(AutoConstants.DUMP_DURATION_LONG.in(Seconds)))
+            .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY)));
   }
 
   /**
