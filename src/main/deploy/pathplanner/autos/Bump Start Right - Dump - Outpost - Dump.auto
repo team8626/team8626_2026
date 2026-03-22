@@ -13,37 +13,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Dump Left to Depot"
+            "pathName": "Bump Start Right to Outpost"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.0
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Depot to Dump Left"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "AimAndDumpMedium"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Dump Left to Trench Left"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Collect Forward 1 Left"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Trench Left to Dump Left"
+            "pathName": "Outpost to Dump Right"
           }
         },
         {
@@ -55,7 +37,7 @@
       ]
     }
   },
-  "resetOdom": false,
+  "resetOdom": true,
   "folder": null,
   "choreoAuto": false
 }

@@ -5,6 +5,12 @@
     "data": {
       "commands": [
         {
+          "type": "path",
+          "data": {
+            "pathName": "Trench Start Right to Dump Right"
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "AimAndDumpShort"
@@ -13,19 +19,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Trench Start Right to Outpost"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 3.0
+            "pathName": "Dump Right to Trench Right"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Outpost to Bump Right"
+            "pathName": "Trench Right CCW Collect"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Trench Right to Dump Right"
           }
         },
         {

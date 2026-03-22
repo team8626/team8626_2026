@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import static edu.wpi.first.units.Units.*;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -12,6 +13,7 @@ import edu.wpi.first.units.measure.Distance;
 import frc.robot.Constants.ShooterTargetConstants;
 import frc.robot.subsystems.anotherShooter.AnotherShooterConstants;
 import frc.robot.subsystems.drive.AkitDrive;
+import frc.robot.subsystems.drive.DriveConstants;
 import org.littletonrobotics.frc2026.FieldConstants;
 import org.littletonrobotics.frc2026.util.geometry.AllianceFlipUtil;
 import org.littletonrobotics.junction.Logger;
@@ -56,16 +58,14 @@ public class ShooterCommandsUtil {
   }
 
   public static ShooterData calculateRPMToTarget(AkitDrive drive, Translation3d target) {
-    Translation3d targetPose = (AllianceFlipUtil.apply(target));
-
-    double distToTargetFeet = getDistToTarget(drive, targetPose).in(Feet);
+    double distToTargetFeet = getDistToTarget(drive, target).in(Feet);
 
     AngularVelocity velocityShooter = RPM.of(AnotherShooterConstants.RPMMap.get(distToTargetFeet));
     AngularVelocity velocityIndexer =
         RPM.of(AnotherShooterConstants.IndexerMap.get(distToTargetFeet));
 
     Logger.recordOutput("AnotherShooter/Target/Pose Robot", drive.getPose());
-    Logger.recordOutput("AnotherShooter/Target/Pose Target", targetPose);
+    Logger.recordOutput("AnotherShooter/Target/Pose Target", AllianceFlipUtil.apply(target));
     Logger.recordOutput("AnotherShooter/Target/Distance to Target", distToTargetFeet, "feet");
     Logger.recordOutput("AnotherShooter/Target/Shooter RPM", velocityShooter.in(RPM), "RPM");
     Logger.recordOutput(
@@ -93,13 +93,35 @@ public class ShooterCommandsUtil {
     Translation2d targetTranslation = AllianceFlipUtil.apply(target).toTranslation2d();
 
     Translation2d delta = targetTranslation.minus(shooterTranslation);
-    Rotation2d angleToTarget = new Rotation2d(Math.atan2(delta.getY(), delta.getX()));
+    Rotation2d targetLockAngle = new Rotation2d(Math.atan2(delta.getY(), delta.getX()));
 
     Logger.recordOutput("AnotherShooter/Target/Pose Shooter", shooterPose3d);
-    Logger.recordOutput("AnotherShooter/Target/Pose Target (Angle Lock)", target);
     Logger.recordOutput(
-        "AnotherShooter/Target/Angle to Target", angleToTarget.getDegrees(), "degrees");
+        "AnotherShooter/Target/Pose Target (Angle Lock)", AllianceFlipUtil.apply(target));
+    Logger.recordOutput(
+        "AnotherShooter/Target/Lock Angle", targetLockAngle.getDegrees(), "degrees");
 
-    return angleToTarget;
+    return targetLockAngle;
+  }
+
+  /** Helper method to determine if the robot is in position to shoot. */
+  public static boolean inPositionToShoot(AkitDrive drive, Translation3d target) {
+    double angleErrorDeg =
+        MathUtil.inputModulus(
+            drive.getRotation().getDegrees() - getTargetLockAngle(drive, target).getDegrees(),
+            -180,
+            180);
+
+    double omegaDegPerSec = Math.toDegrees(drive.getChassisSpeeds().omegaRadiansPerSecond);
+
+    Logger.recordOutput("AnotherShooter/Target/DegToTarget", angleErrorDeg);
+    Logger.recordOutput("AnotherShooter/Target/OmegaDegPerSec", omegaDegPerSec);
+
+    return Math.abs(angleErrorDeg) <= DriveConstants.AIM_TOLERANCE_DEG.get()
+        && Math.abs(omegaDegPerSec) <= DriveConstants.AIM_MAX_ANGULAR_VEL_DEG_PER_SEC.get();
+  }
+
+  public static boolean inPositionToShoot(AkitDrive drive) {
+    return inPositionToShoot(drive, FieldConstants.Hub.topCenterPoint);
   }
 }
