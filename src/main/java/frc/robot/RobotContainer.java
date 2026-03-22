@@ -45,6 +45,7 @@ import frc.robot.commands.AgitateCommand;
 import frc.robot.commands.AnotherShooterRampupCommand;
 import frc.robot.commands.CollectCommand;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.SystemChecks;
 import frc.robot.commands.TeleopDriveCommand;
 import frc.robot.commands.TrackTargetAndShootCommand;
 import frc.robot.generated.TunerConstants;
@@ -87,6 +88,7 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.FuelSim;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -111,6 +113,8 @@ public class RobotContainer {
   private final Climber climber;
 
   private final Vision vision;
+
+  private final SystemChecks systemChecks;
 
   // Controller
   private static final CommandXboxController controller =
@@ -166,10 +170,18 @@ public class RobotContainer {
       vision =
           new Vision(
               akitDrive::addVisionMeasurement,
-              new VisionIO() {},
-              new VisionIO() {},
-              new VisionIO() {});
-
+              new VisionIOPhotonVisionSim(
+                  VisionConstants.CAMERA_NAMES[0],
+                  VisionConstants.CAMERA_TRANSFORMS[0],
+                  akitDrive::getPose),
+              new VisionIOPhotonVisionSim(
+                  VisionConstants.CAMERA_NAMES[1],
+                  VisionConstants.CAMERA_TRANSFORMS[1],
+                  akitDrive::getPose),
+              new VisionIOPhotonVisionSim(
+                  VisionConstants.CAMERA_NAMES[2],
+                  VisionConstants.CAMERA_TRANSFORMS[2],
+                  akitDrive::getPose));
       //   vision.setPoseSupplier(drive::getPose);
       configureFuelSim();
       configureFuelSimRobot(hopper::ableToIntake, hopper::pushFuel);
@@ -258,6 +270,9 @@ public class RobotContainer {
           throw new IllegalStateException("Unexpected robot: " + Constants.robot);
       }
     }
+
+    // Setup System Checks
+    systemChecks = new SystemChecks(intakeLinkage, intakeRoller, index, anotherShooter, climber);
 
     // Set up auto routines
     configurePPNamedCommands();

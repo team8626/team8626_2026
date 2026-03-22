@@ -3,19 +3,53 @@
   "grid_size": 32,
   "tabs": [
     {
-      "name": "Teleoperated",
+      "name": "Autonomous",
       "grid_layout": {
         "layouts": [],
         "containers": [
           {
-            "title": "Right HasTarget",
-            "x": 160.0,
-            "y": 0.0,
+            "title": "Auto Choices",
+            "x": 192.0,
+            "y": 64.0,
+            "width": 640.0,
+            "height": 128.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Auto Choices",
+              "period": 0.06,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "Field",
+            "x": 192.0,
+            "y": 320.0,
+            "width": 1536.0,
+            "height": 608.0,
+            "type": "Field",
+            "properties": {
+              "topic": "/SmartDashboard/Field",
+              "period": 0.06,
+              "field_game": "Rebuilt",
+              "robot_width": 0.85,
+              "robot_length": 0.85,
+              "show_other_objects": true,
+              "show_trajectories": true,
+              "field_rotation": 0.0,
+              "robot_color": 4294198070,
+              "trajectory_color": 4294967295,
+              "show_robot_outside_widget": true
+            }
+          },
+          {
+            "title": "indexer",
+            "x": 1184.0,
+            "y": 64.0,
             "width": 128.0,
-            "height": 96.0,
+            "height": 64.0,
             "type": "Boolean Box",
             "properties": {
-              "topic": "/photonvision/Arducam_AT001/hasTarget",
+              "topic": "/AdvantageKit/Indexer/IsEnabled",
               "period": 0.06,
               "data_type": "boolean",
               "true_color": 4283215696,
@@ -25,14 +59,14 @@
             }
           },
           {
-            "title": "Left HasTarget",
-            "x": 32.0,
-            "y": 0.0,
+            "title": "Shooter",
+            "x": 1312.0,
+            "y": 64.0,
             "width": 128.0,
-            "height": 96.0,
+            "height": 64.0,
             "type": "Boolean Box",
             "properties": {
-              "topic": "/photonvision/Arducam_AT002/hasTarget",
+              "topic": "/AdvantageKit/AnotherShooter/IsEnabled",
               "period": 0.06,
               "data_type": "boolean",
               "true_color": 4283215696,
@@ -42,514 +76,535 @@
             }
           },
           {
-            "title": "DesiredHeight",
-            "x": 448.0,
-            "y": 320.0,
+            "title": "CurrentVelocity",
+            "x": 1184.0,
+            "y": 224.0,
             "width": 128.0,
             "height": 96.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Subsystem/ElevatorSubsystem/DesiredHeight",
+              "topic": "/AdvantageKit/Indexer/CurrentVelocity",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
             }
           },
           {
-            "title": "Height",
-            "x": 448.0,
-            "y": 416.0,
+            "title": "CurrentVelocityRPM",
+            "x": 1312.0,
+            "y": 224.0,
             "width": 128.0,
             "height": 96.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Subsystem/ElevatorSubsystem/Height",
+              "topic": "/AdvantageKit/AnotherShooter/CurrentVelocityRPM",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
             }
           },
           {
-            "title": "DesiredAngleDegrees",
-            "x": 576.0,
-            "y": 320.0,
+            "title": "DesiredRPM",
+            "x": 1312.0,
+            "y": 128.0,
             "width": 128.0,
             "height": 96.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Subsystem/WristSubsystem/DesiredAngleDegrees",
+              "topic": "/AdvantageKit/AnotherShooter/DesiredRPM",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
             }
           },
           {
-            "title": "CurrentAngleDegrees",
-            "x": 576.0,
-            "y": 416.0,
+            "title": "DesiredVelocity",
+            "x": 1184.0,
+            "y": 128.0,
             "width": 128.0,
             "height": 96.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Subsystem/WristSubsystem/CurrentAngleDegrees",
+              "topic": "/AdvantageKit/Indexer/DesiredVelocity",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
             }
           },
           {
-            "title": "Shooter RPM Left",
-            "x": 832.0,
-            "y": 416.0,
+            "title": "RightCurrent",
+            "x": 1600.0,
+            "y": 224.0,
             "width": 128.0,
             "height": 96.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/Shooter RPM Left",
+              "topic": "/AdvantageKit/Climber/RightCurrent",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
             }
           },
           {
-            "title": "Shooter RPM Right",
-            "x": 960.0,
-            "y": 416.0,
+            "title": "LeftCurrent",
+            "x": 1472.0,
+            "y": 224.0,
             "width": 128.0,
             "height": 96.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/Shooter RPM Right",
+              "topic": "/AdvantageKit/Climber/LeftCurrent",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
             }
           },
           {
-            "title": "Last Shot in (ms)",
-            "x": 736.0,
-            "y": 0.0,
-            "width": 352.0,
+            "title": "LeftPosition",
+            "x": 1472.0,
+            "y": 128.0,
+            "width": 128.0,
             "height": 96.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/Last Shot in (ms)",
+              "topic": "/AdvantageKit/Climber/LeftPosition",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
             }
           },
           {
-            "title": "Launcher",
-            "x": 1120.0,
-            "y": 256.0,
+            "title": "RightPosition",
+            "x": 1600.0,
+            "y": 128.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Climber/RightPosition",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Rollers",
+            "x": 992.0,
+            "y": 64.0,
+            "width": 128.0,
+            "height": 64.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeRoller/IsEnabled",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "CurrentVelocity",
+            "x": 992.0,
+            "y": 224.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeRoller/CurrentVelocity",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "DesiredVelocity",
+            "x": 992.0,
+            "y": 128.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeRoller/DesiredVelocity",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "IsEnabled",
+            "x": 864.0,
+            "y": 64.0,
+            "width": 128.0,
+            "height": 64.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeLinkage/IsEnabled",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "DesiredAngle",
+            "x": 864.0,
+            "y": 128.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeLinkage/DesiredAngle",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Position",
+            "x": 864.0,
+            "y": 224.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeLinkage/Position",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Alliance",
+            "x": 192.0,
+            "y": 224.0,
             "width": 96.0,
-            "height": 64.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/Launcher",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "Shooter",
-            "x": 832.0,
-            "y": 256.0,
-            "width": 256.0,
-            "height": 64.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/Shooter",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "Shooting RPM",
-            "x": 832.0,
-            "y": 320.0,
-            "width": 256.0,
             "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/Shooting RPM",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "isLoaded",
-            "x": 736.0,
-            "y": 192.0,
-            "width": 352.0,
-            "height": 64.0,
             "type": "Boolean Box",
             "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/isLoaded",
+              "topic": "/FMSInfo/IsRedAlliance",
               "period": 0.06,
               "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
+              "true_color": 4294901760,
+              "false_color": 4278193663,
               "true_icon": "None",
               "false_icon": "None"
             }
           },
           {
-            "title": "Launcher",
-            "x": 1216.0,
-            "y": 256.0,
-            "width": 128.0,
-            "height": 64.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/CoralShooterSubsystem/Launcher",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "IsLoaded",
-            "x": 1120.0,
-            "y": 192.0,
-            "width": 352.0,
-            "height": 64.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/CoralShooterSubsystem/IsLoaded",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "Shooter",
-            "x": 1344.0,
-            "y": 256.0,
-            "width": 128.0,
-            "height": 64.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/CoralShooterSubsystem/Shooter",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "Robot State",
-            "x": 32.0,
-            "y": 96.0,
+            "title": "EventName",
+            "x": 320.0,
+            "y": 224.0,
             "width": 384.0,
             "height": 96.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Commodore/Current State",
+              "topic": "/FMSInfo/EventName",
               "period": 0.06,
               "data_type": "string",
               "show_submit_button": false
             }
           },
           {
-            "title": "ShootingRPMLeft",
-            "x": 1216.0,
-            "y": 320.0,
+            "title": "MatchNumber",
+            "x": 704.0,
+            "y": 224.0,
             "width": 128.0,
             "height": 96.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Subsystem/CoralShooterSubsystem/ShootingRPMLeft",
+              "topic": "/FMSInfo/MatchNumber",
               "period": 0.06,
-              "data_type": "double",
+              "data_type": "int",
               "show_submit_button": false
             }
-          },
+          }
+        ]
+      }
+    },
+    {
+      "name": "All",
+      "grid_layout": {
+        "layouts": [],
+        "containers": [
           {
-            "title": "ShootingRPMRight",
-            "x": 1344.0,
-            "y": 320.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/CoralShooterSubsystem/ShootingRPMRight",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "Curren Left",
-            "x": 1216.0,
-            "y": 416.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/CoralShooterSubsystem/CurrentRPMLeft",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "Current Right",
-            "x": 1344.0,
-            "y": 416.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/CoralShooterSubsystem/CurrentRPMRight",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "atSetPoint",
-            "x": 448.0,
-            "y": 512.0,
-            "width": 128.0,
-            "height": 64.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/SmartDashboard/Commands/ElevatorSetHeight/atSetPoint",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "atSetPoint",
-            "x": 576.0,
-            "y": 512.0,
-            "width": 128.0,
-            "height": 64.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/SmartDashboard/Commands/WristSetAngle/atSetPoint",
-              "period": 0.02,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "leftAtSetPoint",
-            "x": 832.0,
-            "y": 512.0,
-            "width": 128.0,
-            "height": 64.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/SmartDashboard/Commands/AlgaeShooterRampUp/leftAtSetPoint",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "rightAtSetPoint",
-            "x": 960.0,
-            "y": 512.0,
-            "width": 128.0,
-            "height": 64.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/SmartDashboard/Commands/AlgaeShooterRampUp/rightAtSetPoint",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "algaeState",
-            "x": 736.0,
-            "y": 96.0,
-            "width": 352.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/UIDashboard/ToDashboard/algaeState",
-              "period": 0.06,
-              "data_type": "string",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "coralState",
-            "x": 1120.0,
-            "y": 96.0,
-            "width": 352.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/UIDashboard/ToDashboard/coralState",
-              "period": 0.06,
-              "data_type": "string",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "AlgaeShooterSubsystem",
+            "title": "Auto Choices",
             "x": 32.0,
-            "y": 576.0,
-            "width": 352.0,
-            "height": 96.0,
-            "type": "Subsystem",
+            "y": 128.0,
+            "width": 640.0,
+            "height": 128.0,
+            "type": "ComboBox Chooser",
             "properties": {
-              "topic": "/SmartDashboard/Commands/AlgaeShooterSubsystem",
-              "period": 0.06
+              "topic": "/SmartDashboard/Auto Choices",
+              "period": 0.06,
+              "sort_options": false
             }
           },
           {
-            "title": "WristSubsystem",
-            "x": 32.0,
-            "y": 480.0,
-            "width": 352.0,
-            "height": 96.0,
-            "type": "Subsystem",
+            "title": "indexer",
+            "x": 1024.0,
+            "y": 64.0,
+            "width": 128.0,
+            "height": 64.0,
+            "type": "Boolean Box",
             "properties": {
-              "topic": "/SmartDashboard/Commands/WristSubsystem",
-              "period": 0.06
+              "topic": "/AdvantageKit/Indexer/IsEnabled",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
             }
           },
           {
-            "title": "ElevatorSubsystem",
-            "x": 32.0,
+            "title": "Shooter",
+            "x": 1184.0,
+            "y": 64.0,
+            "width": 256.0,
+            "height": 64.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/AnotherShooter/IsEnabled",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "CurrentVelocity",
+            "x": 1024.0,
+            "y": 288.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Indexer/CurrentVelocity",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "CurrentVelocityRPM",
+            "x": 1184.0,
+            "y": 288.0,
+            "width": 256.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/AnotherShooter/CurrentVelocityRPM",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "DesiredRPM",
+            "x": 1184.0,
+            "y": 192.0,
+            "width": 256.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/AnotherShooter/DesiredRPM",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "DesiredVelocity",
+            "x": 1024.0,
+            "y": 192.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Indexer/DesiredVelocity",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "RightCurrent",
+            "x": 1600.0,
+            "y": 512.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Climber/RightCurrent",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "LeftCurrent",
+            "x": 1472.0,
+            "y": 512.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Climber/LeftCurrent",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "LeftPosition",
+            "x": 1472.0,
             "y": 384.0,
-            "width": 352.0,
-            "height": 96.0,
-            "type": "Subsystem",
-            "properties": {
-              "topic": "/SmartDashboard/Commands/ElevatorSubsystem",
-              "period": 0.06
-            }
-          },
-          {
-            "title": "LauncherAmps",
-            "x": 736.0,
-            "y": 576.0,
-            "width": 96.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/LauncherAmps",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "ShooterAmpsLeft",
-            "x": 832.0,
-            "y": 576.0,
             "width": 128.0,
             "height": 96.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/ShooterAmpsLeft",
+              "topic": "/AdvantageKit/Climber/LeftPosition",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
             }
           },
           {
-            "title": "ShooterAmpsRight",
-            "x": 960.0,
-            "y": 576.0,
+            "title": "RightPosition",
+            "x": 1600.0,
+            "y": 384.0,
             "width": 128.0,
             "height": 96.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/ShooterAmpsRight",
+              "topic": "/AdvantageKit/Climber/RightPosition",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
             }
           },
           {
-            "title": "LauncherAmps",
-            "x": 1120.0,
-            "y": 576.0,
-            "width": 96.0,
-            "height": 96.0,
-            "type": "Text Display",
+            "title": "Rollers",
+            "x": 864.0,
+            "y": 64.0,
+            "width": 128.0,
+            "height": 64.0,
+            "type": "Boolean Box",
             "properties": {
-              "topic": "/SmartDashboard/Subsystem/CoralShooterSubsystem/LauncherAmps",
+              "topic": "/AdvantageKit/IntakeRoller/IsEnabled",
               "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
             }
           },
           {
-            "title": "ShooterAmpsLeft",
-            "x": 1216.0,
-            "y": 576.0,
+            "title": "CurrentVelocity",
+            "x": 864.0,
+            "y": 288.0,
             "width": 128.0,
             "height": 96.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Subsystem/CoralShooterSubsystem/ShooterAmpsLeft",
+              "topic": "/AdvantageKit/IntakeRoller/CurrentVelocity",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
             }
           },
           {
-            "title": "ShooterAmpsRight",
-            "x": 1344.0,
-            "y": 576.0,
+            "title": "DesiredVelocity",
+            "x": 864.0,
+            "y": 192.0,
             "width": 128.0,
             "height": 96.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Subsystem/CoralShooterSubsystem/ShooterAmpsRight",
+              "topic": "/AdvantageKit/IntakeRoller/DesiredVelocity",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
+            }
+          },
+          {
+            "title": "Intake",
+            "x": 704.0,
+            "y": 64.0,
+            "width": 128.0,
+            "height": 64.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeLinkage/IsEnabled",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "DesiredAngle",
+            "x": 704.0,
+            "y": 192.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeLinkage/DesiredAngle",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Position",
+            "x": 704.0,
+            "y": 288.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeLinkage/Position",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Alliance",
+            "x": 32.0,
+            "y": 64.0,
+            "width": 640.0,
+            "height": 64.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/FMSInfo/IsRedAlliance",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4294901760,
+              "false_color": 4278193663,
+              "true_icon": "None",
+              "false_icon": "None"
             }
           },
           {
             "title": "AmpsLeft",
-            "x": 576.0,
-            "y": 576.0,
-            "width": 64.0,
+            "x": 1184.0,
+            "y": 512.0,
+            "width": 128.0,
             "height": 96.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Subsystem/ElevatorSubsystem/AmpsLeft",
+              "topic": "/AdvantageKit/AnotherShooter/AmpsLeft",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
@@ -557,432 +612,263 @@
           },
           {
             "title": "AmpsRight",
-            "x": 640.0,
-            "y": 576.0,
-            "width": 64.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/ElevatorSubsystem/AmpsRight",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "Amps",
-            "x": 448.0,
-            "y": 576.0,
+            "x": 1312.0,
+            "y": 512.0,
             "width": 128.0,
             "height": 96.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Subsystem/WristSubsystem/Amps",
+              "topic": "/AdvantageKit/AnotherShooter/AmpsRight",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
             }
           },
           {
-            "title": "Launcher",
-            "x": 736.0,
-            "y": 256.0,
-            "width": 96.0,
-            "height": 64.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/Launcher",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "Launcher Setpoint",
-            "x": 736.0,
-            "y": 416.0,
-            "width": 96.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/Launcher Setpoint",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "LastShotIn(ms)",
-            "x": 1120.0,
-            "y": 0.0,
-            "width": 352.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/CoralShooterSubsystem/LastShotIn(ms)",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "Launcher Setpoint",
-            "x": 736.0,
-            "y": 320.0,
-            "width": 96.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/Launcher Setpoint",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "LauncherSetpoint",
-            "x": 1120.0,
-            "y": 320.0,
-            "width": 96.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/CoralShooterSubsystem/LauncherSetpoint",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "Pitch",
-            "x": 128.0,
-            "y": 192.0,
-            "width": 96.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/Drive/Pitch",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "Roll",
-            "x": 32.0,
-            "y": 192.0,
-            "width": 96.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/Drive/Roll",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "Yaw",
-            "x": 224.0,
-            "y": 192.0,
-            "width": 96.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/Drive/Yaw",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "OurSide",
-            "x": 320.0,
-            "y": 192.0,
-            "width": 96.0,
-            "height": 96.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/Drive/onOurSide",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "Back HasTarget",
-            "x": 288.0,
-            "y": 0.0,
+            "title": "AppliedOutputLeft",
+            "x": 1184.0,
+            "y": 608.0,
             "width": 128.0,
             "height": 96.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/photonvision/Arducam_AT003/hasTarget",
-              "period": 0.06,
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "Autonomous",
-      "grid_layout": {
-        "layouts": [],
-        "containers": [
-          {
-            "title": "Autonomous Mode",
-            "x": 64.0,
-            "y": 32.0,
-            "width": 384.0,
-            "height": 128.0,
-            "type": "ComboBox Chooser",
-            "properties": {
-              "topic": "/SmartDashboard/Autos/Autonomous Mode",
-              "period": 0.06,
-              "sort_options": false
-            }
-          },
-          {
-            "title": "Pathplanner Trajectory",
-            "x": 448.0,
-            "y": 32.0,
-            "width": 384.0,
-            "height": 128.0,
-            "type": "ComboBox Chooser",
-            "properties": {
-              "topic": "/SmartDashboard/Autos/Pathplanner Trajectory",
-              "period": 0.06,
-              "sort_options": false
-            }
-          },
-          {
-            "title": "Field",
-            "x": 128.0,
-            "y": 576.0,
-            "width": 1376.0,
-            "height": 256.0,
-            "type": "Field",
-            "properties": {
-              "topic": "/SmartDashboard/Field",
-              "period": 0.02,
-              "field_game": "Reefscape",
-              "robot_width": 0.85,
-              "robot_length": 0.85,
-              "show_other_objects": false,
-              "show_trajectories": true,
-              "field_rotation": 0.0,
-              "robot_color": 4294198070,
-              "trajectory_color": 4282776068,
-              "show_robot_outside_widget": true
-            }
-          },
-          {
-            "title": "Robot State",
-            "x": 832.0,
-            "y": 32.0,
-            "width": 384.0,
-            "height": 128.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Commodore/Current State",
+              "topic": "/AdvantageKit/AnotherShooter/AppliedOutputLeft",
               "period": 0.06,
-              "data_type": "string",
+              "data_type": "double",
               "show_submit_button": false
             }
           },
           {
-            "title": "coralState",
-            "x": 1216.0,
-            "y": 32.0,
-            "width": 224.0,
-            "height": 128.0,
+            "title": "AppliedOutputRight",
+            "x": 1312.0,
+            "y": 608.0,
+            "width": 128.0,
+            "height": 96.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/UIDashboard/ToDashboard/coralState",
+              "topic": "/AdvantageKit/AnotherShooter/AppliedOutputRight",
               "period": 0.06,
-              "data_type": "string",
+              "data_type": "double",
               "show_submit_button": false
             }
           },
           {
-            "title": "Auto Choices",
-            "x": 672.0,
-            "y": 192.0,
-            "width": 544.0,
-            "height": 128.0,
-            "type": "ComboBox Chooser",
+            "title": "TempLeft",
+            "x": 1184.0,
+            "y": 704.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Auto Choices",
+              "topic": "/AdvantageKit/AnotherShooter/TempLeft",
               "period": 0.06,
-              "sort_options": false
+              "data_type": "double",
+              "show_submit_button": false
             }
           },
           {
-            "title": "Drive Wheel Radius Characterization",
-            "x": 544.0,
-            "y": 352.0,
-            "width": 448.0,
-            "height": 128.0,
-            "type": "Command",
+            "title": "TempRight",
+            "x": 1312.0,
+            "y": 704.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Drive Wheel Radius Characterization",
+              "topic": "/AdvantageKit/AnotherShooter/TempRight",
               "period": 0.06,
-              "show_type": true,
-              "maximize_button_space": false
+              "data_type": "double",
+              "show_submit_button": false
             }
           },
           {
-            "title": "Auto Choices",
+            "title": "Connected",
             "x": 1024.0,
-            "y": 352.0,
-            "width": 480.0,
-            "height": 128.0,
-            "type": "ComboBox Chooser",
-            "properties": {
-              "topic": "/SmartDashboard/Auto Choices",
-              "period": 0.06,
-              "sort_options": false
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "Intake",
-      "grid_layout": {
-        "layouts": [
-          {
-            "title": "Gains",
-            "x": 384.0,
-            "y": 192.0,
-            "width": 256.0,
-            "height": 384.0,
-            "type": "List Layout",
-            "properties": {
-              "label_position": "TOP"
-            },
-            "children": [
-              {
-                "title": "D",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/Subsystem/WristSubsystem/Gains/D",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "I",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/Subsystem/WristSubsystem/Gains/I",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "P",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/Subsystem/WristSubsystem/Gains/P",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              }
-            ]
-          }
-        ],
-        "containers": [
-          {
-            "title": "Amps",
-            "x": 640.0,
-            "y": 192.0,
-            "width": 512.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/WristSubsystem/Amps",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "AppliedOutput",
-            "x": 640.0,
-            "y": 320.0,
-            "width": 512.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/WristSubsystem/AppliedOutput",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "DesiredAngleDegrees",
-            "x": 384.0,
-            "y": 64.0,
-            "width": 384.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/WristSubsystem/DesiredAngleDegrees",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "CurrentAngleDegrees",
-            "x": 768.0,
-            "y": 64.0,
-            "width": 384.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/WristSubsystem/CurrentAngleDegrees",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "Enabled",
-            "x": 384.0,
-            "y": 576.0,
-            "width": 768.0,
+            "y": 128.0,
+            "width": 128.0,
             "height": 64.0,
             "type": "Boolean Box",
             "properties": {
-              "topic": "/SmartDashboard/Subsystem/WristSubsystem/Enabled",
+              "topic": "/AdvantageKit/Indexer/Connected",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "Current",
+            "x": 1024.0,
+            "y": 512.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Indexer/Current",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Temperature",
+            "x": 1024.0,
+            "y": 704.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Indexer/Temperature",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "MotorVelocity",
+            "x": 1024.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Indexer/MotorVelocity",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "VelocityLeft",
+            "x": 1184.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/AnotherShooter/VelocityLeft",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "VelocityRight",
+            "x": 1312.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/AnotherShooter/VelocityRight",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Connected",
+            "x": 1184.0,
+            "y": 128.0,
+            "width": 256.0,
+            "height": 64.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/AnotherShooter/Connected",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "AveragePosition",
+            "x": 1472.0,
+            "y": 288.0,
+            "width": 256.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Climber/AveragePosition",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "LeftConnected",
+            "x": 1472.0,
+            "y": 128.0,
+            "width": 128.0,
+            "height": 64.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/Climber/LeftConnected",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "RightConnected",
+            "x": 1600.0,
+            "y": 128.0,
+            "width": 128.0,
+            "height": 64.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/Climber/RightConnected",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "AppliedVoltage",
+            "x": 704.0,
+            "y": 608.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeLinkage/AppliedVoltage",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Current",
+            "x": 704.0,
+            "y": 512.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeLinkage/Current",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Connected",
+            "x": 704.0,
+            "y": 128.0,
+            "width": 128.0,
+            "height": 64.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeLinkage/Connected",
               "period": 0.06,
               "data_type": "boolean",
               "true_color": 4283215696,
@@ -993,223 +879,96 @@
           },
           {
             "title": "Temperature",
-            "x": 640.0,
-            "y": 448.0,
-            "width": 512.0,
-            "height": 128.0,
+            "x": 704.0,
+            "y": 704.0,
+            "width": 128.0,
+            "height": 96.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Subsystem/WristSubsystem/Temperature",
+              "topic": "/AdvantageKit/IntakeRoller/Temperature",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
             }
           },
           {
-            "title": "atSetPoint",
-            "x": 384.0,
-            "y": 0.0,
-            "width": 768.0,
-            "height": 64.0,
-            "type": "Boolean Box",
+            "title": "Field",
+            "x": 32.0,
+            "y": 256.0,
+            "width": 640.0,
+            "height": 288.0,
+            "type": "Field",
             "properties": {
-              "topic": "/SmartDashboard/Commands/WristSetAngle/atSetPoint",
+              "topic": "/SmartDashboard/Field",
               "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
+              "field_game": "Rebuilt",
+              "robot_width": 0.85,
+              "robot_length": 0.85,
+              "show_other_objects": true,
+              "show_trajectories": true,
+              "field_rotation": 0.0,
+              "robot_color": 4294198070,
+              "trajectory_color": 4294967295,
+              "show_robot_outside_widget": true
+            }
+          },
+          {
+            "title": "Alerts",
+            "x": 32.0,
+            "y": 544.0,
+            "width": 640.0,
+            "height": 256.0,
+            "type": "Alerts",
+            "properties": {
+              "topic": "/SmartDashboard/Alerts",
+              "period": 0.06
             }
           }
         ]
       }
     },
     {
-      "name": "Shooter",
+      "name": "Climber",
       "grid_layout": {
-        "layouts": [
-          {
-            "title": "Gains",
-            "x": 384.0,
-            "y": 128.0,
-            "width": 256.0,
-            "height": 256.0,
-            "type": "List Layout",
-            "properties": {
-              "label_position": "TOP"
-            },
-            "children": [
-              {
-                "title": "D",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/Gains/D",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "I",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/Gains/I",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "P",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/Gains/P",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              }
-            ]
-          }
-        ],
+        "layouts": [],
         "containers": [
           {
-            "title": "Shooter RPM Right",
-            "x": 1152.0,
-            "y": 256.0,
-            "width": 256.0,
-            "height": 128.0,
+            "title": "AveragePosition",
+            "x": 320.0,
+            "y": 224.0,
+            "width": 576.0,
+            "height": 96.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/Shooter RPM Right",
+              "topic": "/AdvantageKit/Climber/AveragePosition",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
             }
           },
           {
-            "title": "AppliedOutputLauncher",
-            "x": 640.0,
+            "title": "LeftAppliedVoltage",
+            "x": 320.0,
             "y": 512.0,
-            "width": 256.0,
-            "height": 128.0,
+            "width": 288.0,
+            "height": 96.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/AppliedOutputLauncher",
+              "topic": "/AdvantageKit/Climber/LeftAppliedVoltage",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
             }
           },
           {
-            "title": "AppliedOutputShooterLeft",
-            "x": 896.0,
-            "y": 512.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/AppliedOutputShooterLeft",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "AppliedOutputShooterRight",
-            "x": 1152.0,
-            "y": 512.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/AppliedOutputShooterRight",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "Last Shot in (ms)",
-            "x": 384.0,
-            "y": 0.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/Last Shot in (ms)",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "Launcher",
-            "x": 640.0,
-            "y": 64.0,
-            "width": 256.0,
-            "height": 64.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/Launcher",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "Launcher Setpoint",
-            "x": 640.0,
+            "title": "LeftConnected",
+            "x": 320.0,
             "y": 128.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/Launcher Setpoint",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "LauncherAmps",
-            "x": 640.0,
-            "y": 384.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/LauncherAmps",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "Shooter",
-            "x": 896.0,
-            "y": 64.0,
-            "width": 512.0,
-            "height": 64.0,
+            "width": 288.0,
+            "height": 96.0,
             "type": "Boolean Box",
             "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/Shooter",
+              "topic": "/AdvantageKit/Climber/LeftConnected",
               "period": 0.06,
               "data_type": "boolean",
               "true_color": 4283215696,
@@ -1219,112 +978,70 @@
             }
           },
           {
-            "title": "Shooter RPM Left",
-            "x": 896.0,
-            "y": 256.0,
-            "width": 256.0,
-            "height": 128.0,
+            "title": "LeftCurrent",
+            "x": 320.0,
+            "y": 704.0,
+            "width": 288.0,
+            "height": 96.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/Shooter RPM Left",
+              "topic": "/AdvantageKit/Climber/LeftCurrent",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
             }
           },
           {
-            "title": "ShooterAmpsLeft",
-            "x": 896.0,
-            "y": 384.0,
-            "width": 256.0,
-            "height": 128.0,
+            "title": "LeftPosition",
+            "x": 320.0,
+            "y": 320.0,
+            "width": 288.0,
+            "height": 96.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/ShooterAmpsLeft",
+              "topic": "/AdvantageKit/Climber/LeftPosition",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
             }
           },
           {
-            "title": "ShooterAmpsRight",
-            "x": 1152.0,
-            "y": 384.0,
-            "width": 256.0,
-            "height": 128.0,
+            "title": "LeftVelocity",
+            "x": 320.0,
+            "y": 608.0,
+            "width": 288.0,
+            "height": 96.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/ShooterAmpsRight",
+              "topic": "/AdvantageKit/Climber/LeftVelocity",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
             }
           },
           {
-            "title": "Shooting RPM",
-            "x": 896.0,
+            "title": "RightAppliedVoltage",
+            "x": 608.0,
+            "y": 512.0,
+            "width": 288.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Climber/RightAppliedVoltage",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "RightConnected",
+            "x": 608.0,
             "y": 128.0,
-            "width": 512.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/Shooting RPM",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "TemperatureLauncher",
-            "x": 640.0,
-            "y": 640.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/TemperatureLauncher",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "TemperatureShooterLeft",
-            "x": 896.0,
-            "y": 640.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/TemperatureShooterLeft",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "TemperatureShooterRight",
-            "x": 1152.0,
-            "y": 640.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/TemperatureShooterRight",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "isLoaded",
-            "x": 640.0,
-            "y": 0.0,
-            "width": 768.0,
-            "height": 64.0,
+            "width": 288.0,
+            "height": 96.0,
             "type": "Boolean Box",
             "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/isLoaded",
+              "topic": "/AdvantageKit/Climber/RightConnected",
               "period": 0.06,
               "data_type": "boolean",
               "true_color": 4283215696,
@@ -1334,105 +1051,122 @@
             }
           },
           {
-            "title": "launcher RPM Right",
-            "x": 640.0,
-            "y": 256.0,
-            "width": 256.0,
+            "title": "RightCurrent",
+            "x": 608.0,
+            "y": 704.0,
+            "width": 288.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Climber/RightCurrent",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "RightPosition",
+            "x": 608.0,
+            "y": 320.0,
+            "width": 288.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Climber/RightPosition",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "RightVelocity",
+            "x": 608.0,
+            "y": 608.0,
+            "width": 288.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Climber/RightVelocity",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "AutoClimb",
+            "x": 960.0,
+            "y": 672.0,
+            "width": 480.0,
             "height": 128.0,
-            "type": "Text Display",
+            "type": "Command",
             "properties": {
-              "topic": "/SmartDashboard/Subsystem/AlgaeShooterSubsystem/launcher RPM Right",
+              "topic": "/SmartDashboard/Climb/AutoClimb",
               "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
+              "show_type": true,
+              "maximize_button_space": false
             }
           },
           {
-            "title": "ForcedRMP",
-            "x": 224.0,
-            "y": 0.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
+            "title": "Zero",
+            "x": 960.0,
+            "y": 128.0,
+            "width": 480.0,
+            "height": 128.0,
+            "type": "Command",
             "properties": {
-              "topic": "/SmartDashboard/Commands/AlgaeShooterRampUp/ForcedRMP",
+              "topic": "/SmartDashboard/Climb/Zero",
               "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
+              "show_type": true,
+              "maximize_button_space": false
             }
           },
           {
-            "title": "OverrideRPM",
-            "x": 32.0,
-            "y": 0.0,
-            "width": 192.0,
-            "height": 96.0,
-            "type": "Toggle Switch",
+            "title": "Stow",
+            "x": 960.0,
+            "y": 256.0,
+            "width": 480.0,
+            "height": 128.0,
+            "type": "Command",
             "properties": {
-              "topic": "/SmartDashboard/Commands/AlgaeShooterRampUp/OverrideRPM",
+              "topic": "/SmartDashboard/Climb/Stow",
               "period": 0.06,
-              "data_type": "boolean"
+              "show_type": true,
+              "maximize_button_space": false
             }
           },
           {
-            "title": "ForcedHeight",
-            "x": 224.0,
-            "y": 96.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
+            "title": "Extend",
+            "x": 960.0,
+            "y": 384.0,
+            "width": 480.0,
+            "height": 128.0,
+            "type": "Command",
             "properties": {
-              "topic": "/SmartDashboard/Commands/ElevatorSetHeight/ForcedHeight",
+              "topic": "/SmartDashboard/Climb/Extend",
               "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
+              "show_type": true,
+              "maximize_button_space": false
             }
           },
           {
-            "title": "ForcedAngle",
-            "x": 224.0,
-            "y": 192.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
+            "title": "Climb",
+            "x": 960.0,
+            "y": 512.0,
+            "width": 480.0,
+            "height": 128.0,
+            "type": "Command",
             "properties": {
-              "topic": "/SmartDashboard/Commands/WristSetAngle/ForcedAngle",
+              "topic": "/SmartDashboard/Climb/Climb",
               "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "OverrideHeight",
-            "x": 32.0,
-            "y": 96.0,
-            "width": 192.0,
-            "height": 96.0,
-            "type": "Toggle Switch",
-            "properties": {
-              "topic": "/SmartDashboard/Commands/ElevatorSetHeight/OverrideHeight",
-              "period": 0.06,
-              "data_type": "boolean"
-            }
-          },
-          {
-            "title": "OverrideAngle",
-            "x": 32.0,
-            "y": 192.0,
-            "width": 192.0,
-            "height": 96.0,
-            "type": "Toggle Switch",
-            "properties": {
-              "topic": "/SmartDashboard/Commands/WristSetAngle/OverrideAngle",
-              "period": 0.06,
-              "data_type": "boolean"
+              "show_type": true,
+              "maximize_button_space": false
             }
           }
         ]
       }
     },
     {
-      "name": "Tab 5",
+      "name": "Characterization",
       "grid_layout": {
         "layouts": [],
         "containers": [
