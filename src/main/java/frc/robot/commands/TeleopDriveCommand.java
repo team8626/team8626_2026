@@ -11,7 +11,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -27,9 +26,8 @@ import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.drive.DriveConstants.DriveSpeed;
 import frc.robot.util.SlewRateLimiter2d;
 import frc.robot.util.TunableControls.TunablePIDController;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
-import org.littletonrobotics.frc2026.FieldConstants;
-import org.littletonrobotics.frc2026.util.geometry.AllianceFlipUtil;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -44,6 +42,7 @@ public class TeleopDriveCommand extends Command {
 
   private LinearVelocity maxDriveSpeed = DriveConstants.DEFAULT_DRIVE_SPEED;
   private AngularVelocity maxRotSpeed = DriveConstants.DEFAULT_ROT_SPEED;
+  private double rotSpeedToHub = 0.0;
 
   @AutoLogOutput private DriveSpeed driveSpeed = DriveSpeed.DEFAULT;
 
@@ -53,7 +52,15 @@ public class TeleopDriveCommand extends Command {
   @AutoLogOutput
   private final Trigger inBumpZoneTrigger = new Trigger(this::inBumpZone).debounce(0.1);
 
-  @AutoLogOutput private final Trigger hubAimTrigger = RobotContainer.getHubAimTrigger();
+  @AutoLogOutput private BooleanSupplier forceTargetAim = () -> false;
+  @AutoLogOutput private BooleanSupplier forceHubLockThenX = () -> false;
+
+  @AutoLogOutput
+  private final Trigger hubAimTrigger =
+      RobotContainer.getHubAimTrigger().or(() -> forceTargetAim.getAsBoolean());
+
+  @AutoLogOutput
+  private final Trigger hubAimInPlaceTrigger = RobotContainer.getHubAimInPlaceTrigger();
 
   private final TunablePIDController trenchYController =
       new TunablePIDController(DriveConstants.TRENCH_TRANSLATION_CONSTANTS);
@@ -84,9 +91,17 @@ public class TeleopDriveCommand extends Command {
                     currentDriveMode =
                         (hubAimTrigger.getAsBoolean() ? DriveMode.HUB_LOCK : DriveMode.NORMAL)));
 
-    hubAimTrigger
-        .whileTrue(updateDriveMode(DriveMode.HUB_LOCK))
-        .onFalse(updateDriveMode(DriveMode.NORMAL));
+    if (hubAimTrigger != null) {
+      hubAimTrigger
+          .whileTrue(updateDriveMode(DriveMode.HUB_LOCK))
+          .onFalse(updateDriveMode(DriveMode.NORMAL));
+    }
+
+    if (hubAimInPlaceTrigger != null) {
+      hubAimInPlaceTrigger
+          .whileTrue(updateDriveMode(DriveMode.HUB_LOCK_IN_PLACE))
+          .onFalse(updateDriveMode(DriveMode.NORMAL));
+    }
 
     for (int i = 0; i < 4; i++) {
       Logger.recordOutput("Trench" + i, TeleopDriveConstants.TRENCH_ZONES[i]);
@@ -176,6 +191,15 @@ public class TeleopDriveCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+
+    // Forcing the drice to X
+    boolean shouldStopWithX =
+        forceHubLockThenX.getAsBoolean() && ShooterCommandsUtil.inPositionToShoot(drive);
+    if (shouldStopWithX) {
+      drive.stopWithX();
+      return;
+    }
+
     Translation2d linearVelocity =
         getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
     linearVelocity = linearVelocity.times(maxDriveSpeed.in(MetersPerSecond));
@@ -193,14 +217,22 @@ public class TeleopDriveCommand extends Command {
             maxRotSpeed.times(omega));
         break;
       case HUB_LOCK:
-        double rotSpeedToHub =
+        rotSpeedToHub =
             rotationController.calculate(
                 drive.getRotation().getRadians(),
-                getHubLockAngle(drive.getRotation()).getRadians());
+                ShooterCommandsUtil.getHubLockAngle(drive).getRadians());
         drive.driveFieldCentric(
             MetersPerSecond.of(linearVelocity.getX()),
             MetersPerSecond.of(linearVelocity.getY()),
             RadiansPerSecond.of(rotSpeedToHub));
+        break;
+      case HUB_LOCK_IN_PLACE:
+        rotSpeedToHub =
+            rotationController.calculate(
+                drive.getRotation().getRadians(),
+                ShooterCommandsUtil.getHubLockAngle(drive).getRadians());
+        drive.driveFieldCentric(
+            MetersPerSecond.of(0), MetersPerSecond.of(0), RadiansPerSecond.of(rotSpeedToHub));
         break;
     }
   }
@@ -234,36 +266,97 @@ public class TeleopDriveCommand extends Command {
     }
   }
 
+  // @Deprecated
+  // private Rotation2d getHubLockAngle(AkitDrive drive) {
+  //   Pose2d robotPose = drive.getPose();
+  //   Translation2d hubTranslation =
+  //       AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint)
+  //           .minus(new Translation3d(robotPose.getTranslation()))
+  //           .toTranslation2d();
+  //   Rotation2d angleToHub =
+  //       new Rotation2d(Math.atan2(hubTranslation.getY(), hubTranslation.getX()))
+  //           .plus(Rotation2d.kZero);
+  //   return angleToHub;
+  // }
+
+  // Called once the command ends or is interrupted.
+  @Override
+  public void end(boolean interrupted) {
+    // TODO: Set top X and reset drive mode here?
+    // if(currentDriveMode == DriveMode.HUB_LOCK_IN_PLACE) {
+    //   drive.stopWithX();
+    //   currentDriveMode = DriveMode.NORMAL;
+    // }
+  }
+
+  @Override
+  public boolean isFinished() {
+    return false;
+  }
+
+  // private boolean inPositionToShoot() {
+  //   return Math.abs(
+  //           MathUtil.inputModulus(
+  //               drive.getRotation().getDegrees() - getHubLockAngle(drive).getDegrees(), -180,
+  // 180))
+  //       < (DriveConstants.AIM_TOLERANCE_DEG.get() / 2);
+  // }
+
+  public void setForceTargetAim(boolean enabled) {
+    this.forceTargetAim = () -> enabled;
+  }
+
+  public void setForceHubLockThenX(boolean enabled) {
+    this.forceHubLockThenX = () -> enabled;
+  }
+
   public Command withSpeed(DriveSpeed speed) {
     return Commands.startEnd(() -> setSpeed(speed), () -> setSpeed(DriveSpeed.DEFAULT));
   }
 
-  private Rotation2d getHubLockAngle(Rotation2d currentRotation) {
-    Pose2d robotPose = drive.getPose();
-    Translation2d hubTranslation =
-        AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint)
-            .minus(new Translation3d(robotPose.getTranslation()))
-            .toTranslation2d();
-    Rotation2d angleToHub =
-        new Rotation2d(Math.atan2(hubTranslation.getY(), hubTranslation.getX()))
-            .plus(Rotation2d.kZero);
-    return angleToHub;
+  public Command withHubLock() {
+    return Commands.startEnd(
+        () -> {
+          setForceTargetAim(true);
+          currentDriveMode = DriveMode.HUB_LOCK;
+        },
+        () -> {
+          setForceTargetAim(false);
+          currentDriveMode = DriveMode.NORMAL;
+        });
   }
 
-  // Called once the command ends or is interrupted.
-  @Override
-  public void end(boolean interrupted) {}
+  public Command withHubLockThenX() {
+    return Commands.startEnd(
+        () -> {
+          setForceTargetAim(true);
+          setForceHubLockThenX(true);
+          currentDriveMode = DriveMode.HUB_LOCK;
+        },
+        () -> {
+          setForceTargetAim(false);
+          setForceHubLockThenX(false);
+          currentDriveMode = DriveMode.NORMAL;
+        });
+  }
 
-  // Returns true when the command should end.
-  @Override
-  public boolean isFinished() {
-    return false;
+  public Command withHubLock(Command command) {
+    return command.alongWith(withHubLock());
+  }
+
+  public Command withHubLockThenX(Command command) {
+    return command.alongWith(withHubLockThenX());
+  }
+
+  public Command withSpeed(DriveSpeed speed, Command command) {
+    return command.alongWith(withSpeed(speed));
   }
 
   private enum DriveMode {
     NORMAL,
     TRENCH_LOCK,
     BUMP_LOCK,
-    HUB_LOCK
+    HUB_LOCK,
+    HUB_LOCK_IN_PLACE
   }
 }

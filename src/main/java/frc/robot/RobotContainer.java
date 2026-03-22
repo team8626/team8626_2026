@@ -48,6 +48,7 @@ import frc.robot.commands.IndexerStartCommand;
 import frc.robot.commands.IndexerStopCommand;
 import frc.robot.commands.ShooterCommandsUtil;
 import frc.robot.commands.TeleopDriveCommand;
+import frc.robot.commands.TrackTargetAndShootCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.anotherShooter.AnotherShooter;
 import frc.robot.subsystems.anotherShooter.AnotherShooterConstants;
@@ -60,6 +61,7 @@ import frc.robot.subsystems.climber.ClimberIOSim;
 import frc.robot.subsystems.climber.ClimberIOSpark;
 import frc.robot.subsystems.drive.AkitDrive;
 import frc.robot.subsystems.drive.CommandSwerveDrivetrain;
+import frc.robot.subsystems.drive.DriveConstants.DriveSpeed;
 import frc.robot.subsystems.drive.DriveConstants.Rebuilt_SwerveConstants;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -70,6 +72,7 @@ import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.hopper.HopperIO;
 import frc.robot.subsystems.hopper.HopperIOSim;
 import frc.robot.subsystems.indexer.Indexer;
+import frc.robot.subsystems.indexer.IndexerConstants;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
 import frc.robot.subsystems.indexer.IndexerIOSpark;
@@ -89,6 +92,7 @@ import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.util.FuelSim;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -125,17 +129,19 @@ public class RobotContainer {
   private static final Trigger testShootTrigger = operator.rightTrigger();
   private static final Trigger testIntakeRollerTrigger = operator.rightBumper();
   private static final Trigger testIntakeDeployTrigger = operator.leftBumper();
+  private static final Trigger testAgitateTrigger = operator.y();
 
   private static final Trigger collectTrigger = controller.leftBumper();
-  // private static final Trigger collectTriggerHold = controller.leftTrigger();
-  private static final Trigger plowTrigger = controller.x();
-  private static final Trigger plowTriggerHold = controller.leftTrigger();
-  private static final Trigger agitateTrigger = controller.y();
+  private static final Trigger plowTrigger = controller.leftTrigger();
+  private static final Trigger blurpTrigger = controller.y();
+  private static final Trigger unjamTrigger = controller.x();
 
-  private static final Trigger dumpHopperTrigger = controller.rightTrigger();
-  private static final Trigger aimAndShootTrigger = controller.rightBumper();
+  private static final Trigger fixedRPMShootTrigger = controller.rightBumper();
+  private static final Trigger aimAndShootTrigger = controller.rightTrigger();
+  private static final Trigger collectAndShootTrigger = collectTrigger.and(aimAndShootTrigger);
 
-  private static final Trigger driverAimTrigger = controller.a();
+  private static final Trigger hubAimTrigger = controller.b();
+  private static final Trigger hubAimInPlaceTrigger = controller.a();
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -325,62 +331,109 @@ public class RobotContainer {
       default:
     }
 
-    // Switch to X pattern when X button is pressed
-    // controller.x().onTrue(Commands.runOnce(akitDrive::stopWithX, akitDrive));
-
-    collectTrigger.toggleOnTrue(new CollectCommand(intakeLinkage, intakeRoller));
-
-    plowTrigger.toggleOnTrue(
-        Commands.defer(
-            () ->
-                new CollectCommand(
-                    () -> IntakeLinkageConstants.PLOW_ANGLE,
-                    () -> IntakeRollerConstants.PLOW_VELOCITY,
-                    intakeLinkage,
-                    intakeRoller),
-            Set.of(intakeLinkage, intakeRoller)));
-
-    plowTriggerHold.whileTrue(
-        Commands.defer(
-            () ->
-                new CollectCommand(
-                    () -> IntakeLinkageConstants.PLOW_ANGLE,
-                    () -> IntakeRollerConstants.PLOW_VELOCITY,
-                    intakeLinkage,
-                    intakeRoller),
-            Set.of(intakeLinkage, intakeRoller)));
-
-    agitateTrigger.whileTrue(new AgitateCommand(intakeLinkage));
-
-    dumpHopperTrigger
+    // -------------------------------------------------------------- Collect
+    //
+    // Run the intake roller and moves the intake to collect position.
+    // Also runs the drivetrain at a slow speed to help with intaking.
+    //
+    collectTrigger
+        .and(aimAndShootTrigger.negate())
         .whileTrue(
-            Commands.sequence(
-                new AnotherShooterRampupCommand(anotherShooter),
-                Commands.parallel(
-                    new IndexerStartCommand(index), new AgitateCommand(intakeLinkage))))
-        .onFalse(Commands.runOnce(anotherShooter::stop, anotherShooter));
+            new CollectCommand(intakeLinkage, intakeRoller)
+                .alongWith(teleopDrive.withSpeed(DriveSpeed.INTAKE))
+                .withName("Collect Command"));
 
+    // -------------------------------------------------------------- Plow
+    //
+    // Run the intake roller backwards and moves the intake to plow position
+    //
+    plowTrigger.whileTrue(
+        new CollectCommand(
+                () -> IntakeLinkageConstants.PLOW_ANGLE,
+                () -> IntakeRollerConstants.PLOW_VELOCITY,
+                intakeLinkage,
+                intakeRoller)
+            .withName("Plow Command"));
+
+    // -------------------------------------------------------------- Just Shoot
+    //
+    // Run the shooter and indexer to dump fuel from the hopper.
+    // The shooter will run at a fixed velocity.
+    // Activates agitation
+    //
+    fixedRPMShootTrigger.whileTrue(
+        Commands.sequence(new AnotherShooterRampupCommand(anotherShooter), feedShooterCommand())
+            .withName("Just Shoot Command")
+            .finallyDo(anotherShooter::stop));
+
+    // -------------------------------------------------------------- Aim and Shoot
+    //
+    // Run the shooter and indexer to dump fuel from the hopper.
+    // The robot will align to target.
+    // The shooter will run at a velocity based on the distance to the target.
+    // Activates agitation
+    //
     aimAndShootTrigger
+        .and(collectTrigger.negate())
         .whileTrue(
-            Commands.defer(
-                () ->
-                    Commands.sequence(
-                        // TODO: Start with aligining to the target:
-                        // new AlignToHubCommand(akitDrive).withTimeout(1.0),
-                        Commands.runOnce(akitDrive::stopWithX, akitDrive),
-                        new AnotherShooterRampupCommand(
-                            () ->
-                                ShooterCommandsUtil.calculateRPMToHub(akitDrive).velocityShooter(),
-                            anotherShooter),
-                        Commands.parallel(
-                            new IndexerStartCommand(
-                                () ->
-                                    ShooterCommandsUtil.calculateRPMToHub(akitDrive)
-                                        .velocityIndexer(),
-                                index),
-                            new AgitateCommand(intakeLinkage))),
-                Set.of(anotherShooter, hopper, index, akitDrive)))
-        .onFalse(Commands.runOnce(anotherShooter::stop, anotherShooter));
+            teleopDrive.withHubLockThenX(
+                Commands.parallel(
+                        new TrackTargetAndShootCommand(index, anotherShooter, akitDrive),
+                        new AgitateCommand(intakeLinkage))
+                    .withName("Aim And Shoot Command")));
+
+    // -------------------------------------------------------------- Collect and Shoot
+    //
+    // Run the intake, shooter, and indexer to collect fuel and dump it into the hub.
+    // The robot will align to target while doing this.
+    //
+    collectAndShootTrigger.whileTrue(
+        teleopDrive.withHubLock(
+            teleopDrive.withSpeed(
+                DriveSpeed.INTAKE,
+                Commands.parallel(
+                        new CollectCommand(intakeLinkage, intakeRoller),
+                        new TrackTargetAndShootCommand(index, anotherShooter, akitDrive))
+                    .withName("Collect And Shoot Command"))));
+
+    // -------------------------------------------------------------- Unjam
+    //
+    // Run the shooter and indexer in reverse to unjam fuel.
+    //
+    unjamTrigger.whileTrue(
+        Commands.parallel(
+                Commands.runOnce(
+                        () -> anotherShooter.start(AnotherShooterConstants.UNJAM_VELOCITY),
+                        anotherShooter)
+                    .andThen(Commands.idle(anotherShooter)),
+                Commands.runOnce(() -> index.start(IndexerConstants.UNJAM_VELOCITY), index)
+                    .andThen(Commands.idle(index)))
+            .finallyDo(
+                () -> {
+                  anotherShooter.stop();
+                  index.stop();
+                })
+            .withName("Unjamming Command"));
+
+    // -------------------------------------------------------------- Blurp
+    //
+    // Open the intake and reverse the rollers.
+    blurpTrigger.whileTrue(
+        Commands.parallel(
+                Commands.runOnce(
+                        () -> intakeRoller.start(IntakeRollerConstants.BLURP_VELOCITY),
+                        intakeRoller)
+                    .andThen(Commands.idle(intakeRoller)),
+                Commands.runOnce(
+                        () -> intakeLinkage.setPosition(IntakeLinkageConstants.BLURP_ANGLE),
+                        intakeLinkage)
+                    .andThen(Commands.idle(intakeLinkage)))
+            .finallyDo(
+                () -> {
+                  intakeRoller.stop();
+                  intakeLinkage.setPosition(IntakeLinkageConstants.STOW_ANGLE);
+                })
+            .withName("Blurp Command"));
 
     // Align to camera's best AprilTag: POV Left = front left, POV Up = front right, POV Right =
     // rear right
@@ -388,9 +441,13 @@ public class RobotContainer {
     // controller.povRight().whileTrue(AlignToTargetCommand.alignToFrontRightCamera(drive, vision));
     // controller.povDown().whileTrue(AlignToTargetCommand.alignToRearRightCamera(drive, vision));
 
+    // --------------------------------------------------------------
+    // Test commands for subsystems.
+    // These are not intended for comp, just for testing on the practice bot and in sim.
+
     // Run the intake roller at the dashboard RPM
     testIntakeRollerTrigger.toggleOnTrue(
-        Commands.startEnd(() -> intakeRoller.start(), () -> intakeRoller.stop(), index)
+        Commands.startEnd(() -> intakeRoller.start(), () -> intakeRoller.stop(), intakeRoller)
             .withName("Start intakeRoller (Dashboard RPM)"));
 
     // Deploy/Stow the intake
@@ -401,15 +458,15 @@ public class RobotContainer {
                 intakeLinkage)
             .withName("Deploy intakeLinkage (Dashboard RPM)"));
 
-    // Run the climber motors
-    // climberReleaseTrigger.whileTrue(
-    //     Commands.runOnce(() -> climber.runOpenLoop(Volts.of(6.0)), climber));
-    // climberPullrigger.whileTrue(
-    //     Commands.runOnce(() -> climber.runOpenLoop(Volts.of(-6.0)), climber));
+    // Fuel agitation
+    testAgitateTrigger.whileTrue(new AgitateCommand(intakeLinkage));
 
+    // Run the indexer at the dashboard RPM
     testIndexTrigger.toggleOnTrue(
         Commands.startEnd(() -> index.start(), () -> index.stop(), index)
             .withName("Start Indexer (Dashboard RPM)"));
+
+    // Run the shooter at the dashboard RPM
     testShootTrigger.toggleOnTrue(
         Commands.startEnd(() -> anotherShooter.start(), () -> anotherShooter.stop(), anotherShooter)
             .withName("Start Shooter (Dashboard RPM)"));
@@ -458,7 +515,11 @@ public class RobotContainer {
   }
 
   public static Trigger getHubAimTrigger() {
-    return driverAimTrigger;
+    return hubAimTrigger;
+  }
+
+  public static Trigger getHubAimInPlaceTrigger() {
+    return hubAimInPlaceTrigger;
   }
 
   /**
@@ -469,58 +530,34 @@ public class RobotContainer {
 
     NamedCommands.registerCommand(
         "AimAndDumpShort",
-        Commands.defer(
-                () ->
-                    Commands.sequence(
-                        new AnotherShooterRampupCommand(anotherShooter),
-                        Commands.parallel(
-                            new IndexerStartCommand(index), new AgitateCommand(intakeLinkage))),
-                Set.of(index, anotherShooter, intakeLinkage))
+        Commands.sequence(new AnotherShooterRampupCommand(anotherShooter), feedShooterCommand())
+            .finallyDo(
+                () -> {
+                  anotherShooter.stop();
+                  index.stop();
+                  intakeLinkage.stow();
+                })
             .withTimeout(AutoConstants.DUMP_DURATION_SHORT.in(Seconds)));
     NamedCommands.registerCommand(
         "AimAndDumpMedium",
-        Commands.defer(
-                () ->
-                    Commands.sequence(
-                        new AnotherShooterRampupCommand(anotherShooter),
-                        Commands.parallel(
-                            new IndexerStartCommand(index), new AgitateCommand(intakeLinkage))),
-                Set.of(index, anotherShooter, intakeLinkage))
+        Commands.sequence(new AnotherShooterRampupCommand(anotherShooter), feedShooterCommand())
+            .finallyDo(
+                () -> {
+                  anotherShooter.stop();
+                  index.stop();
+                  intakeLinkage.stow();
+                })
             .withTimeout(AutoConstants.DUMP_DURATION_MEDIUM.in(Seconds)));
+
     NamedCommands.registerCommand(
         "AimAndDumpLong",
-        Commands.defer(
-                () ->
-                    Commands.sequence(
-                            new AnotherShooterRampupCommand(anotherShooter),
-                            Commands.parallel(
-                                new IndexerStartCommand(index), new AgitateCommand(intakeLinkage)))
-                        .handleInterrupt(
-                            () ->
-                                new AnotherShooterStopCommand(anotherShooter)
-                                    .andThen(new IndexerStopCommand(index))
-                                    .andThen(
-                                        Commands.runOnce(
-                                            () -> intakeLinkage.stow(), intakeLinkage))),
-                Set.of(index, anotherShooter, intakeLinkage))
-            .withTimeout(AutoConstants.DUMP_DURATION_LONG.in(Seconds)));
-
-    //     (index), Set.of(index, /* anotherShooter, */ drive))
-    // .withTimeout(AutoConstants.DUMP_DURATION_LONG.in(Seconds)));
-
-    // dumpHopperTrigger
-    //     .whileTrue(
-    //         Commands.runOnce(() -> anotherShooter.start(RPM.of(2500)), anotherShooter)
-    //             .alongWith(Commands.runOnce(() -> index.start(), index)))
-    //     .onFalse(
-    //         Commands.runOnce(() -> anotherShooter.stop(), anotherShooter)
-    //             .alongWith(Commands.runOnce(() -> index.stop(), index)));
-
-    NamedCommands.registerCommand(
-        "AutoAimAndDumpLong",
-        Commands.defer(
-                () -> new IndexerStartCommand(index),
-                Set.of(index, /* anotherShooter, */ akitDrive))
+        Commands.sequence(new AnotherShooterRampupCommand(anotherShooter), feedShooterCommand())
+            .finallyDo(
+                () -> {
+                  anotherShooter.stop();
+                  index.stop();
+                  intakeLinkage.stow();
+                })
             .withTimeout(AutoConstants.DUMP_DURATION_LONG.in(Seconds)));
   }
 
@@ -646,4 +683,41 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     return autoChooser.get();
   }
+
+  // Helpers
+  private Command feedShooterCommand() {
+    return Commands.parallel(new IndexerStartCommand(index), new AgitateCommand(intakeLinkage));
+  }
+
+  private Command feedShooterCommand(Supplier<AngularVelocity> indexVelocitySupplier) {
+    return Commands.parallel(
+        new IndexerStartCommand(indexVelocitySupplier, index), new AgitateCommand(intakeLinkage));
+  }
+
+//   private Command collectAimAndShootCommand() {
+//     return Commands.defer(
+//         () -> {
+//           var shot = ShooterCommandsUtil.calculateRPMToHub(akitDrive);
+
+//           return Commands.parallel(
+//                   new AnotherShooterRampupCommand(() -> shot.velocityShooter(), anotherShooter),
+//                   // new AimToTargetCommand(akitDrive),
+//                   new IndexerStartCommand(() -> shot.velocityIndexer(), index),
+//                   Commands.run(
+//                       () -> intakeRoller.start(IntakeRollerConstants.DEFAULT_VELOCITY),
+//                       intakeRoller),
+//                   Commands.run(
+//                       () -> intakeLinkage.setPosition(IntakeLinkageConstants.DEPLOY_ANGLE),
+//                       intakeLinkage))
+//               .finallyDo(
+//                   () -> {
+//                     anotherShooter.stop();
+//                     index.stop();
+//                     intakeRoller.stop();
+//                     intakeLinkage.stow();
+//                   })
+//               .withName("Collect Aim Shoot Command");
+//         },
+//         Set.of(intakeLinkage, intakeRoller, index, anotherShooter));
+//   }
 }

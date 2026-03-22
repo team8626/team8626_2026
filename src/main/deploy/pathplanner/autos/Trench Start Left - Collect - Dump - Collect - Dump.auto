@@ -7,7 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Start Middle - Backup"
+            "pathName": "Trench Start Left to Trench Left"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Trench Left CW Collect"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Trench Left to Dump Left"
           }
         },
         {
@@ -19,19 +31,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Middle to Depot"
+            "pathName": "Dump Left to Trench Left"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Depot Right to Middle"
+            "pathName": "Trench Left CCW Collect"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Trench Left to Dump Left"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "AimAndDumpLong"
+            "name": "AimAndDumpMedium"
           }
         }
       ]

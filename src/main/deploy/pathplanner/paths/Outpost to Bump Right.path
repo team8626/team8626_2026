@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": -0.3454410445601853,
-        "y": 0.24560555555555524
+        "x": 1.3605283062170455,
+        "y": 1.4752599148873697
       },
       "isLocked": false,
       "linkedName": "Outpost"
     },
     {
       "anchor": {
-        "x": 3.570874803795662,
-        "y": 2.031362193207763
+        "x": 3.4895402129708906,
+        "y": 2.1012104469891564
       },
       "prevControl": {
-        "x": 3.247374803795662,
-        "y": 1.471043756959231
+        "x": 3.2841977036062273,
+        "y": 1.9586115204580525
       },
       "nextControl": null,
       "isLocked": false,
@@ -30,8 +30,8 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.67,
-      "rotationDegrees": 59.99999999999999
+      "waypointRelativePos": 0.4546928146258503,
+      "rotationDegrees": 111.41720185640649
     }
   ],
   "constraintZones": [],

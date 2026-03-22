@@ -3,45 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.45847562210648196,
-        "y": 0.65
+        "x": 2.35,
+        "y": 4.0
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.5157478443299333,
-        "y": 0.8838666666667768
+        "x": 1.4494615974600462,
+        "y": 2.7188841770119874
       },
       "isLocked": false,
-      "linkedName": "Outpost"
+      "linkedName": "Dump Middle"
     },
     {
       "anchor": {
-        "x": 2.720538888890117,
-        "y": 2.2127888888889995
+        "x": 0.45847562210648196,
+        "y": 0.65
       },
       "prevControl": {
-        "x": 2.4061108363743156,
-        "y": 1.2904666015093176
-      },
-      "nextControl": {
-        "x": 2.939788888890117,
-        "y": 2.855922222222332
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 1.8532833333333332,
-        "y": 3.6
-      },
-      "prevControl": {
-        "x": 2.7462302159730845,
-        "y": 3.6
+        "x": 1.8604621503995435,
+        "y": 0.6169249429223749
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Climb Right"
+      "linkedName": "Outpost"
     }
   ],
   "rotationTargets": [],
@@ -58,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }
