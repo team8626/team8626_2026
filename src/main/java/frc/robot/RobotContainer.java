@@ -109,7 +109,7 @@ public class RobotContainer {
   private final Hopper hopper;
   private final AnotherShooter anotherShooter;
 
-  public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+  public final CommandSwerveDrivetrain drivetrain;
 
   private final Climber climber;
 
@@ -155,6 +155,7 @@ public class RobotContainer {
 
     if (Constants.currentMode == Mode.SIM) {
       // Simulation: use physics sim IO (automatically detected via RobotBase.isReal())
+      drivetrain = null; // Not Used here (this is for using Phoenix Tuner template)
       akitDrive =
           new AkitDrive(
               new GyroIO() {},
@@ -188,6 +189,7 @@ public class RobotContainer {
       configureFuelSimRobot(hopper::ableToIntake, hopper::pushFuel);
     } else if (Constants.currentMode == Mode.REPLAY) {
       // Replay: no hardware IO
+      drivetrain = null; // Not Used here (this is for using Phoenix Tuner template)
       akitDrive =
           new AkitDrive(
               new GyroIO() {},
@@ -212,6 +214,7 @@ public class RobotContainer {
     } else {
       switch (Constants.robot) {
         case REBUILT_PHOENIX:
+          drivetrain = TunerConstants.createDrivetrain();
           akitDrive =
               new AkitDrive(
                   new GyroIO() {},
@@ -240,6 +243,7 @@ public class RobotContainer {
           break;
         case REBUILT_AKIT:
           // Real robot, full hardware IO
+          drivetrain = null; // Not Used here (this is for using Phoenix Tuner template)
           akitDrive =
               new AkitDrive(
                   new GyroIOPigeon2(),
@@ -276,8 +280,8 @@ public class RobotContainer {
     systemChecks = new SystemChecks(intakeLinkage, intakeRoller, index, anotherShooter, climber);
 
     // Set up auto routines
-    configurePPNamedCommands();
     configurePPEventTriggers();
+    configurePPNamedCommands();
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     // Set up SysId routines
@@ -287,6 +291,7 @@ public class RobotContainer {
     teleopDrive = new TeleopDriveCommand(akitDrive, controller);
 
     // Configure the button bindings
+    configureDefaultCommands();
     configureButtonBindings();
 
     // Configure named commands
@@ -294,32 +299,25 @@ public class RobotContainer {
 
   }
 
-  /**
-   * Use this method to define your button->command mappings. Buttons can be created by
-   * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
-   */
-  private void configureButtonBindings() {
-    // Default command, normal field-relative drive
-
-    double MaxSpeed =
-        1.0
-            * TunerConstants.kSpeedAt12Volts.in(
-                MetersPerSecond); // kSpeedAt12Volts desired top speed
-    double MaxAngularRate =
-        RotationsPerSecond.of(0.75)
-            .in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
-
-    SwerveRequest.FieldCentric drive =
-        new SwerveRequest.FieldCentric()
-            .withDeadband(MaxSpeed * 0.1)
-            .withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
-            .withDriveRequestType(
-                DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+  public void configureDefaultCommands() {
 
     switch (Constants.robot) {
       case REBUILT_PHOENIX:
+        double MaxSpeed =
+            1.0
+                * TunerConstants.kSpeedAt12Volts.in(
+                    MetersPerSecond); // kSpeedAt12Volts desired top speed
+        double MaxAngularRate =
+            RotationsPerSecond.of(0.75)
+                .in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+
+        SwerveRequest.FieldCentric drive =
+            new SwerveRequest.FieldCentric()
+                .withDeadband(MaxSpeed * 0.1)
+                .withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+                .withDriveRequestType(
+                    DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(
@@ -342,7 +340,15 @@ public class RobotContainer {
 
       default:
     }
+  }
 
+  /**
+   * Use this method to define your button->command mappings. Buttons can be created by
+   * instantiating a {@link GenericHID} or one of its subclasses ({@link
+   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
+   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
+   */
+  private void configureButtonBindings() {
     // -------------------------------------------------------------- Collect
     //
     // Run the intake roller and moves the intake to collect position.
@@ -542,23 +548,30 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "AimAndDumpShort",
         Commands.sequence(
-                new AnotherShooterRampupCommand(anotherShooter).withTimeout(1.0),
+                new AnotherShooterRampupCommand(anotherShooter).withTimeout(0.5),
                 feedShooterCommand().withTimeout(AutoConstants.DUMP_DURATION_SHORT.in(Seconds)))
-            .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY)));
+            .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY))
+            .withName("AimAndDumpShort"));
 
     NamedCommands.registerCommand(
         "AimAndDumpMedium",
         Commands.sequence(
-                new AnotherShooterRampupCommand(anotherShooter).withTimeout(1.0),
-                feedShooterCommand().withTimeout(AutoConstants.DUMP_DURATION_MEDIUM.in(Seconds)))
-            .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY)));
+                new AnotherShooterRampupCommand(anotherShooter),
+                Commands.deadline(
+                    Commands.waitSeconds(AutoConstants.DUMP_DURATION_MEDIUM.in(Seconds)),
+                    feedShooterCommand()))
+            .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY))
+            .withName("AimAndDumpMedium"));
 
     NamedCommands.registerCommand(
         "AimAndDumpLong",
         Commands.sequence(
-                new AnotherShooterRampupCommand(anotherShooter).withTimeout(1.0),
-                feedShooterCommand().withTimeout(AutoConstants.DUMP_DURATION_LONG.in(Seconds)))
-            .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY)));
+                new AnotherShooterRampupCommand(anotherShooter),
+                Commands.deadline(
+                    Commands.waitSeconds(AutoConstants.DUMP_DURATION_MEDIUM.in(Seconds)),
+                    feedShooterCommand()))
+            .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY))
+            .withName("AimAndDumpLong"));
   }
 
   /**
@@ -568,25 +581,32 @@ public class RobotContainer {
   private void configurePPEventTriggers() {
     // Start collecting when the "CollectStart" event is triggered
     new EventTrigger("CollectStart")
-        .whileTrue(new CollectCommand(intakeLinkage, intakeRoller).withName("PP Collect Start"));
+        .onTrue(
+            Commands.runOnce(
+                    () -> {
+                      intakeLinkage.setPosition(IntakeLinkageConstants.DEPLOY_ANGLE);
+                      intakeRoller.start(IntakeRollerConstants.DEFAULT_VELOCITY);
+                    })
+                .withName("PP Collect Start"));
 
     // Stop collecting when the "CollectDone" event is triggered.
-    // No action is needed, we just need a trigger to end the collect command (interrupt)
     new EventTrigger("CollectDone")
         .onTrue(
-            Commands.runOnce(() -> {}, intakeLinkage, intakeRoller).withName("PP Collect Done"));
+            Commands.runOnce(
+                    () -> {
+                      intakeLinkage.setPosition(IntakeLinkageConstants.STOW_ANGLE);
+                      intakeRoller.stop();
+                    })
+                .withName("PP Collect Done"));
 
     // Ramp up the shooter when the "RampUp" event is triggered
-    // The shooter will keep running until stopped or interrupted
     new EventTrigger("RampUp")
-        .whileTrue(new AnotherShooterRampupCommand(anotherShooter).withName("PP Ramp Up"));
-
-    // Stop the shooter and indexer when the "StopDump" event is triggered
-    new EventTrigger("StopDump")
         .onTrue(
-            Commands.runOnce(() -> stopShooting(AnotherShooterConstants.STOP_DELAY))
-                .withName("PP Stop Dump"));
+            Commands.parallel(
+                Commands.print("=== RampUp FIRED ==="),
+                new AnotherShooterRampupCommand(anotherShooter).withName("PP Ramp Up")));
   }
+
   /**
    * Configure SysId routines to be identified by autos and paths. These will show up on the
    * dashboard and can be run to collect data for system identification.
