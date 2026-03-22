@@ -32,6 +32,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -42,11 +43,8 @@ import frc.robot.Constants.Dimensions;
 import frc.robot.Constants.Mode;
 import frc.robot.commands.AgitateCommand;
 import frc.robot.commands.AnotherShooterRampupCommand;
-import frc.robot.commands.AnotherShooterStopCommand;
 import frc.robot.commands.CollectCommand;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.IndexerStartCommand;
-import frc.robot.commands.IndexerStopCommand;
 import frc.robot.commands.TeleopDriveCommand;
 import frc.robot.commands.TrackTargetAndShootCommand;
 import frc.robot.generated.TunerConstants;
@@ -90,9 +88,7 @@ import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.util.FuelSim;
-import java.util.Set;
 import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -364,19 +360,7 @@ public class RobotContainer {
     fixedRPMShootTrigger.whileTrue(
         Commands.sequence(new AnotherShooterRampupCommand(anotherShooter), feedShooterCommand())
             .withName("Just Shoot Command")
-            .finallyDo(
-                () -> {
-                  index.stop();
-
-                  Commands.defer(
-                          () ->
-                              Commands.sequence(
-                                  Commands.waitSeconds(
-                                      AnotherShooterConstants.STOP_DELAY.in(Seconds)),
-                                  Commands.runOnce(anotherShooter::stop, anotherShooter)),
-                          Set.of(anotherShooter))
-                      .schedule();
-                }));
+            .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY)));
 
     // -------------------------------------------------------------- Aim and Shoot
     //
@@ -567,21 +551,26 @@ public class RobotContainer {
    */
   private void configurePPEventTriggers() {
     // Start collecting when the "CollectStart" event is triggered
-    new EventTrigger("CollectStart").whileTrue(new CollectCommand(intakeLinkage, intakeRoller));
+    new EventTrigger("CollectStart")
+        .whileTrue(new CollectCommand(intakeLinkage, intakeRoller).withName("PP Collect Start"));
 
     // Stop collecting when the "CollectDone" event is triggered.
     // No action is needed, we just need a trigger to end the collect command (interrupt)
-    new EventTrigger("CollectDone").onTrue(Commands.runOnce(() -> {}, intakeLinkage, intakeRoller));
+    new EventTrigger("CollectDone")
+        .onTrue(
+            Commands.runOnce(() -> {}, intakeLinkage, intakeRoller).withName("PP Collect Done"));
 
     // Ramp up the shooter when the "RampUp" event is triggered
     // The shooter will keep running until stopped or interrupted
-    new EventTrigger("RampUp").whileTrue(new AnotherShooterRampupCommand(anotherShooter));
+    new EventTrigger("RampUp")
+        .whileTrue(new AnotherShooterRampupCommand(anotherShooter).withName("PP Ramp Up"));
 
+    // Stop the shooter and indexer when the "StopDump" event is triggered
     new EventTrigger("StopDump")
-        .whileTrue(
-            new IndexerStopCommand(index).alongWith(new AnotherShooterStopCommand(anotherShooter)));
+        .onTrue(
+            Commands.runOnce(() -> stopShooting(AnotherShooterConstants.STOP_DELAY))
+                .withName("PP Stop Dump"));
   }
-
   /**
    * Configure SysId routines to be identified by autos and paths. These will show up on the
    * dashboard and can be run to collect data for system identification.
@@ -689,32 +678,34 @@ public class RobotContainer {
     return autoChooser.get();
   }
 
-  // Helpers
   private Command feedShooterCommand() {
-    return Commands.parallel(new IndexerStartCommand(index), new AgitateCommand(intakeLinkage));
-  }
-
-  private Command feedShooterCommand(Supplier<AngularVelocity> indexVelocitySupplier) {
     return Commands.parallel(
-        new IndexerStartCommand(indexVelocitySupplier, index), new AgitateCommand(intakeLinkage));
+        Commands.startEnd(
+            () -> {
+              anotherShooter.startFeeding();
+              index.start();
+            },
+            () -> {
+              anotherShooter.stopFeeding();
+              index.stop();
+            },
+            index),
+        new AgitateCommand(intakeLinkage));
   }
 
   private void stopShooting() {
-    anotherShooter.stop();
-    index.stop();
-    intakeLinkage.stow();
+    stopShooting(Seconds.of(0));
   }
 
   private void stopShooting(Time delay) {
     index.stop();
+    anotherShooter.stopFeeding();
     intakeLinkage.stow();
 
-    Commands.defer(
-            () ->
-                Commands.sequence(
-                    Commands.waitSeconds(delay.in(Seconds)),
-                    Commands.runOnce(anotherShooter::stop, anotherShooter)),
-            Set.of(anotherShooter))
-        .schedule();
+    CommandScheduler.getInstance()
+        .schedule(
+            Commands.sequence(
+                Commands.waitSeconds(delay.in(Seconds)),
+                Commands.runOnce(anotherShooter::stop, anotherShooter)));
   }
 }
