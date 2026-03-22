@@ -35,6 +35,8 @@ public interface AnotherShooterIO {
 
     public double velocityRPMDesired = 0;
 
+    public int shotCount = 0;
+
     public double kP = GAINS.kP();
     public double kI = GAINS.kI();
     public double kD = GAINS.kD();
