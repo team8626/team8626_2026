@@ -14,134 +14,71 @@
 package frc.robot.subsystems.intakeRoller;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.subsystems.intakeRoller.IntakeRollerConstants.GAINS;
 import static frc.robot.subsystems.intakeRoller.IntakeRollerConstants.ROLLER_CONFIG;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 
-/**
- * Simulation IO for the indexer subsystem.
- *
- * <p><b>Open-loop mode:</b> The motor is driven by a commanded voltage (or duty cycle) with no
- * feedback. Speed depends on load and battery voltage; useful for simple on/off or manual control
- * where exact speed is not critical.
- *
- * <p><b>Closed-loop (velocity) mode:</b> A target velocity (setpoint) is given, and the actual
- * velocity is measured and fed back. The controller adjusts the motor output so the actual velocity
- * tracks the setpoint despite load or voltage changes. This implementation uses a PID controller
- * plus feedforward (Ks, Kv) to achieve accurate, responsive velocity control.
- *
- * <p><b>PID controller:</b> Computes a correction from the velocity error (setpoint minus actual).
- *
- * <ul>
- *   <li><b>Kp</b> (proportional): Output proportional to error; larger Kp gives a stronger, faster
- *       response but can cause overshoot or oscillation.
- *   <li><b>Ki</b> (integral): Not used here (0). Would eliminate steady-state error over time.
- *   <li><b>Kd</b> (derivative): Responds to the rate of change of error; helps dampen overshoot and
- *       smooth the response.
- * </ul>
- *
- * Tuning (velocityKp, velocityKd in {@link IntakeRollerConstants}) balances response speed and
- * stability.
- */
 public class IntakeRollerIOSim implements IntakeRollerIO {
-  /** Simulates indexer motor dynamics (Neo Vortex + gearbox) for physics-accurate behavior. */
-  private final DCMotorSim motorSim;
-
+  private boolean isEnabled = false;
   private boolean connected = true;
 
-  /** PID used to correct velocity error when in velocity closed-loop mode. */
-  private final PIDController velocityController =
-      new PIDController(GAINS.kP(), GAINS.kI(), GAINS.kD());
-
-  private double kV = GAINS.kV();
-  private double kS = GAINS.kS();
-
-  /** True when setVelocity() is active; false for open-loop (setOpenLoop/stop). */
-  private boolean velocityClosedLoop = false;
-  /** Feedforward voltage (Ks * sign + Kv * setpoint) added to PID output in velocity mode. */
-  private double velocityFFVolts = 0.0;
-  /**
-   * Voltage commanded to the motor; written by open-loop or by velocity closed-loop in
-   * updateInputs.
-   */
-  private double appliedVolts = 0.0;
+  private final FlywheelSim motorSim;
 
   /** Target velocity for closed-loop control. */
   private AngularVelocity desiredWheelVelocity = RPM.of(0.0);
 
   public IntakeRollerIOSim() {
     motorSim =
-        new DCMotorSim(
-            LinearSystemId.createDCMotorSystem(
-                DCMotor.getNeoVortex(1), 0.0012, 1 /*IntakeRollerConstants.REDUCTION*/),
-            DCMotor.getNeoVortex(1));
+        new FlywheelSim(
+            LinearSystemId.createFlywheelSystem(
+                DCMotor.getNeoVortex(1), 4 * ROLLER_CONFIG.MOI(), ROLLER_CONFIG.REDUCTION()),
+            DCMotor.getNeoVortex(1),
+            0.00363458292);
   }
 
   @Override
   public void updateInputs(IntakeRollerIOInputs inputs) {
-    if (velocityClosedLoop) {
-      appliedVolts =
-          velocityFFVolts + velocityController.calculate(motorSim.getAngularVelocityRadPerSec());
-    } else {
-      velocityController.reset();
-    }
-
-    motorSim.setInputVoltage(MathUtil.clamp(appliedVolts, -12.0, 12.0));
     motorSim.update(0.02);
 
+    inputs.isEnabled = isEnabled;
     inputs.connected = connected;
 
-    inputs.velocityRPMMotor = motorSim.getAngularVelocityRPM(); // (ROLLER_CONFIG.REDUCTION());
-    inputs.velocityRPMRollers = inputs.velocityRPMMotor / ROLLER_CONFIG.REDUCTION();
     inputs.velocityRPMDesired = desiredWheelVelocity.in(RPM);
+    inputs.velocityRPMRollers = motorSim.getAngularVelocityRPM() / ROLLER_CONFIG.REDUCTION();
+    inputs.velocityRPMMotor = motorSim.getAngularVelocityRPM();
 
-    inputs.appliedVoltage = Volts.of(appliedVolts);
     inputs.current = Amps.of(Math.abs(motorSim.getCurrentDrawAmps()));
-    inputs.atGoal =
-        velocityClosedLoop
-            || Math.abs(inputs.velocityRPMDesired - inputs.velocityRPMRollers)
-                < IntakeRollerConstants.VELOCITY_TOLERANCE.in(RPM);
+    inputs.appliedVoltage = Volts.of(motorSim.getInputVoltage());
   }
 
   @Override
-  public void setOpenLoop(Voltage output) {
-    velocityClosedLoop = false;
-    appliedVolts = output.in(Volts);
-  }
-
-  @Override
-  public void setVelocity(AngularVelocity new_velocity) {
-    velocityClosedLoop = true;
+  public void start(AngularVelocity new_velocity) {
     desiredWheelVelocity = new_velocity;
-
-    AngularVelocity motorAngularVelocity = desiredWheelVelocity.times(ROLLER_CONFIG.REDUCTION());
-
-    velocityFFVolts =
-        kS * Math.signum(motorAngularVelocity.in(RadiansPerSecond))
-            + kV * motorAngularVelocity.in(RadiansPerSecond);
-    velocityController.setSetpoint(motorAngularVelocity.in(RadiansPerSecond));
+    setVelocity(desiredWheelVelocity);
+    isEnabled = true;
   }
 
   @Override
   public void stop() {
-    velocityClosedLoop = false;
     desiredWheelVelocity = RPM.of(0.0);
-    appliedVolts = 0.0;
+    setVelocity(desiredWheelVelocity);
+    isEnabled = false;
+  }
+
+  private void setVelocity(AngularVelocity new_RPM) {
+    motorSim.setAngularVelocity(new_RPM.times(ROLLER_CONFIG.REDUCTION()).in(RadiansPerSecond));
   }
 
   @Override
-  public void setPID(double new_kP, double new_kI, double new_kD, double new_kV, double new_kS) {
-    velocityController.setPID(new_kP, new_kI, new_kD);
-    kV = new_kV;
-    kS = new_kS;
+  public void setPID(double kP, double kI, double kD, double kV, double kS) {
+    System.out.printf("New PID: %f, %f, %f \n", kP, kI, kD);
   }
+
+  @Override
+  public void setVoltage(double voltage) {}
 
   // Use for unit testing purpose only
   @Deprecated

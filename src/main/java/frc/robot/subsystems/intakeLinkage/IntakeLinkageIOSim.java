@@ -61,6 +61,7 @@ public class IntakeLinkageIOSim implements IntakeLinkageIO {
 
     motorSim.update(0.02);
 
+    inputs.desiredDeg = desiredAngle.in(Degrees);
     inputs.positionDeg = Units.radiansToDegrees(motorSim.getAngleRads());
     inputs.positionRad = motorSim.getAngleRads();
     motorSim.setInputVoltage(MathUtil.clamp(appliedVolts, -12.0, 12.0));
@@ -69,6 +70,8 @@ public class IntakeLinkageIOSim implements IntakeLinkageIO {
     inputs.velocityDegPerSec = Units.radiansToDegrees(motorSim.getVelocityRadPerSec());
     inputs.appliedVoltage = appliedVolts;
     inputs.amps = motorSim.getCurrentDrawAmps();
+
+    motorSim.setState(desiredAngle.in(Radians), 6.0);
   }
 
   @Override
@@ -83,21 +86,6 @@ public class IntakeLinkageIOSim implements IntakeLinkageIO {
   @Override
   public void goUp(Angle offset) {
     desiredAngle.minus(offset);
-  }
-
-  @Override
-  public void stow() {
-    desiredAngle = IntakeLinkageConstants.STOW_ANGLE;
-  }
-
-  @Override
-  public void deploy() {
-    desiredAngle = IntakeLinkageConstants.DEPLOY_ANGLE;
-  }
-
-  @Override
-  public void hopperOpen() {
-    desiredAngle = IntakeLinkageConstants.HOPPER_OPEN_ANGLE;
   }
 
   @Override
