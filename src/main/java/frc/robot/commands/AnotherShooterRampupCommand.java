@@ -3,15 +3,20 @@ package frc.robot.commands;
 import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.anotherShooter.AnotherShooter;
 import frc.robot.subsystems.anotherShooter.AnotherShooterConstants;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class AnotherShooterRampupCommand extends Command {
   private final AnotherShooter shooter;
   private final Supplier<AngularVelocity> velocitySupplier;
   private static final AngularVelocity DEFAULT_VELOCITY = AnotherShooterConstants.DEFAULT_VELOCITY;
+
+  private final Timer timer = new Timer();
+  private boolean logged = false;
 
   public AnotherShooterRampupCommand(AnotherShooter new_shooter) {
     this(() -> DEFAULT_VELOCITY, new_shooter);
@@ -27,13 +32,21 @@ public class AnotherShooterRampupCommand extends Command {
   @Override
   public void initialize() {
     shooter.start(velocitySupplier.get());
+    timer.restart();
+    logged = false;
   }
 
   @Override
-  public void execute() {}
+  public void execute() {
+    Logger.recordOutput("AnotherShooter/Ramp/ElapsedSec", timer.get());
+  }
 
   @Override
   public void end(boolean interrupted) {
+    timer.stop();
+    if (!logged) {
+      Logger.recordOutput("AnotherShooter/Ramp/TimedOutSec", timer.get());
+    }
     if (interrupted) {
       shooter.stop();
     }
@@ -41,13 +54,16 @@ public class AnotherShooterRampupCommand extends Command {
 
   @Override
   public boolean isFinished() {
-    boolean atSetpoint = false;
-
     AngularVelocity currentRPM = shooter.getVelocity();
 
-    atSetpoint =
-        Math.abs(Math.abs(currentRPM.in(RPM)) - velocitySupplier.get().in(RPM))
+    boolean atSetpoint =
+        Math.abs(currentRPM.in(RPM) - velocitySupplier.get().in(RPM))
             <= AnotherShooterConstants.VELOCITY_TOLERANCE.in(RPM);
+
+    if (atSetpoint && !logged) {
+      Logger.recordOutput("AnotherShooter/Ramp/TimeToSetpointSec", timer.get());
+      logged = true;
+    }
 
     return atSetpoint;
   }
