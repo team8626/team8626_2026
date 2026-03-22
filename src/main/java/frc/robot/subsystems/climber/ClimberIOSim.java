@@ -20,6 +20,9 @@ public class ClimberIOSim implements ClimberIO {
   private double velocity = 0;
   private double voltage = 0;
 
+  private boolean leftIsEnabled = false;
+  private boolean rightIsEnabled = false;
+
   public ClimberIOSim() {}
 
   @Override
@@ -43,36 +46,36 @@ public class ClimberIOSim implements ClimberIO {
     inputs.rightVelocity = RadiansPerSecond.of(velocity);
     inputs.rightAppliedVoltage = Volts.of(voltage);
     inputs.averagePosition = Radians.of(position);
+
+    inputs.leftConnected = true;
+    inputs.rightConnected = true;
+    inputs.leftIsEnabled = leftIsEnabled;
+    inputs.rightIsEnabled = rightIsEnabled;
   }
 
   @Override
   public void setVoltage(Voltage out) {
     voltage = out.in(Volts);
     velocity = voltage * kV;
+
+    leftIsEnabled = out.in(Volts) != 0;
+    rightIsEnabled = out.in(Volts) != 0;
   }
 
   @Override
   public void setLeftVoltage(Voltage out) {
     setVoltage(out);
+    leftIsEnabled = out.in(Volts) != 0;
   }
 
   @Override
   public void setRightVoltage(Voltage out) {
     setVoltage(out);
+    rightIsEnabled = out.in(Volts) != 0;
   }
 
   @Override
   public void stop() {
     setVoltage(Volts.of(0));
   }
-
-  // @Override
-  // public void stopFront() {
-  //     stop();
-  // }
-
-  // @Override
-  // public void stopBack() {
-  //     stop();
-  // }
 }
