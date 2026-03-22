@@ -246,6 +246,7 @@ public class TeleopDriveCommand extends Command {
   }
 
   private void setSpeed(DriveSpeed new_driveSpeed) {
+    driveSpeed = new_driveSpeed;
     switch (new_driveSpeed) {
       case SLOW -> {
         maxDriveSpeed = DriveConstants.SLOW_DRIVE_SPEED;
