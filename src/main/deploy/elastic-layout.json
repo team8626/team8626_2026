@@ -9,8 +9,8 @@
         "containers": [
           {
             "title": "Auto Choices",
-            "x": 192.0,
-            "y": 64.0,
+            "x": 32.0,
+            "y": 32.0,
             "width": 640.0,
             "height": 128.0,
             "type": "ComboBox Chooser",
@@ -22,10 +22,10 @@
           },
           {
             "title": "Field",
-            "x": 192.0,
-            "y": 320.0,
-            "width": 1536.0,
-            "height": 608.0,
+            "x": 32.0,
+            "y": 448.0,
+            "width": 1504.0,
+            "height": 480.0,
             "type": "Field",
             "properties": {
               "topic": "/SmartDashboard/Field",
@@ -43,8 +43,8 @@
           },
           {
             "title": "indexer",
-            "x": 1184.0,
-            "y": 64.0,
+            "x": 992.0,
+            "y": 32.0,
             "width": 128.0,
             "height": 64.0,
             "type": "Boolean Box",
@@ -60,8 +60,8 @@
           },
           {
             "title": "Shooter",
-            "x": 1312.0,
-            "y": 64.0,
+            "x": 1120.0,
+            "y": 32.0,
             "width": 128.0,
             "height": 64.0,
             "type": "Boolean Box",
@@ -76,65 +76,9 @@
             }
           },
           {
-            "title": "CurrentVelocity",
-            "x": 1184.0,
-            "y": 224.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/Indexer/CurrentVelocity",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "CurrentVelocityRPM",
-            "x": 1312.0,
-            "y": 224.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/AnotherShooter/CurrentVelocityRPM",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "DesiredRPM",
-            "x": 1312.0,
-            "y": 128.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/AnotherShooter/DesiredRPM",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "DesiredVelocity",
-            "x": 1184.0,
-            "y": 128.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/Indexer/DesiredVelocity",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
             "title": "RightCurrent",
-            "x": 1600.0,
-            "y": 224.0,
+            "x": 1408.0,
+            "y": 192.0,
             "width": 128.0,
             "height": 96.0,
             "type": "Text Display",
@@ -147,8 +91,8 @@
           },
           {
             "title": "LeftCurrent",
-            "x": 1472.0,
-            "y": 224.0,
+            "x": 1280.0,
+            "y": 192.0,
             "width": 128.0,
             "height": 96.0,
             "type": "Text Display",
@@ -161,8 +105,8 @@
           },
           {
             "title": "LeftPosition",
-            "x": 1472.0,
-            "y": 128.0,
+            "x": 1280.0,
+            "y": 96.0,
             "width": 128.0,
             "height": 96.0,
             "type": "Text Display",
@@ -175,8 +119,8 @@
           },
           {
             "title": "RightPosition",
-            "x": 1600.0,
-            "y": 128.0,
+            "x": 1408.0,
+            "y": 96.0,
             "width": 128.0,
             "height": 96.0,
             "type": "Text Display",
@@ -189,8 +133,8 @@
           },
           {
             "title": "Rollers",
-            "x": 992.0,
-            "y": 64.0,
+            "x": 832.0,
+            "y": 32.0,
             "width": 128.0,
             "height": 64.0,
             "type": "Boolean Box",
@@ -205,37 +149,9 @@
             }
           },
           {
-            "title": "CurrentVelocity",
-            "x": 992.0,
-            "y": 224.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/IntakeRoller/CurrentVelocity",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "DesiredVelocity",
-            "x": 992.0,
-            "y": 128.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/IntakeRoller/DesiredVelocity",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
             "title": "IsEnabled",
-            "x": 864.0,
-            "y": 64.0,
+            "x": 704.0,
+            "y": 32.0,
             "width": 128.0,
             "height": 64.0,
             "type": "Boolean Box",
@@ -250,38 +166,10 @@
             }
           },
           {
-            "title": "DesiredAngle",
-            "x": 864.0,
-            "y": 128.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/IntakeLinkage/DesiredAngle",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "Position",
-            "x": 864.0,
-            "y": 224.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/IntakeLinkage/Position",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
             "title": "Alliance",
-            "x": 192.0,
-            "y": 224.0,
-            "width": 96.0,
+            "x": 32.0,
+            "y": 160.0,
+            "width": 128.0,
             "height": 96.0,
             "type": "Boolean Box",
             "properties": {
@@ -296,8 +184,8 @@
           },
           {
             "title": "EventName",
-            "x": 320.0,
-            "y": 224.0,
+            "x": 160.0,
+            "y": 160.0,
             "width": 384.0,
             "height": 96.0,
             "type": "Text Display",
@@ -310,8 +198,8 @@
           },
           {
             "title": "MatchNumber",
-            "x": 704.0,
-            "y": 224.0,
+            "x": 544.0,
+            "y": 160.0,
             "width": 128.0,
             "height": 96.0,
             "type": "Text Display",
@@ -319,6 +207,152 @@
               "topic": "/FMSInfo/MatchNumber",
               "period": 0.06,
               "data_type": "int",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "LeftIsEnabled",
+            "x": 1280.0,
+            "y": 32.0,
+            "width": 128.0,
+            "height": 64.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/Climber/LeftIsEnabled",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "RightIsEnabled",
+            "x": 1408.0,
+            "y": 32.0,
+            "width": 128.0,
+            "height": 64.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/Climber/RightIsEnabled",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "VelocityRPMDesired",
+            "x": 1120.0,
+            "y": 96.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/AnotherShooter/VelocityRPMDesired",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "VelocityRPMFlyWheel",
+            "x": 1120.0,
+            "y": 192.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/AnotherShooter/VelocityRPMFlyWheel",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "VelocityRPMDesired",
+            "x": 992.0,
+            "y": 96.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Indexer/VelocityRPMDesired",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "VelocityRPMFlywheel",
+            "x": 992.0,
+            "y": 192.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Indexer/VelocityRPMFlywheel",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "PositionDeg",
+            "x": 704.0,
+            "y": 192.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeLinkage/PositionDeg",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "DesiredDeg",
+            "x": 704.0,
+            "y": 96.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeLinkage/DesiredDeg",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "VelocityRPMDesired",
+            "x": 832.0,
+            "y": 96.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeRoller/VelocityRPMDesired",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "VelocityRPMRollers",
+            "x": 832.0,
+            "y": 192.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeRoller/VelocityRPMRollers",
+              "period": 0.06,
+              "data_type": "double",
               "show_submit_button": false
             }
           }
@@ -330,19 +364,6 @@
       "grid_layout": {
         "layouts": [],
         "containers": [
-          {
-            "title": "Auto Choices",
-            "x": 32.0,
-            "y": 128.0,
-            "width": 640.0,
-            "height": 128.0,
-            "type": "ComboBox Chooser",
-            "properties": {
-              "topic": "/SmartDashboard/Auto Choices",
-              "period": 0.06,
-              "sort_options": false
-            }
-          },
           {
             "title": "indexer",
             "x": 1024.0,
@@ -378,63 +399,7 @@
             }
           },
           {
-            "title": "CurrentVelocity",
-            "x": 1024.0,
-            "y": 288.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/Indexer/CurrentVelocity",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "CurrentVelocityRPM",
-            "x": 1184.0,
-            "y": 288.0,
-            "width": 256.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/AnotherShooter/CurrentVelocityRPM",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "DesiredRPM",
-            "x": 1184.0,
-            "y": 192.0,
-            "width": 256.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/AnotherShooter/DesiredRPM",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "DesiredVelocity",
-            "x": 1024.0,
-            "y": 192.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/Indexer/DesiredVelocity",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "RightCurrent",
+            "title": "AmpsRight",
             "x": 1600.0,
             "y": 512.0,
             "width": 128.0,
@@ -448,7 +413,7 @@
             }
           },
           {
-            "title": "LeftCurrent",
+            "title": "AmpsLeft",
             "x": 1472.0,
             "y": 512.0,
             "width": 128.0,
@@ -504,34 +469,6 @@
               "false_color": 4294198070,
               "true_icon": "None",
               "false_icon": "None"
-            }
-          },
-          {
-            "title": "CurrentVelocity",
-            "x": 864.0,
-            "y": 288.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/IntakeRoller/CurrentVelocity",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "DesiredVelocity",
-            "x": 864.0,
-            "y": 192.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/IntakeRoller/DesiredVelocity",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
             }
           },
           {
@@ -552,38 +489,10 @@
             }
           },
           {
-            "title": "DesiredAngle",
-            "x": 704.0,
-            "y": 192.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/IntakeLinkage/DesiredAngle",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "Position",
-            "x": 704.0,
-            "y": 288.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/IntakeLinkage/Position",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
             "title": "Alliance",
             "x": 32.0,
-            "y": 64.0,
-            "width": 640.0,
+            "y": 128.0,
+            "width": 288.0,
             "height": 64.0,
             "type": "Boolean Box",
             "properties": {
@@ -625,65 +534,9 @@
             }
           },
           {
-            "title": "AppliedOutputLeft",
-            "x": 1184.0,
-            "y": 608.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/AnotherShooter/AppliedOutputLeft",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "AppliedOutputRight",
-            "x": 1312.0,
-            "y": 608.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/AnotherShooter/AppliedOutputRight",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "TempLeft",
-            "x": 1184.0,
-            "y": 704.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/AnotherShooter/TempLeft",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "TempRight",
-            "x": 1312.0,
-            "y": 704.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/AnotherShooter/TempRight",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
             "title": "Connected",
             "x": 1024.0,
-            "y": 128.0,
+            "y": 0.0,
             "width": 128.0,
             "height": 64.0,
             "type": "Boolean Box",
@@ -698,79 +551,9 @@
             }
           },
           {
-            "title": "Current",
-            "x": 1024.0,
-            "y": 512.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/Indexer/Current",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "Temperature",
-            "x": 1024.0,
-            "y": 704.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/Indexer/Temperature",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "MotorVelocity",
-            "x": 1024.0,
-            "y": 384.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/Indexer/MotorVelocity",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "VelocityLeft",
-            "x": 1184.0,
-            "y": 384.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/AnotherShooter/VelocityLeft",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "VelocityRight",
-            "x": 1312.0,
-            "y": 384.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/AnotherShooter/VelocityRight",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
             "title": "Connected",
             "x": 1184.0,
-            "y": 128.0,
+            "y": 0.0,
             "width": 256.0,
             "height": 64.0,
             "type": "Boolean Box",
@@ -801,7 +584,7 @@
           {
             "title": "LeftConnected",
             "x": 1472.0,
-            "y": 128.0,
+            "y": 0.0,
             "width": 128.0,
             "height": 64.0,
             "type": "Boolean Box",
@@ -818,7 +601,7 @@
           {
             "title": "RightConnected",
             "x": 1600.0,
-            "y": 128.0,
+            "y": 0.0,
             "width": 128.0,
             "height": 64.0,
             "type": "Boolean Box",
@@ -847,23 +630,9 @@
             }
           },
           {
-            "title": "Current",
-            "x": 704.0,
-            "y": 512.0,
-            "width": 128.0,
-            "height": 96.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/IntakeLinkage/Current",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
             "title": "Connected",
             "x": 704.0,
-            "y": 128.0,
+            "y": 0.0,
             "width": 128.0,
             "height": 64.0,
             "type": "Boolean Box",
@@ -894,9 +663,9 @@
           {
             "title": "Field",
             "x": 32.0,
-            "y": 256.0,
+            "y": 288.0,
             "width": 640.0,
-            "height": 288.0,
+            "height": 256.0,
             "type": "Field",
             "properties": {
               "topic": "/SmartDashboard/Field",
@@ -922,6 +691,539 @@
             "properties": {
               "topic": "/SmartDashboard/Alerts",
               "period": 0.06
+            }
+          },
+          {
+            "title": "Connected",
+            "x": 864.0,
+            "y": 0.0,
+            "width": 128.0,
+            "height": 64.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeRoller/Connected",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "Amps",
+            "x": 1024.0,
+            "y": 512.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Indexer/Amps",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Amps",
+            "x": 704.0,
+            "y": 512.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeLinkage/Amps",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Amps",
+            "x": 864.0,
+            "y": 512.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeRoller/Current",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "AppliedVoltage",
+            "x": 864.0,
+            "y": 608.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeRoller/AppliedVoltage",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "AppliedVoltage",
+            "x": 1024.0,
+            "y": 608.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Indexer/AppliedVoltage",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Temperature",
+            "x": 864.0,
+            "y": 704.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeRoller/Temperature",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "TempCelsius",
+            "x": 1024.0,
+            "y": 704.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Indexer/TempCelsius",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "TempCelsiusLeft",
+            "x": 1184.0,
+            "y": 704.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/AnotherShooter/TempCelsiusLeft",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "TempCelsiusRight",
+            "x": 1312.0,
+            "y": 704.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/AnotherShooter/TempCelsiusRight",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "LeftAppliedVoltage",
+            "x": 1472.0,
+            "y": 608.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Climber/LeftAppliedVoltage",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "RightAppliedVoltage",
+            "x": 1600.0,
+            "y": 608.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Climber/RightAppliedVoltage",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "DesiredDeg",
+            "x": 704.0,
+            "y": 192.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeLinkage/DesiredDeg",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "PositionDeg",
+            "x": 704.0,
+            "y": 288.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeLinkage/PositionDeg",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Desired RPM",
+            "x": 864.0,
+            "y": 192.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeRoller/VelocityRPMDesired",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Rollers RPM",
+            "x": 864.0,
+            "y": 288.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeRoller/VelocityRPMRollers",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Motor RPM",
+            "x": 864.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeRoller/VelocityRPMMotor",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Desired RPM",
+            "x": 1024.0,
+            "y": 192.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Indexer/VelocityRPMDesired",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Wheel RPM",
+            "x": 1024.0,
+            "y": 288.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Indexer/VelocityRPMFlywheel",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "VelocityRPMDesired",
+            "x": 1184.0,
+            "y": 192.0,
+            "width": 256.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/AnotherShooter/VelocityRPMDesired",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "FlyWheel RPM",
+            "x": 1184.0,
+            "y": 288.0,
+            "width": 256.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/AnotherShooter/VelocityRPMFlyWheel",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Left RPM",
+            "x": 1184.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/AnotherShooter/VelocityRPMLeft",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Right RPM",
+            "x": 1312.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/AnotherShooter/VelocityRPMRight",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "AppliedVoltageLeft",
+            "x": 1184.0,
+            "y": 608.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/AnotherShooter/AppliedVoltageLeft",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "AppliedVoltageRight",
+            "x": 1312.0,
+            "y": 608.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/AnotherShooter/AppliedVoltageRight",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "LeftIsEnabled",
+            "x": 1472.0,
+            "y": 64.0,
+            "width": 128.0,
+            "height": 64.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/Climber/LeftIsEnabled",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "RightIsEnabled",
+            "x": 1600.0,
+            "y": 64.0,
+            "width": 128.0,
+            "height": 64.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/Climber/RightIsEnabled",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "RL hasTarget",
+            "x": 32.0,
+            "y": 224.0,
+            "width": 192.0,
+            "height": 64.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/photonvision/OV9182_1/hasTarget",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "RR hasTarget",
+            "x": 256.0,
+            "y": 224.0,
+            "width": 192.0,
+            "height": 64.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/photonvision/OV9182_2/hasTarget",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "FL hasTarget",
+            "x": 480.0,
+            "y": 224.0,
+            "width": 192.0,
+            "height": 64.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/photonvision/OV9182_3/hasTarget",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "Auto Choices",
+            "x": 32.0,
+            "y": 0.0,
+            "width": 640.0,
+            "height": 128.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Auto Choices",
+              "period": 0.06,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "DriveSpeed",
+            "x": 32.0,
+            "y": 800.0,
+            "width": 192.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/TeleopDriveCommand/DriveSpeed",
+              "period": 0.06,
+              "data_type": "string",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "ForceHubLockThenX",
+            "x": 224.0,
+            "y": 800.0,
+            "width": 192.0,
+            "height": 96.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/TeleopDriveCommand/ForceHubLockThenX",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "ForceTargetAim",
+            "x": 416.0,
+            "y": 800.0,
+            "width": 192.0,
+            "height": 96.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/TeleopDriveCommand/ForceTargetAim",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "HubAimInPlaceTrigger",
+            "x": 608.0,
+            "y": 800.0,
+            "width": 224.0,
+            "height": 96.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/TeleopDriveCommand/HubAimInPlaceTrigger",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "HubAimTrigger",
+            "x": 832.0,
+            "y": 800.0,
+            "width": 192.0,
+            "height": 96.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/TeleopDriveCommand/HubAimTrigger",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
             }
           }
         ]
@@ -1103,7 +1405,7 @@
               "topic": "/SmartDashboard/Climb/AutoClimb",
               "period": 0.06,
               "show_type": true,
-              "maximize_button_space": false
+              "maximize_button_space": true
             }
           },
           {
@@ -1117,7 +1419,7 @@
               "topic": "/SmartDashboard/Climb/Zero",
               "period": 0.06,
               "show_type": true,
-              "maximize_button_space": false
+              "maximize_button_space": true
             }
           },
           {
@@ -1131,7 +1433,7 @@
               "topic": "/SmartDashboard/Climb/Stow",
               "period": 0.06,
               "show_type": true,
-              "maximize_button_space": false
+              "maximize_button_space": true
             }
           },
           {
@@ -1145,7 +1447,7 @@
               "topic": "/SmartDashboard/Climb/Extend",
               "period": 0.06,
               "show_type": true,
-              "maximize_button_space": false
+              "maximize_button_space": true
             }
           },
           {
@@ -1159,7 +1461,192 @@
               "topic": "/SmartDashboard/Climb/Climb",
               "period": 0.06,
               "show_type": true,
-              "maximize_button_space": false
+              "maximize_button_space": true
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Vision",
+      "grid_layout": {
+        "layouts": [],
+        "containers": [
+          {
+            "title": "OV9182_1 (RL) Connected",
+            "x": 448.0,
+            "y": 0.0,
+            "width": 288.0,
+            "height": 64.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/Vision/OV9182_1/Connected",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "TagIds",
+            "x": 448.0,
+            "y": 128.0,
+            "width": 288.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Vision/OV9182_1/TagIds",
+              "period": 0.06,
+              "data_type": "int[]",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "OV9182_2 (RR) Connected",
+            "x": 736.0,
+            "y": 0.0,
+            "width": 288.0,
+            "height": 64.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/Vision/OV9182_2/Connected",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "TagIds",
+            "x": 736.0,
+            "y": 128.0,
+            "width": 288.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Vision/OV9182_2/TagIds",
+              "period": 0.06,
+              "data_type": "int[]",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "OV9182_3 (FL) Connected",
+            "x": 1024.0,
+            "y": 0.0,
+            "width": 288.0,
+            "height": 64.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/Vision/OV9182_3/Connected",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "TagIds",
+            "x": 1024.0,
+            "y": 128.0,
+            "width": 288.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Vision/OV9182_3/TagIds",
+              "period": 0.06,
+              "data_type": "int[]",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "PhotonAlerts",
+            "x": 448.0,
+            "y": 608.0,
+            "width": 864.0,
+            "height": 256.0,
+            "type": "Alerts",
+            "properties": {
+              "topic": "/SmartDashboard/PhotonAlerts",
+              "period": 0.06
+            }
+          },
+          {
+            "title": "hasTarget",
+            "x": 448.0,
+            "y": 64.0,
+            "width": 288.0,
+            "height": 64.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/photonvision/OV9182_1/hasTarget",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "hasTarget",
+            "x": 736.0,
+            "y": 64.0,
+            "width": 288.0,
+            "height": 64.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/photonvision/OV9182_2/hasTarget",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "hasTarget",
+            "x": 1024.0,
+            "y": 64.0,
+            "width": 288.0,
+            "height": 64.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/photonvision/OV9182_3/hasTarget",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "Field",
+            "x": 448.0,
+            "y": 256.0,
+            "width": 864.0,
+            "height": 352.0,
+            "type": "Field",
+            "properties": {
+              "topic": "/SmartDashboard/Field",
+              "period": 0.06,
+              "field_game": "Rebuilt",
+              "robot_width": 0.85,
+              "robot_length": 0.85,
+              "show_other_objects": true,
+              "show_trajectories": true,
+              "field_rotation": 0.0,
+              "robot_color": 4294198070,
+              "trajectory_color": 4294967295,
+              "show_robot_outside_widget": true
             }
           }
         ]
@@ -1172,9 +1659,9 @@
         "containers": [
           {
             "title": "Drive Dynamic Forward",
-            "x": 480.0,
-            "y": 64.0,
-            "width": 320.0,
+            "x": 32.0,
+            "y": 32.0,
+            "width": 256.0,
             "height": 128.0,
             "type": "Command",
             "properties": {
@@ -1186,9 +1673,9 @@
           },
           {
             "title": "Drive Dynamic Reverse",
-            "x": 832.0,
-            "y": 64.0,
-            "width": 320.0,
+            "x": 288.0,
+            "y": 32.0,
+            "width": 256.0,
             "height": 128.0,
             "type": "Command",
             "properties": {
@@ -1200,23 +1687,9 @@
           },
           {
             "title": "Drive Quasistatic Reverse",
-            "x": 832.0,
-            "y": 224.0,
-            "width": 320.0,
-            "height": 128.0,
-            "type": "Command",
-            "properties": {
-              "topic": "/SmartDashboard/Characterization/Drive Quasistatic Reverse",
-              "period": 0.06,
-              "show_type": true,
-              "maximize_button_space": false
-            }
-          },
-          {
-            "title": "Drive Quasistatic Reverse",
-            "x": 480.0,
-            "y": 224.0,
-            "width": 320.0,
+            "x": 288.0,
+            "y": 160.0,
+            "width": 256.0,
             "height": 128.0,
             "type": "Command",
             "properties": {
@@ -1228,9 +1701,9 @@
           },
           {
             "title": "Drive Simple FF",
-            "x": 480.0,
-            "y": 384.0,
-            "width": 320.0,
+            "x": 32.0,
+            "y": 320.0,
+            "width": 256.0,
             "height": 128.0,
             "type": "Command",
             "properties": {
@@ -1242,9 +1715,9 @@
           },
           {
             "title": "Drive Wheel Radius",
-            "x": 832.0,
-            "y": 384.0,
-            "width": 320.0,
+            "x": 288.0,
+            "y": 320.0,
+            "width": 256.0,
             "height": 128.0,
             "type": "Command",
             "properties": {
@@ -1252,6 +1725,504 @@
               "period": 0.06,
               "show_type": true,
               "maximize_button_space": false
+            }
+          },
+          {
+            "title": "AnotherShooter Dynamic Forward",
+            "x": 576.0,
+            "y": 32.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Characterization/AnotherShooter Dynamic Forward",
+              "period": 0.06,
+              "show_type": true,
+              "maximize_button_space": false
+            }
+          },
+          {
+            "title": "AnotherShooter Quasistatic Forward",
+            "x": 32.0,
+            "y": 160.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Characterization/AnotherShooter Quasistatic Forward",
+              "period": 0.06,
+              "show_type": true,
+              "maximize_button_space": false
+            }
+          },
+          {
+            "title": "AnotherShooter Dynamic Reverse",
+            "x": 832.0,
+            "y": 32.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Characterization/AnotherShooter Dynamic Reverse",
+              "period": 0.06,
+              "show_type": true,
+              "maximize_button_space": false
+            }
+          },
+          {
+            "title": "AnotherShooter Quasistatic Forward",
+            "x": 576.0,
+            "y": 160.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Characterization/AnotherShooter Quasistatic Forward",
+              "period": 0.06,
+              "show_type": true,
+              "maximize_button_space": false
+            }
+          },
+          {
+            "title": "AnotherShooter Quasistatic Reverse",
+            "x": 832.0,
+            "y": 160.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Characterization/AnotherShooter Quasistatic Reverse",
+              "period": 0.06,
+              "show_type": true,
+              "maximize_button_space": false
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "System Checks",
+      "grid_layout": {
+        "layouts": [],
+        "containers": [
+          {
+            "title": "Climber",
+            "x": 1120.0,
+            "y": 32.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/System Checks/Climber",
+              "period": 0.06,
+              "show_type": true,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Indexer",
+            "x": 576.0,
+            "y": 32.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/System Checks/Indexer",
+              "period": 0.06,
+              "show_type": true,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Intake Sequence",
+            "x": 32.0,
+            "y": 384.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/System Checks/Intake Sequence",
+              "period": 0.06,
+              "show_type": true,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Linkage",
+            "x": 288.0,
+            "y": 32.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/System Checks/Linkage",
+              "period": 0.06,
+              "show_type": true,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Plow Sequence",
+            "x": 32.0,
+            "y": 512.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/System Checks/Plow Sequence",
+              "period": 0.06,
+              "show_type": true,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Rollers",
+            "x": 32.0,
+            "y": 32.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/System Checks/Rollers",
+              "period": 0.06,
+              "show_type": true,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Shoot Sequence",
+            "x": 576.0,
+            "y": 384.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/System Checks/Shoot Sequence",
+              "period": 0.06,
+              "show_type": true,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Shooter",
+            "x": 832.0,
+            "y": 32.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/System Checks/Shooter",
+              "period": 0.06,
+              "show_type": true,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "VelocityRPMDesired",
+            "x": 576.0,
+            "y": 160.0,
+            "width": 256.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Indexer/VelocityRPMDesired",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "VelocityRPMFlywheel",
+            "x": 576.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Indexer/VelocityRPMFlywheel",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "DesiredDeg",
+            "x": 288.0,
+            "y": 160.0,
+            "width": 256.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeLinkage/DesiredDeg",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "PositionDeg",
+            "x": 288.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeLinkage/PositionDeg",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "VelocityRPMDesired",
+            "x": 32.0,
+            "y": 160.0,
+            "width": 256.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeRoller/VelocityRPMDesired",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "VelocityRPMRollers",
+            "x": 32.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/IntakeRoller/VelocityRPMRollers",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "VelocityRPMFlyWheel",
+            "x": 832.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/AnotherShooter/VelocityRPMFlyWheel",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "VelocityRPMDesired",
+            "x": 832.0,
+            "y": 160.0,
+            "width": 256.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/AnotherShooter/VelocityRPMDesired",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "LeftPosition",
+            "x": 1120.0,
+            "y": 160.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Climber/LeftPosition",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "RightPosition",
+            "x": 1248.0,
+            "y": 160.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Climber/RightPosition",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "LeftCurrent",
+            "x": 1120.0,
+            "y": 256.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Climber/LeftCurrent",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "RightCurrent",
+            "x": 1248.0,
+            "y": 256.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Climber/RightCurrent",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Reset Fuel",
+            "x": 1120.0,
+            "y": 512.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Reset Fuel",
+              "period": 0.06,
+              "show_type": true,
+              "maximize_button_space": true
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Tab 7",
+      "grid_layout": {
+        "layouts": [],
+        "containers": [
+          {
+            "title": "DriveSpeed",
+            "x": 480.0,
+            "y": 64.0,
+            "width": 256.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/TeleopDriveCommand/DriveSpeed",
+              "period": 0.06,
+              "data_type": "string",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "RPMDrop",
+            "x": 768.0,
+            "y": 352.0,
+            "width": 192.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/AnotherShooter/ShotCounter/RPMDrop",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "DesiredRPM",
+            "x": 768.0,
+            "y": 160.0,
+            "width": 192.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/AnotherShooter/ShotCounter/DesiredRPM",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "ShotCondition",
+            "x": 960.0,
+            "y": 160.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/AnotherShooter/ShotCounter/ShotCondition",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "ShotInProgress",
+            "x": 960.0,
+            "y": 256.0,
+            "width": 128.0,
+            "height": 96.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/AnotherShooter/ShotCounter/ShotInProgress",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "Count",
+            "x": 768.0,
+            "y": 64.0,
+            "width": 320.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/AnotherShooter/ShotCounter/Count",
+              "period": 0.06,
+              "data_type": "int",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "AvgCurrentAmps",
+            "x": 768.0,
+            "y": 448.0,
+            "width": 192.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/AnotherShooter/ShotCounter/AvgCurrentAmps",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "ActualRPM",
+            "x": 768.0,
+            "y": 256.0,
+            "width": 192.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/AnotherShooter/ShotCounter/ActualRPM",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
             }
           }
         ]
