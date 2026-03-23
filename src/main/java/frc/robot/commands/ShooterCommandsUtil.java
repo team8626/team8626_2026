@@ -146,4 +146,26 @@ public class ShooterCommandsUtil {
   public static boolean inPositionToShoot(AkitDrive drive) {
     return inPositionToShoot(drive, FieldConstants.Hub.topCenterPoint);
   }
+
+  public static boolean isInAllianceZone(AkitDrive drive) {
+    var alliance = edu.wpi.first.wpilibj.DriverStation.getAlliance();
+    if (alliance.isEmpty()) {
+      return false;
+    }
+
+    double robotX = drive.getPose().getX();
+
+    return switch (alliance.get()) {
+      case Blue -> robotX <= FieldConstants.LinesVertical.allianceZone;
+      case Red -> robotX >= FieldConstants.LinesVertical.oppAllianceZone;
+    };
+  }
+
+  private static boolean isAllowedToShoot(AkitDrive drive, Translation3d target) {
+    return isInAllianceZone(drive) && inPositionToShoot(drive, target);
+  }
+
+  private static boolean isAllowedToShoot(AkitDrive drive) {
+    return isAllowedToShoot(drive, FieldConstants.Hub.topCenterPoint);
+  }
 }
