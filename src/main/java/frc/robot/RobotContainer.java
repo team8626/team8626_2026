@@ -139,10 +139,10 @@ public class RobotContainer {
 
   private static final Trigger fixedRPMShootTrigger = controller.rightBumper();
   private static final Trigger aimAndShootTrigger = controller.rightTrigger();
-  private static final Trigger collectAndShootTrigger = collectTrigger.and(aimAndShootTrigger);
+  private static final Trigger collectAndShootTrigger = controller.povUp();
 
-  private static final Trigger hubAimTrigger = controller.b();
-  private static final Trigger hubAimInPlaceTrigger = controller.a();
+  private static final Trigger hubTrackTrigger = controller.b();
+  private static final Trigger hubAimTrigger = controller.a();
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -354,12 +354,10 @@ public class RobotContainer {
     // Run the intake roller and moves the intake to collect position.
     // Also runs the drivetrain at a slow speed to help with intaking.
     //
-    collectTrigger
-        .and(aimAndShootTrigger.negate())
-        .whileTrue(
-            new CollectCommand(intakeLinkage, intakeRoller)
-                .alongWith(teleopDrive.withSpeed(DriveSpeed.INTAKE))
-                .withName("Collect Command"));
+    collectTrigger.whileTrue(
+        new CollectCommand(intakeLinkage, intakeRoller)
+            .alongWith(teleopDrive.withSpeed(DriveSpeed.INTAKE))
+            .withName("Collect Command"));
 
     // -------------------------------------------------------------- Plow
     //
@@ -391,21 +389,19 @@ public class RobotContainer {
     // The shooter will run at a velocity based on the distance to the target.
     // Activates agitation
     //
-    aimAndShootTrigger
-        .and(collectTrigger.negate())
-        .whileTrue(
-            teleopDrive.withHubLockThenX(
-                Commands.parallel(
-                        new TrackTargetAndShootCommand(index, anotherShooter, akitDrive),
-                        new AgitateCommand(intakeLinkage))
-                    .withName("Aim And Shoot Command")));
+    aimAndShootTrigger.whileTrue(
+        teleopDrive.withHubLockThenX(
+            Commands.parallel(
+                    new TrackTargetAndShootCommand(index, anotherShooter, akitDrive),
+                    new AgitateCommand(intakeLinkage))
+                .withName("Aim And Shoot Command")));
 
     // -------------------------------------------------------------- Collect and Shoot
     //
     // Run the intake, shooter, and indexer to collect fuel and dump it into the hub.
     // The robot will align to target while doing this.
     //
-    collectAndShootTrigger.whileTrue(
+    collectAndShootTrigger.toggleOnTrue(
         teleopDrive.withHubLock(
             teleopDrive.withSpeed(
                 DriveSpeed.INTAKE,
@@ -532,12 +528,12 @@ public class RobotContainer {
         Meters.of(AnotherShooterConstants.ANOTHERSHOOTER_OFFSET.getZ()));
   }
 
-  public static Trigger getHubAimTrigger() {
-    return hubAimTrigger;
+  public static Trigger getTrackTrigger() {
+    return hubTrackTrigger;
   }
 
-  public static Trigger getHubAimInPlaceTrigger() {
-    return hubAimInPlaceTrigger;
+  public static Trigger getAimTrigger() {
+    return hubAimTrigger;
   }
 
   /**
