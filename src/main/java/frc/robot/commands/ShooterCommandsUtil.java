@@ -57,6 +57,26 @@ public class ShooterCommandsUtil {
     return calculateRPMToTarget(drive, ShooterTargetConstants.TARGET_PASSING_OUTPOST_SIDE);
   }
 
+  public static Translation3d getPassingTarget(AkitDrive drive) {
+    Translation3d depotTarget = ShooterTargetConstants.TARGET_PASSING_DEPOT_SIDE;
+    Translation3d outpostTarget = ShooterTargetConstants.TARGET_PASSING_OUTPOST_SIDE;
+
+    double depotDist = getDistToTarget(drive, depotTarget).in(Meters);
+    double outpostDist = getDistToTarget(drive, outpostTarget).in(Meters);
+
+    Translation3d selected = depotDist <= outpostDist ? depotTarget : outpostTarget;
+
+    Logger.recordOutput("AnotherShooter/Passing/SelectedTarget", AllianceFlipUtil.apply(selected));
+    Logger.recordOutput("AnotherShooter/Passing/DepotDistanceM", depotDist);
+    Logger.recordOutput("AnotherShooter/Passing/OutpostDistanceM", outpostDist);
+
+    return selected;
+  }
+
+  public static ShooterData calculateRPMToPassing(AkitDrive drive) {
+    return calculateRPMToTarget(drive, getPassingTarget(drive));
+  }
+
   public static ShooterData calculateRPMToTarget(AkitDrive drive, Translation3d target) {
     double distToTargetFeet = getDistToTarget(drive, target).in(Feet);
 
@@ -75,13 +95,16 @@ public class ShooterCommandsUtil {
 
     return new ShooterData(velocityShooter, velocityIndexer);
   }
-
   /**
    * Helper method to calculate the angle to lock onto the hub or target. This can be used in
    * commands to rotate the robot to face the hub or target for shooting.
    */
   public static Rotation2d getHubLockAngle(AkitDrive drive) {
     return getTargetLockAngle(drive, FieldConstants.Hub.topCenterPoint);
+  }
+
+  public static Rotation2d getPassingLockAngle(AkitDrive drive) {
+    return getTargetLockAngle(drive, getPassingTarget(drive));
   }
 
   public static Rotation2d getTargetLockAngle(AkitDrive drive, Translation3d target) {
@@ -103,7 +126,6 @@ public class ShooterCommandsUtil {
 
     return targetLockAngle;
   }
-
   /** Helper method to determine if the robot is in position to shoot. */
   public static boolean inPositionToShoot(AkitDrive drive, Translation3d target) {
     double angleErrorDeg =
