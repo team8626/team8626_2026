@@ -77,6 +77,7 @@ public class AnotherShooterConstants {
 
   static {
     // format is (distance to target in feet, required shooter velocity in RPM)
+    RPMMap.put(1.0, 1500.0);
     RPMMap.put(4.68, 2150.0);
     RPMMap.put(6.85, 2400.0);
     RPMMap.put(8.63, 2575.0);
@@ -87,6 +88,7 @@ public class AnotherShooterConstants {
 
   static {
     // format is (distance to target in feet, required shooter velocity in RPM)
+    IndexerMap.put(1.0, 42.0);
     IndexerMap.put(4.68, 42.0);
     IndexerMap.put(6.85, 42.0);
     IndexerMap.put(8.63, 42.0);
