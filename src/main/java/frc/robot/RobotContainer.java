@@ -547,29 +547,31 @@ public class RobotContainer {
   private void configurePPNamedCommands() {
     NamedCommands.registerCommand(
         "AimAndDumpShort",
-        Commands.sequence(
-                new AnotherShooterRampupCommand(anotherShooter).withTimeout(0.5),
-                feedShooterCommand().withTimeout(AutoConstants.DUMP_DURATION_SHORT.in(Seconds)))
+        Commands.deadline(
+                Commands.waitSeconds(AutoConstants.DUMP_DURATION_SHORT.in(Seconds)),
+                Commands.parallel(
+                    new TrackTargetAndShootCommand(index, anotherShooter, akitDrive),
+                    new AgitateCommand(intakeLinkage)))
             .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY))
             .withName("AimAndDumpShort"));
 
     NamedCommands.registerCommand(
         "AimAndDumpMedium",
-        Commands.sequence(
-                new AnotherShooterRampupCommand(anotherShooter),
-                Commands.deadline(
-                    Commands.waitSeconds(AutoConstants.DUMP_DURATION_MEDIUM.in(Seconds)),
-                    feedShooterCommand()))
+        Commands.deadline(
+                Commands.waitSeconds(AutoConstants.DUMP_DURATION_MEDIUM.in(Seconds)),
+                Commands.parallel(
+                    new TrackTargetAndShootCommand(index, anotherShooter, akitDrive),
+                    new AgitateCommand(intakeLinkage)))
             .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY))
             .withName("AimAndDumpMedium"));
 
     NamedCommands.registerCommand(
         "AimAndDumpLong",
-        Commands.sequence(
-                new AnotherShooterRampupCommand(anotherShooter),
-                Commands.deadline(
-                    Commands.waitSeconds(AutoConstants.DUMP_DURATION_MEDIUM.in(Seconds)),
-                    feedShooterCommand()))
+        Commands.deadline(
+                Commands.waitSeconds(AutoConstants.DUMP_DURATION_LONG.in(Seconds)),
+                Commands.parallel(
+                    new TrackTargetAndShootCommand(index, anotherShooter, akitDrive),
+                    new AgitateCommand(intakeLinkage)))
             .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY))
             .withName("AimAndDumpLong"));
   }
