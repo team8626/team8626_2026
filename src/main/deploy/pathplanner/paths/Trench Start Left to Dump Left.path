@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.567610570362953,
-        "y": 7.442542091861001
+        "x": 3.0113607662671233,
+        "y": 7.36482439711758
       },
       "isLocked": false,
       "linkedName": "Trench Start Left"
     },
     {
       "anchor": {
-        "x": 2.6193585069444447,
-        "y": 6.875608000578705
+        "x": 2.370512137913813,
+        "y": 5.746706888555937
       },
       "prevControl": {
-        "x": 2.8693585069444447,
-        "y": 6.875608000578705
+        "x": 2.4922106877853882,
+        "y": 6.21598846853596
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -59.99999999999999
+    "rotation": -41.51263622063338
   },
   "reversed": false,
   "folder": null,

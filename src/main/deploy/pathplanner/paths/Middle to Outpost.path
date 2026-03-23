@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.35,
-        "y": 4.0
+        "x": 2.3361340164811653,
+        "y": 3.80385768942637
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.4494615974600462,
-        "y": 2.7188841770119874
+        "x": 0.8733313267014884,
+        "y": 2.2229242026998097
       },
       "isLocked": false,
       "linkedName": "Dump Middle"
@@ -20,8 +20,8 @@
         "y": 0.65
       },
       "prevControl": {
-        "x": 1.8604621503995435,
-        "y": 0.6169249429223749
+        "x": 1.0237795644263705,
+        "y": 0.6343162278824206
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": -90.0
   },
   "reversed": false,
   "folder": null,
