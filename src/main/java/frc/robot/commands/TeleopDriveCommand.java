@@ -26,7 +26,6 @@ import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.drive.DriveConstants.DriveSpeed;
 import frc.robot.util.SlewRateLimiter2d;
 import frc.robot.util.TunableControls.TunablePIDController;
-import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -52,15 +51,12 @@ public class TeleopDriveCommand extends Command {
   @AutoLogOutput
   private final Trigger inBumpZoneTrigger = new Trigger(this::inBumpZone).debounce(0.1);
 
-  @AutoLogOutput private BooleanSupplier forceTargetAim = () -> false;
-  @AutoLogOutput private BooleanSupplier forceHubLockThenX = () -> false;
+  @AutoLogOutput private boolean forceTargetTracking = false;
+  @AutoLogOutput private boolean forceTargetLockThenX = false;
 
-  @AutoLogOutput
-  private final Trigger hubAimTrigger =
-      RobotContainer.getHubAimTrigger().or(() -> forceTargetAim.getAsBoolean());
+  @AutoLogOutput private final Trigger hubTrackTrigger = new Trigger(() -> forceTargetTracking);
 
-  @AutoLogOutput
-  private final Trigger hubAimInPlaceTrigger = RobotContainer.getHubAimInPlaceTrigger();
+  @AutoLogOutput private final Trigger hubAimTrigger = RobotContainer.getAimTrigger();
 
   private final TunablePIDController trenchYController =
       new TunablePIDController(DriveConstants.TRENCH_TRANSLATION_CONSTANTS);
@@ -89,18 +85,27 @@ public class TeleopDriveCommand extends Command {
             Commands.runOnce(
                 () ->
                     currentDriveMode =
-                        (hubAimTrigger.getAsBoolean() ? DriveMode.HUB_LOCK : DriveMode.NORMAL)));
+                        (hubTrackTrigger.getAsBoolean() ? DriveMode.HUB_TRACK : DriveMode.NORMAL)));
+
+    RobotContainer.getTrackTrigger()
+        .onTrue(Commands.runOnce(() -> forceTargetTracking = !forceTargetTracking));
+
+    hubTrackTrigger
+        .onTrue(updateDriveMode(DriveMode.HUB_TRACK))
+        .onFalse(updateDriveMode(DriveMode.NORMAL));
 
     if (hubAimTrigger != null) {
-      hubAimTrigger
-          .whileTrue(updateDriveMode(DriveMode.HUB_LOCK))
-          .onFalse(updateDriveMode(DriveMode.NORMAL));
-    }
-
-    if (hubAimInPlaceTrigger != null) {
-      hubAimInPlaceTrigger
-          .whileTrue(updateDriveMode(DriveMode.HUB_LOCK_IN_PLACE))
-          .onFalse(updateDriveMode(DriveMode.NORMAL));
+      if (hubAimTrigger != null) {
+        hubAimTrigger
+            .whileTrue(updateDriveMode(DriveMode.HUB_AIM))
+            .onFalse(
+                Commands.runOnce(
+                    () ->
+                        currentDriveMode =
+                            hubTrackTrigger.getAsBoolean()
+                                ? DriveMode.HUB_TRACK
+                                : DriveMode.NORMAL));
+      }
     }
 
     for (int i = 0; i < 4; i++) {
@@ -192,9 +197,8 @@ public class TeleopDriveCommand extends Command {
   @Override
   public void execute() {
 
-    // Forcing the drice to X
-    boolean shouldStopWithX =
-        forceHubLockThenX.getAsBoolean() && ShooterCommandsUtil.inPositionToShoot(drive);
+    // Forcing the drive to X
+    boolean shouldStopWithX = forceTargetLockThenX && ShooterCommandsUtil.inPositionToShoot(drive);
     if (shouldStopWithX) {
       drive.stopWithX();
       return;
@@ -216,7 +220,7 @@ public class TeleopDriveCommand extends Command {
             MetersPerSecond.of(linearVelocity.getY()),
             maxRotSpeed.times(omega));
         break;
-      case HUB_LOCK:
+      case HUB_TRACK:
         rotSpeedToHub =
             rotationController.calculate(
                 drive.getRotation().getRadians(),
@@ -226,7 +230,7 @@ public class TeleopDriveCommand extends Command {
             MetersPerSecond.of(linearVelocity.getY()),
             RadiansPerSecond.of(rotSpeedToHub));
         break;
-      case HUB_LOCK_IN_PLACE:
+      case HUB_AIM:
         rotSpeedToHub =
             rotationController.calculate(
                 drive.getRotation().getRadians(),
@@ -303,13 +307,13 @@ public class TeleopDriveCommand extends Command {
   //       < (DriveConstants.AIM_TOLERANCE_DEG.get() / 2);
   // }
 
-  public void setForceTargetAim(boolean enabled) {
-    this.forceTargetAim = () -> enabled;
-  }
+  // private void setForceTargetAim(boolean enabled) {
+  //   this.forceTargetAim = () -> enabled;
+  // }
 
-  public void setForceHubLockThenX(boolean enabled) {
-    this.forceHubLockThenX = () -> enabled;
-  }
+  // private void setForceHubLockThenX(boolean enabled) {
+  //   this.forceHubLockThenX = () -> enabled;
+  // }
 
   public Command withSpeed(DriveSpeed speed) {
     return Commands.startEnd(() -> setSpeed(speed), () -> setSpeed(DriveSpeed.DEFAULT));
@@ -318,11 +322,11 @@ public class TeleopDriveCommand extends Command {
   public Command withHubLock() {
     return Commands.startEnd(
         () -> {
-          setForceTargetAim(true);
-          currentDriveMode = DriveMode.HUB_LOCK;
+          forceTargetTracking = true;
+          currentDriveMode = DriveMode.HUB_TRACK;
         },
         () -> {
-          setForceTargetAim(false);
+          forceTargetTracking = false;
           currentDriveMode = DriveMode.NORMAL;
         });
   }
@@ -330,13 +334,13 @@ public class TeleopDriveCommand extends Command {
   public Command withHubLockThenX() {
     return Commands.startEnd(
         () -> {
-          setForceTargetAim(true);
-          setForceHubLockThenX(true);
-          currentDriveMode = DriveMode.HUB_LOCK;
+          forceTargetTracking = true;
+          forceTargetLockThenX = true;
+          currentDriveMode = DriveMode.HUB_TRACK;
         },
         () -> {
-          setForceTargetAim(false);
-          setForceHubLockThenX(false);
+          forceTargetTracking = false;
+          forceTargetLockThenX = false;
           currentDriveMode = DriveMode.NORMAL;
         });
   }
@@ -357,7 +361,7 @@ public class TeleopDriveCommand extends Command {
     NORMAL,
     TRENCH_LOCK,
     BUMP_LOCK,
-    HUB_LOCK,
-    HUB_LOCK_IN_PLACE
+    HUB_TRACK, // Will allow driving (not rotation)
+    HUB_AIM // Will stop driving when aiming
   }
 }
