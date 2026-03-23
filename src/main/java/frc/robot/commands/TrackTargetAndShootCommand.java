@@ -34,7 +34,9 @@ public class TrackTargetAndShootCommand extends Command {
     this.shooter = shooter;
     this.drive = drive;
     this.targetSupplier = targetSupplier;
-    addRequirements(indexer, shooter);
+
+    // DO NOT USE REQUITEMENTS, THIS BLOCKS AUTOs
+    // addRequirements(indexer, shooter);
   }
 
   @Override
