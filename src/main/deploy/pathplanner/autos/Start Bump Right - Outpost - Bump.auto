@@ -5,21 +5,33 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "AimAndDumpShort"
+          }
+        },
+        {
           "type": "path",
           "data": {
-            "pathName": "Start Middle - Backup"
+            "pathName": "Bump Start Right to Outpost"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Outpost to Bump Right"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "AimAndDumpMedium"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Middle to Start"
+            "name": "AimAndDumpLong"
           }
         }
       ]

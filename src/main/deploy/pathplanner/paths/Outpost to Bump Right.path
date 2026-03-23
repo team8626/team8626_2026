@@ -31,7 +31,7 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 0.4546928146258503,
-      "rotationDegrees": 111.41720185640649
+      "rotationDegrees": 111.4172018564065
     }
   ],
   "constraintZones": [],
@@ -60,7 +60,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": -90.0
   },
   "useDefaultConstraints": true
 }

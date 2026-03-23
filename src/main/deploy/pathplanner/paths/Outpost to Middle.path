@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.4211097584902967,
-        "y": 2.2596733643692932
+        "x": 0.9073792897402975,
+        "y": 2.3662859856592466
       },
       "isLocked": false,
       "linkedName": "Outpost"
     },
     {
       "anchor": {
-        "x": 2.35,
-        "y": 4.0
+        "x": 2.3361340164811653,
+        "y": 3.80385768942637
       },
       "prevControl": {
-        "x": 2.35,
-        "y": 3.0
+        "x": 1.5774761433361886,
+        "y": 2.201852436501142
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,7 +31,14 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "RampUp",
+      "waypointRelativePos": 0.7398851915520634,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
@@ -48,7 +55,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": -90.0
   },
   "useDefaultConstraints": true
 }
