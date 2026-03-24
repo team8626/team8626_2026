@@ -8,9 +8,11 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import frc.robot.Constants.ShooterTargetConstants;
+import frc.robot.Robot;
 import frc.robot.subsystems.anotherShooter.AnotherShooterConstants;
 import frc.robot.subsystems.drive.AkitDrive;
 import frc.robot.subsystems.drive.DriveConstants;
@@ -88,7 +90,10 @@ public class ShooterCommandsUtil {
     double efficiency = shotEfficiencyMultiplier.get();
 
     AngularVelocity velocityShooter =
-        RPM.of(AnotherShooterConstants.RPMMap.get(distToTargetFeet) * efficiency);
+        Robot.isReal()
+            ? RPM.of(AnotherShooterConstants.RPMMap.get(distToTargetFeet) * efficiency)
+            : RPM.of(computeShooterRPM(getDistToTarget(drive, target).in(Meters)) * efficiency);
+
     AngularVelocity velocityIndexer =
         RotationsPerSecond.of(
             AnotherShooterConstants.IndexerMap.get(distToTargetFeet) * efficiency);
@@ -177,5 +182,27 @@ public class ShooterCommandsUtil {
 
   private static boolean isAllowedToShoot(AkitDrive drive) {
     return isAllowedToShoot(drive, FieldConstants.Hub.topCenterPoint);
+  }
+
+  private static double computeShooterRPM(double distanceMeters) {
+    double theta = Math.toRadians(68.0);
+    double g = 9.81;
+
+    double shooterHeight = AnotherShooterConstants.ANOTHERSHOOTER_OFFSET.getZ();
+    double targetHeight = FieldConstants.Hub.topCenterPoint.getZ();
+    double h = targetHeight - shooterHeight;
+
+    double numerator = g * distanceMeters * distanceMeters;
+    double denominator = 2 * Math.pow(Math.cos(theta), 2) * (distanceMeters * Math.tan(theta) - h);
+
+    if (denominator <= 0) return 0; // unreachable shot
+
+    double v = Math.sqrt(numerator / denominator);
+
+    double wheelRadius = Units.inchesToMeters(2.0 /* Inches */);
+
+    double rpm = (v / (2 * Math.PI * wheelRadius)) * 60.0;
+
+    return rpm;
   }
 }
