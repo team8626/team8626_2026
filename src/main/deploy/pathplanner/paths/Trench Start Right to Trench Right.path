@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.6222397617009134,
-        "y": 0.65
+        "x": 3.6267695847602743,
+        "y": 0.5361970248287673
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.0852397617009135,
-        "y": 0.65
+        "x": 4.089769584760274,
+        "y": 0.5361970248287673
       },
       "isLocked": false,
       "linkedName": "Trench Start Right"
     },
     {
       "anchor": {
-        "x": 5.99,
-        "y": 0.65
+        "x": 6.525047445776256,
+        "y": 0.5361970248287673
       },
       "prevControl": {
-        "x": 5.338538233169454,
-        "y": 0.6500000000000004
+        "x": 5.87358567894571,
+        "y": 0.5361970248287676
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 2.0,
-    "rotation": 90.0
+    "rotation": 0.0
   },
   "reversed": false,
   "folder": null,
