@@ -404,7 +404,8 @@ public class RobotContainer {
             teleopDrive.withHubLockThenX(
                 Commands.parallel(
                         new TrackTargetAndShootCommand(index, anotherShooter, akitDrive),
-                        new AgitateCommand(intakeLinkage))
+                        new AgitateCommand(intakeLinkage, intakeRoller),
+                        simLaunchFuelCommand())
                     .withName("Aim And Shoot Command")));
 
     // -------------------------------------------------------------- Collect and Shoot
@@ -420,7 +421,8 @@ public class RobotContainer {
                     DriveSpeed.INTAKE,
                     Commands.parallel(
                             new CollectCommand(intakeLinkage, intakeRoller),
-                            new TrackTargetAndShootCommand(index, anotherShooter, akitDrive))
+                            new TrackTargetAndShootCommand(index, anotherShooter, akitDrive),
+                            simLaunchFuelCommand())
                         .withName("Collect And Shoot Command"))));
 
     // -------------------------------------------------------------- Passing
@@ -436,7 +438,8 @@ public class RobotContainer {
                         index,
                         anotherShooter,
                         akitDrive),
-                    new AgitateCommand(intakeLinkage))
+                    new AgitateCommand(intakeLinkage, intakeRoller),
+                    simLaunchFuelCommand())
                 .withName("Passing Shoot Command")));
 
     // -------------------------------------------------------------- Collect and Pass
@@ -450,7 +453,12 @@ public class RobotContainer {
                 DriveSpeed.INTAKE,
                 Commands.parallel(
                         new CollectCommand(intakeLinkage, intakeRoller),
-                        new TrackTargetAndShootCommand(index, anotherShooter, akitDrive))
+                        new TrackTargetAndShootCommand(
+                            () -> ShooterCommandsUtil.getPassingTarget(akitDrive),
+                            index,
+                            anotherShooter,
+                            akitDrive),
+                        simLaunchFuelCommand())
                     .withName("Collect And Pass Command"))));
 
     // -------------------------------------------------------------- Unjam
@@ -516,7 +524,7 @@ public class RobotContainer {
             .withName("Deploy intakeLinkage (Dashboard RPM)"));
 
     // Fuel agitation
-    testAgitateTrigger.whileTrue(new AgitateCommand(intakeLinkage));
+    testAgitateTrigger.whileTrue(new AgitateCommand(intakeLinkage, intakeRoller));
 
     // Run the indexer at the dashboard RPM
     testIndexTrigger.toggleOnTrue(
@@ -590,7 +598,7 @@ public class RobotContainer {
                 Commands.waitSeconds(AutoConstants.DUMP_DURATION_SHORT.in(Seconds)),
                 Commands.parallel(
                     new TrackTargetAndShootCommand(index, anotherShooter, akitDrive),
-                    new AgitateCommand(intakeLinkage)))
+                    new AgitateCommand(intakeLinkage, intakeRoller)))
             .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY))
             .withName("AimAndDumpShort"));
 
@@ -600,7 +608,7 @@ public class RobotContainer {
                 Commands.waitSeconds(AutoConstants.DUMP_DURATION_MEDIUM.in(Seconds)),
                 Commands.parallel(
                     new TrackTargetAndShootCommand(index, anotherShooter, akitDrive),
-                    new AgitateCommand(intakeLinkage)))
+                    new AgitateCommand(intakeLinkage, intakeRoller)))
             .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY))
             .withName("AimAndDumpMedium"));
 
@@ -610,7 +618,7 @@ public class RobotContainer {
                 Commands.waitSeconds(AutoConstants.DUMP_DURATION_LONG.in(Seconds)),
                 Commands.parallel(
                     new TrackTargetAndShootCommand(index, anotherShooter, akitDrive),
-                    new AgitateCommand(intakeLinkage)))
+                    new AgitateCommand(intakeLinkage, intakeRoller)))
             .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY))
             .withName("AimAndDumpLong"));
   }
@@ -767,7 +775,23 @@ public class RobotContainer {
               index.stop();
             },
             index),
-        new AgitateCommand(intakeLinkage));
+        simLaunchFuelCommand(),
+        new AgitateCommand(intakeLinkage, intakeRoller));
+  }
+
+  private Command simLaunchFuelCommand() {
+    if (Constants.currentMode != Mode.SIM) {
+      return Commands.none();
+    }
+
+    return Commands.repeatingSequence(
+        Commands.waitSeconds(0.12),
+        Commands.runOnce(
+            () -> {
+              if (hopper.popFuel()) {
+                launchFuel(anotherShooter.getVelocity());
+              }
+            }));
   }
 
   private void stopShooting() {
