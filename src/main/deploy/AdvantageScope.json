@@ -1,0 +1,251 @@
+{
+  "hubs": [
+    {
+      "x": 79,
+      "y": 158,
+      "width": 1473,
+      "height": 837,
+      "state": {
+        "sidebar": {
+          "width": 426,
+          "expanded": [
+            "/AdvantageKit",
+            "/AdvantageKit/RealOutputs/Odometry",
+            "/Fuel Simulation",
+            "/AdvantageKit/RealOutputs/SwerveStates",
+            "/AdvantageKit/RealOutputs/SwerveChassisSpeeds",
+            "/AdvantageKit/Vision/OV9182_2",
+            "/AdvantageKit/RealOutputs",
+            "/AdvantageKit/RealOutputs/AnotherShooter/Target/Pose Target (Angle Lock)",
+            "/AdvantageKit/RealOutputs/Vision",
+            "/AdvantageKit/RealOutputs/Vision/OV9182_1",
+            "/AdvantageKit/RealOutputs/Vision/OV9182_2",
+            "/AdvantageKit/RealOutputs/Vision/OV9182_3",
+            "/AdvantageKit/RealOutputs/AnotherShooter",
+            "/AdvantageKit/RealOutputs/AnotherShooter/Passing",
+            "/AdvantageKit/RealOutputs/AnotherShooter/Passing/SelectedTarget",
+            "/AdvantageKit/RealOutputs/AnotherShooter/Target",
+            "/AdvantageKit/RealOutputs/AnotherShooter/Target/Pose Target",
+            "/AdvantageKit/Hopper"
+          ]
+        },
+        "tabs": {
+          "selected": 3,
+          "tabs": [
+            {
+              "type": 0,
+              "title": "",
+              "controller": null,
+              "controllerUUID": "vnnrl5nx1tgme9izzz1fdaj6lzm1nucc",
+              "renderer": "",
+              "controlsHeight": 0
+            },
+            {
+              "type": 1,
+              "title": "Line Graph",
+              "controller": {
+                "leftSources": [],
+                "rightSources": [],
+                "discreteSources": [],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "rightUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "hsagsldxmnpc2naspwrplh6aof5m5pqh",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 2,
+              "title": "Shooting Target",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "robot",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Odometry/Robot",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "bumpers": ""
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/OV9182_1/TagPoses",
+                    "logType": "Pose3d[]",
+                    "visible": false,
+                    "options": {
+                      "color": "#ffff00",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/OV9182_2/TagPoses",
+                    "logType": "Pose3d[]",
+                    "visible": false,
+                    "options": {
+                      "color": "#ff00ff",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/OV9182_3/TagPoses",
+                    "logType": "Pose3d[]",
+                    "visible": false,
+                    "options": {
+                      "color": "#00ffff",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/AnotherShooter/Target/Pose Target",
+                    "logType": "Translation3d",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/AnotherShooter/Target/Pose Robot",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/AnotherShooter/Target/Pose Shooter",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff8c00"
+                    }
+                  },
+                  {
+                    "type": "heatmap",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/AnotherShooter/Target/Pose Target",
+                    "logType": "Translation3d",
+                    "visible": true,
+                    "options": {
+                      "timeRange": "enabled"
+                    }
+                  },
+                  {
+                    "type": "heatmap",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/AnotherShooter/Passing/SelectedTarget",
+                    "logType": "Translation3d",
+                    "visible": true,
+                    "options": {
+                      "timeRange": "enabled"
+                    }
+                  }
+                ],
+                "field": "FRC:2026 Field",
+                "orientation": 0,
+                "size": "large"
+              },
+              "controllerUUID": "2khdo7vaehct00rwgw9qye4se5j4nx3s",
+              "renderer": null,
+              "controlsHeight": 547
+            },
+            {
+              "type": 3,
+              "title": "3D Field",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "robot",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Odometry/Robot",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "model": "8626-Blue"
+                    }
+                  },
+                  {
+                    "type": "gamePiece",
+                    "logKey": "NT:/Fuel Simulation/Fuels",
+                    "logType": "Translation3d[]",
+                    "visible": true,
+                    "options": {
+                      "variant": "Fuel"
+                    }
+                  }
+                ],
+                "game": "FRC:2026 Field"
+              },
+              "controllerUUID": "di96cb1cg456t4v2z745n303hdyfhujn",
+              "renderer": {
+                "cameraIndex": -1,
+                "orbitFov": 50,
+                "cameraPosition": [
+                  11.50230178990322,
+                  10.966854526562182,
+                  1.1609328925827478
+                ],
+                "cameraTarget": [
+                  1.5625038167403176,
+                  0.022028112410774896,
+                  0.21113654869972354
+                ]
+              },
+              "controlsHeight": 177
+            },
+            {
+              "type": 9,
+              "title": "Swerve",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "states",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/SwerveStates/Measured",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff0000",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "states",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/SwerveStates/Setpoints",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#0000ff",
+                      "arrangement": "0,1,2,3"
+                    }
+                  }
+                ],
+                "maxSpeed": 5,
+                "sizeX": 0.65,
+                "sizeY": 0.65,
+                "orientation": 1
+              },
+              "controllerUUID": "1mjoya0ic5r8engzzpupizxo1dkaepj6",
+              "renderer": null,
+              "controlsHeight": 185
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "satellites": [],
+  "version": "26.0.0"
+}
