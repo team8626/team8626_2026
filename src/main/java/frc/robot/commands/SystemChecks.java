@@ -52,7 +52,7 @@ public class SystemChecks {
             Commands.waitSeconds(2.0),
             Commands.runOnce(linkage::stow, linkage),
             Commands.waitSeconds(2.0),
-            new AgitateCommand(linkage).withTimeout(3.0),
+            new AgitateCommand(linkage, roller).withTimeout(3.0),
             Commands.runOnce(linkage::stow, linkage))
         .finallyDo(linkage::stow)
         .withName("SystemCheck/Linkage");
@@ -162,7 +162,7 @@ public class SystemChecks {
             new AnotherShooterRampupCommand(shooter).withTimeout(3.0),
             Commands.parallel(
                     Commands.startEnd(indexer::start, indexer::stop, indexer).withTimeout(3.0),
-                    new AgitateCommand(linkage).withTimeout(3.0))
+                    new AgitateCommand(linkage, roller).withTimeout(3.0))
                 .withTimeout(3.0))
         .finallyDo(
             () -> {

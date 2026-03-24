@@ -24,6 +24,7 @@ public class IntakeRollerConstants {
   public static final AngularVelocity DEFAULT_VELOCITY = RPM.of(750);
   public static final AngularVelocity PLOW_VELOCITY = RPM.of(-1000);
   public static final AngularVelocity BLURP_VELOCITY = RPM.of(-800);
+  public static final AngularVelocity AGITATE_VELOCITY = RPM.of((375));
 
   public static final Time STOP_DELAY = Seconds.of(0.5);
 
