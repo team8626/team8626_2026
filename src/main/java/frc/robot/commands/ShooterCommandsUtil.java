@@ -14,6 +14,7 @@ import frc.robot.Constants.ShooterTargetConstants;
 import frc.robot.subsystems.anotherShooter.AnotherShooterConstants;
 import frc.robot.subsystems.drive.AkitDrive;
 import frc.robot.subsystems.drive.DriveConstants;
+import frc.robot.util.LoggedTunableNumber;
 import org.littletonrobotics.frc2026.FieldConstants;
 import org.littletonrobotics.frc2026.util.geometry.AllianceFlipUtil;
 import org.littletonrobotics.junction.Logger;
@@ -21,6 +22,11 @@ import org.littletonrobotics.junction.Logger;
 public class ShooterCommandsUtil {
   public static record ShooterData(
       AngularVelocity velocityShooter, AngularVelocity velocityIndexer) {}
+
+  private static final LoggedTunableNumber shotEfficiencyMultiplier =
+      new LoggedTunableNumber(
+          "AnotherShooter/ShotEfficiencyMultiplier",
+          AnotherShooterConstants.DEFAULT_SHOT_EFFICIENCY);
 
   /**
    * Helper methods to calculate the distance to the hub or target. This can be used in commands to
@@ -79,15 +85,19 @@ public class ShooterCommandsUtil {
 
   public static ShooterData calculateRPMToTarget(AkitDrive drive, Translation3d target) {
     double distToTargetFeet = getDistToTarget(drive, target).in(Feet);
+    double efficiency = shotEfficiencyMultiplier.get();
 
-    AngularVelocity velocityShooter = RPM.of(AnotherShooterConstants.RPMMap.get(distToTargetFeet));
+    AngularVelocity velocityShooter =
+        RPM.of(AnotherShooterConstants.RPMMap.get(distToTargetFeet) * efficiency);
     AngularVelocity velocityIndexer =
-        RPM.of(AnotherShooterConstants.IndexerMap.get(distToTargetFeet));
+        RotationsPerSecond.of(
+            AnotherShooterConstants.IndexerMap.get(distToTargetFeet) * efficiency);
 
     Logger.recordOutput("AnotherShooter/Target/Pose Robot", drive.getPose());
     Logger.recordOutput("AnotherShooter/Target/Pose Target", AllianceFlipUtil.apply(target));
     Logger.recordOutput("AnotherShooter/Target/Distance to Target", distToTargetFeet, "feet");
     Logger.recordOutput("AnotherShooter/Target/Shooter RPM", velocityShooter.in(RPM), "RPM");
+    Logger.recordOutput("AnotherShooter/Target/ShotEfficiencyMultiplier", efficiency);
     Logger.recordOutput(
         "AnotherShooter/Target/Indexer RPS",
         velocityIndexer.in(RotationsPerSecond),

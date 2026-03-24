@@ -19,6 +19,8 @@ public class AnotherShooterConstants {
   public static final AngularVelocity VELOCITY_TOLERANCE = RPM.of(25);
   public static final AngularVelocity UNJAM_VELOCITY = RPM.of(-500);
 
+  public static final double DEFAULT_SHOT_EFFICIENCY = 1.00;
+
   public static final Time STOP_DELAY = Milliseconds.of(200);
 
   public static final Angle ANOTHERSHOOTER_ANGLE = Degrees.of(67);
