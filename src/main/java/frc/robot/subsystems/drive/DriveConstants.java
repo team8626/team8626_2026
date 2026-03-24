@@ -55,10 +55,10 @@ public class DriveConstants {
   public static final LinearVelocity SLOW_DRIVE_SPEED = MetersPerSecond.of(3.2);
   public static final AngularVelocity SLOW_ROT_SPEED = RotationsPerSecond.of(0.75);
 
-  public static final LinearVelocity FAST_DRIVE_SPEED = MetersPerSecond.of(5);
+  public static final LinearVelocity FAST_DRIVE_SPEED = MetersPerSecond.of(5.74);
   public static final AngularVelocity FAST_ROT_SPEED = RotationsPerSecond.of(2.5);
 
-  public static final LinearVelocity INTAKE_DRIVE_SPEED = MetersPerSecond.of(1.5);
+  public static final LinearVelocity INTAKE_DRIVE_SPEED = MetersPerSecond.of(2);
   public static final AngularVelocity INTAKE_ROT_SPEED = RotationsPerSecond.of(0.75);
 
   public static final LinearVelocity DEFAULT_DRIVE_SPEED = FAST_DRIVE_SPEED;
