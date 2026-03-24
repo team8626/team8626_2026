@@ -191,7 +191,16 @@ public class RobotContainer {
                   akitDrive::getPose));
       //   vision.setPoseSupplier(drive::getPose);
       configureFuelSim();
-      configureFuelSimRobot(hopper::ableToIntake, hopper::pushFuel);
+      configureFuelSimRobot(
+          () ->
+              hopper.ableToIntake()
+                  && Math.abs(
+                          intakeLinkage
+                              .getPosition()
+                              .minus(IntakeLinkageConstants.DEPLOY_ANGLE)
+                              .in(Degrees))
+                      < 5.0,
+          hopper::pushFuel);
     } else if (Constants.currentMode == Mode.REPLAY) {
       // Replay: no hardware IO
       drivetrain = null; // Not Used here (this is for using Phoenix Tuner template)
