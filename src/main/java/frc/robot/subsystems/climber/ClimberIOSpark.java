@@ -79,6 +79,7 @@ public class ClimberIOSpark implements ClimberIO {
 
     configright
         .inverted(!ClimberConstants.MOTOR_CONFIG.INVERTED()) // Motors are mirrored
+        .idleMode(IdleMode.kBrake)
         .smartCurrentLimit((int) ClimberConstants.MAX_CURRENT.in(Amps))
         .voltageCompensation(12.0);
 
