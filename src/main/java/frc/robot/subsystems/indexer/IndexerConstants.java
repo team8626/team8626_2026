@@ -24,6 +24,9 @@ public class IndexerConstants {
   public static final AngularVelocity DEFAULT_VELOCITY = RevolutionsPerSecond.of(30);
   public static final AngularVelocity UNJAM_VELOCITY = RevolutionsPerSecond.of(-5);
 
+  public static final Voltage DEFAULT_OUTPUT = Volts.of(7);
+  public static final Voltage UNJAM_OUTPUT = Volts.of(-2);
+
   public static final Current MAX_CURRENT = Amps.of(50);
 
   public static final AngularVelocity VELOCITY_TOLERANCE = RevolutionsPerSecond.of(1);

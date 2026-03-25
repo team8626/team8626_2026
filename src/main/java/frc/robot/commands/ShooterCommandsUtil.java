@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants.ShooterTargetConstants;
 import frc.robot.Robot;
 import frc.robot.subsystems.anotherShooter.AnotherShooterConstants;
@@ -22,8 +23,7 @@ import org.littletonrobotics.frc2026.util.geometry.AllianceFlipUtil;
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterCommandsUtil {
-  public static record ShooterData(
-      AngularVelocity velocityShooter, AngularVelocity velocityIndexer) {}
+  public static record ShooterData(AngularVelocity velocityShooter, Voltage outputIndexer) {}
 
   private static final LoggedTunableNumber shotEfficiencyMultiplier =
       new LoggedTunableNumber(
@@ -96,7 +96,10 @@ public class ShooterCommandsUtil {
 
     AngularVelocity velocityIndexer =
         RotationsPerSecond.of(
-            AnotherShooterConstants.IndexerMap.get(distToTargetFeet) * efficiency);
+            AnotherShooterConstants.IndexerRPMMap.get(distToTargetFeet) * efficiency);
+
+    Voltage outputIndexer =
+        Volts.of(AnotherShooterConstants.IndexerOutputMap.get(distToTargetFeet) * efficiency);
 
     Logger.recordOutput("AnotherShooter/Target/Pose Robot", drive.getPose());
     Logger.recordOutput("AnotherShooter/Target/Pose Target", AllianceFlipUtil.apply(target));
@@ -107,8 +110,9 @@ public class ShooterCommandsUtil {
         "AnotherShooter/Target/Indexer RPS",
         velocityIndexer.in(RotationsPerSecond),
         "rotations per second");
+    Logger.recordOutput("AnotherShooter/Target/Indexer Output", outputIndexer.in(Volts), "volts");
 
-    return new ShooterData(velocityShooter, velocityIndexer);
+    return new ShooterData(velocityShooter, outputIndexer);
   }
   /**
    * Helper method to calculate the angle to lock onto the hub or target. This can be used in

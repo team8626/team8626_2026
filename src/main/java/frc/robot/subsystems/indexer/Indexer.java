@@ -67,6 +67,8 @@ public class Indexer extends SubsystemBase {
       new LoggedTunableNumber(
           "Indexer/Flywheel/RotPerSecond",
           IndexerConstants.DEFAULT_VELOCITY.in(RotationsPerSecond));
+  private final LoggedTunableNumber flywheelVolts =
+      new LoggedTunableNumber("Indexer/Flywheel/Volts", IndexerConstants.DEFAULT_OUTPUT.in(Volts));
 
   public Indexer(IndexerIO io) {
     this.io = io;
@@ -87,7 +89,7 @@ public class Indexer extends SubsystemBase {
    *
    * @param velocityRadPerSec Velocity in radians per second
    */
-  public void start(AngularVelocity velocity) {
+  public void startRPM(AngularVelocity velocity) {
     AngularVelocity new_velocity = velocity;
 
     // Check if the velocity is in bounds before setting it.
@@ -101,8 +103,16 @@ public class Indexer extends SubsystemBase {
     io.start(new_velocity);
   }
 
+  public void start(Voltage input) {
+    io.setVoltage(input.in(Volts));
+  }
+
   public void start() {
-    start(RotationsPerSecond.of(flywheelRPS.get()));
+    start(Volts.of(flywheelVolts.get()));
+  }
+
+  public void startRPM() {
+    startRPM(RotationsPerSecond.of(flywheelRPS.get()));
   }
 
   /**

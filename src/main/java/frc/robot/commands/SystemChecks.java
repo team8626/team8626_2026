@@ -1,7 +1,6 @@
 package frc.robot.commands;
 
-import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -77,10 +76,11 @@ public class SystemChecks {
   public Command indexer() {
     return Commands.sequence(
             Commands.waitSeconds(1.0),
-            Commands.startEnd(() -> indexer.start(RotationsPerSecond.of(5)), indexer::stop, indexer)
+            Commands.startEnd(() -> indexer.start(Volts.of(2)), indexer::stop, indexer)
                 .withTimeout(3.0),
             Commands.waitSeconds(1.0),
-            Commands.startEnd(indexer::start, indexer::stop, indexer).withTimeout(3.0))
+            Commands.startEnd(() -> indexer.start(Volts.of(7)), indexer::stop, indexer)
+                .withTimeout(3.0))
         .finallyDo(indexer::stop)
         .withName("SystemCheck/Indexer");
   }

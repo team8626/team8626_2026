@@ -75,7 +75,9 @@ public class AnotherShooterConstants {
       double MAX_ACCELERATION_RPM_PER_SEC) {}
 
   public static final InterpolatingDoubleTreeMap RPMMap = new InterpolatingDoubleTreeMap();
-  public static final InterpolatingDoubleTreeMap IndexerMap = new InterpolatingDoubleTreeMap();
+  public static final InterpolatingDoubleTreeMap IndexerRPMMap = new InterpolatingDoubleTreeMap();
+  public static final InterpolatingDoubleTreeMap IndexerOutputMap =
+      new InterpolatingDoubleTreeMap();
 
   static {
     // format is (distance to target in feet, required shooter velocity in RPM)
@@ -89,13 +91,24 @@ public class AnotherShooterConstants {
   }
 
   static {
+    // format is (distance to target in feet, required shooter output in volts)
+    IndexerOutputMap.put(1.0, 7.0);
+    IndexerOutputMap.put(4.68, 7.0);
+    IndexerOutputMap.put(6.85, 7.0);
+    IndexerOutputMap.put(8.63, 7.0);
+    IndexerOutputMap.put(9.92, 7.0);
+    IndexerOutputMap.put(11.20, 7.0);
+    IndexerOutputMap.put(17.33, 5.0);
+  }
+
+  static {
     // format is (distance to target in feet, required shooter velocity in RPM)
-    IndexerMap.put(1.0, 42.0);
-    IndexerMap.put(4.68, 42.0);
-    IndexerMap.put(6.85, 42.0);
-    IndexerMap.put(8.63, 42.0);
-    IndexerMap.put(9.92, 42.0);
-    IndexerMap.put(11.20, 15.0);
-    IndexerMap.put(17.33, 12.0);
+    IndexerRPMMap.put(1.0, 42.0);
+    IndexerRPMMap.put(4.68, 42.0);
+    IndexerRPMMap.put(6.85, 42.0);
+    IndexerRPMMap.put(8.63, 42.0);
+    IndexerRPMMap.put(9.92, 42.0);
+    IndexerRPMMap.put(11.20, 15.0);
+    IndexerRPMMap.put(17.33, 12.0);
   }
 }
