@@ -42,7 +42,6 @@ public class TrackTargetAndShootCommand extends Command {
   @Override
   public void initialize() {
     indexer.stop();
-    shooter.stopFeeding();
   }
 
   @Override
@@ -58,18 +57,15 @@ public class TrackTargetAndShootCommand extends Command {
             <= AnotherShooterConstants.VELOCITY_TOLERANCE.in(RPM);
 
     if (shooterAtSpeed) {
-      indexer.start(shot.velocityIndexer());
-      shooter.startFeeding();
+      indexer.start(shot.outputIndexer());
     } else {
       indexer.stop();
-      shooter.stopFeeding();
     }
   }
 
   @Override
   public void end(boolean interrupted) {
     indexer.stop();
-    shooter.stopFeeding();
 
     CommandScheduler.getInstance()
         .schedule(
