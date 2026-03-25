@@ -27,7 +27,7 @@ public class IntakeLinkageConstants {
   public static final Angle MIN_ANGLE = Degrees.of(80);
   public static final Angle MAX_ANGLE = Degrees.of(220);
 
-  public static final Angle STOW_ANGLE = Degrees.of(140);
+  public static final Angle STOW_ANGLE = Degrees.of(120);
   public static final Angle AGITAGE_ANGLE = Degrees.of(100);
   public static final Angle DEPLOY_ANGLE = Degrees.of(195);
   public static final Angle PLOW_ANGLE = Degrees.of(210);
