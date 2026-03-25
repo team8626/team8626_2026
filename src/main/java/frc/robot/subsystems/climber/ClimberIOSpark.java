@@ -97,7 +97,7 @@ public class ClimberIOSpark implements ClimberIO {
 
     inputs.leftConnected = connectedDebounce.calculate(!sparkStickyFault);
     inputs.leftPosition = Rotations.of(encoderleft.getPosition());
-    inputs.leftVelocity = RotationsPerSecond.of(encoderleft.getVelocity());
+    inputs.leftVelocity = RPM.of(encoderleft.getVelocity());
     inputs.leftCurrent = Amps.of(motorleft.getOutputCurrent());
     inputs.leftAppliedVoltage = Volts.of(motorleft.getAppliedOutput() * 12.0);
 
