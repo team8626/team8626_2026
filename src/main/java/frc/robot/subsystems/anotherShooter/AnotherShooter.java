@@ -54,7 +54,7 @@ public class AnotherShooter extends SubsystemBase {
     if ((new_velocity.abs(RPM)) > AnotherShooterConstants.MAX_VELOCITY.in(RPM)) {
       velocity = RPM.of(AnotherShooterConstants.MAX_VELOCITY.copySign(velocity, RPM));
     }
-    io.start(new_velocity);
+    io.start(velocity);
   }
 
   public void start() {
