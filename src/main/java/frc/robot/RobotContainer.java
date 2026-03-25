@@ -480,7 +480,7 @@ public class RobotContainer {
                         () -> anotherShooter.start(AnotherShooterConstants.UNJAM_VELOCITY),
                         anotherShooter)
                     .andThen(Commands.idle(anotherShooter)),
-                Commands.runOnce(() -> index.start(IndexerConstants.UNJAM_VELOCITY), index)
+                Commands.runOnce(() -> index.start(IndexerConstants.UNJAM_OUTPUT), index)
                     .andThen(Commands.idle(index)))
             .finallyDo(
                 () -> {
@@ -776,11 +776,9 @@ public class RobotContainer {
     return Commands.parallel(
         Commands.startEnd(
             () -> {
-              anotherShooter.startFeeding();
               index.start();
             },
             () -> {
-              anotherShooter.stopFeeding();
               index.stop();
             },
             index),
@@ -809,7 +807,6 @@ public class RobotContainer {
 
   private void stopShooting(Time delay) {
     index.stop();
-    anotherShooter.stopFeeding();
     intakeLinkage.stow();
 
     CommandScheduler.getInstance()
