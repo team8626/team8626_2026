@@ -67,7 +67,7 @@ public class IntakeLinkageConstants {
   // PID Constants
   public static final Gains GAINS =
       switch (Constants.robot) {
-        case REBUILT_PHOENIX, REBUILT_AKIT -> new Gains(0.02, 0.0, 0.0, 0.0, 0.0, 0.0);
+        case REBUILT_PHOENIX, REBUILT_AKIT -> new Gains(0.007, 0.0, 0.0, 0.0, 0.0, 0.0);
         default -> new Gains(0.05, 0.0, 0.0, 0.10395, 0.00296, 0.0);
       };
 
