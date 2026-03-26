@@ -105,7 +105,6 @@ public class ShooterCommandsUtil {
     Logger.recordOutput("AnotherShooter/Target/Pose Target", AllianceFlipUtil.apply(target));
     Logger.recordOutput("AnotherShooter/Target/Distance to Target", distToTargetFeet, "feet");
     Logger.recordOutput("AnotherShooter/Target/Shooter RPM", velocityShooter.in(RPM), "RPM");
-    Logger.recordOutput("AnotherShooter/Target/ShotEfficiencyMultiplier", efficiency);
     Logger.recordOutput(
         "AnotherShooter/Target/Indexer RPS",
         velocityIndexer.in(RotationsPerSecond),
