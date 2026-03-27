@@ -139,13 +139,13 @@ public class RobotContainer {
 
   private static final Trigger collectTrigger = controller.leftBumper();
   private static final Trigger plowTrigger = controller.leftTrigger();
-  private static final Trigger blurpTrigger = controller.y();
+//   private static final Trigger blurpTrigger = controller.y();
   private static final Trigger unjamTrigger = controller.x();
 
   private static final Trigger fixedRPMShootTrigger = controller.rightBumper();
   private static final Trigger aimAndShootTrigger = controller.rightTrigger();
   private static final Trigger collectAndShootTrigger = controller.povUp();
-  private static final Trigger passingTrigger = controller.povRight();
+  private static final Trigger passingTrigger = controller.y();
   private static final Trigger collectAndPassTrigger = controller.povDown();
 
   private static final Trigger hubTrackTrigger = controller.b();
@@ -418,7 +418,7 @@ public class RobotContainer {
     aimAndShootTrigger
         .and(inAllianceZoneTrigger)
         .whileTrue(
-            teleopDrive.withHubLockThenX(
+            teleopDrive.withHubLock(
                 Commands.parallel(
                         new TrackTargetAndShootCommand(index, anotherShooter, akitDrive),
                         new AgitateCommand(intakeLinkage, intakeRoller),
@@ -500,26 +500,6 @@ public class RobotContainer {
                   index.stop();
                 })
             .withName("Unjamming Command"));
-
-    // -------------------------------------------------------------- Blurp
-    //
-    // Open the intake and reverse the rollers.
-    blurpTrigger.whileTrue(
-        Commands.parallel(
-                Commands.runOnce(
-                        () -> intakeRoller.start(IntakeRollerConstants.BLURP_VELOCITY),
-                        intakeRoller)
-                    .andThen(Commands.idle(intakeRoller)),
-                Commands.runOnce(
-                        () -> intakeLinkage.setPosition(IntakeLinkageConstants.BLURP_ANGLE),
-                        intakeLinkage)
-                    .andThen(Commands.idle(intakeLinkage)))
-            .finallyDo(
-                () -> {
-                  intakeRoller.stop();
-                  intakeLinkage.setPosition(IntakeLinkageConstants.STOW_ANGLE);
-                })
-            .withName("Blurp Command"));
 
     // --------------------------------------------------------------
     // Alliance Shift Triggers
