@@ -227,7 +227,7 @@ public class DriveConstants {
 
     private static final SteerFeedbackType STEER_FEEDBACK_TYPE = SteerFeedbackType.FusedCANcoder;
 
-    private static final Current SLIP_CURRENT = Amps.of(95); // NEEDS TUNING
+    private static final Current SLIP_CURRENT = Amps.of(80);
 
     private static final TalonFXConfiguration DRIVE_CONFIGS =
         new TalonFXConfiguration()
@@ -438,7 +438,7 @@ public class DriveConstants {
   private static final ControlConstants TRENCH_TRANSLATION_BASE_CONSTANTS =
       new ControlConstants().withPID(6, 0, 0);
   private static final ControlConstants ROTATION_BASE_CONSTANTS =
-      new ControlConstants().withPID(8, 0, 0).withContinuous(-Math.PI, Math.PI);
+      new ControlConstants().withPID(10, 0, 0).withContinuous(-Math.PI, Math.PI);
 
   public static final TunableControlConstants TRENCH_TRANSLATION_CONSTANTS =
       new TunableControlConstants("Swerve/Trench Translation", TRENCH_TRANSLATION_BASE_CONSTANTS);
