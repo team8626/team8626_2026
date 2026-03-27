@@ -1,12 +1,15 @@
 package frc.robot.util;
 
+import static edu.wpi.first.units.Units.Seconds;
+
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import java.util.Optional;
 import java.util.function.Supplier;
 import lombok.Setter;
-// import org.littletonrobotics.frc2026.subsystems.launcher.LaunchCalculator;
+import org.littletonrobotics.junction.Logger;
 
 public class HubShiftTracker {
   public enum ShiftEnum {
@@ -185,5 +188,35 @@ public class HubShiftTracker {
     };
     return getShiftInfo(shiftSchedule, shiftedShiftStartTimes, shiftedShiftEndTimes);
     // }
+  }
+
+  public static boolean isActiveNow() {
+    return getOfficialShiftInfo().active();
+  }
+
+  public static double getRemainingActiveTime() {
+    var info = getOfficialShiftInfo();
+    return info.active() ? info.remainingTime() : 0.0;
+  }
+
+  public static double getTimeUntilNextActive() {
+    var info = getOfficialShiftInfo();
+    return info.active() ? 0.0 : info.remainingTime();
+  }
+
+  public static boolean isActiveIn(Time warningTime) {
+    double t = getTimeUntilNextActive();
+    return DriverStation.isEnabled() && !isActiveNow() && t > 0.0 && t <= warningTime.in(Seconds);
+  }
+
+  public static boolean canStartShooting() {
+    return DriverStation.isEnabled() && getShiftedShiftInfo().active();
+  }
+
+  public static void updateData() {
+    Logger.recordOutput("HubShift/OfficialShiftInfo", getOfficialShiftInfo());
+    Logger.recordOutput("HubShift/TimeUntilNextActive", (int) getTimeUntilNextActive());
+    Logger.recordOutput("HubShift/TimeUntilInactive", (int) getRemainingActiveTime());
+    Logger.recordOutput("HubShift/isActive", isActiveNow());
   }
 }

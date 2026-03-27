@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.util.HubShiftTracker;
 import org.littletonrobotics.frc2026.util.geometry.AllianceFlipUtil;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -102,6 +103,10 @@ public class Robot extends LoggedRobot {
     // Silent DS Warnings (only if FMS is not connected)
     DriverStation.silenceJoystickConnectionWarning(true);
 
+    // Log hub state
+    Logger.recordOutput("HubShift/Official", HubShiftTracker.getOfficialShiftInfo());
+    Logger.recordOutput("HubShift/Shifted", HubShiftTracker.getShiftedShiftInfo());
+
     // Start webserver
     WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
   }
@@ -125,6 +130,9 @@ public class Robot extends LoggedRobot {
 
     // Update the field in the dashboard
     m_field.setRobotPose(robotContainer.akitDrive.getPose());
+
+    // Update Hubtracking States
+    HubShiftTracker.updateData();
   }
 
   /** This function is called once when the robot is disabled. */

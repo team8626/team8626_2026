@@ -28,6 +28,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.EventTrigger;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -35,6 +36,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.AutoConstants;
@@ -45,6 +47,7 @@ import frc.robot.commands.AgitateCommand;
 import frc.robot.commands.AnotherShooterRampupCommand;
 import frc.robot.commands.CollectCommand;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.RumbleCommands;
 import frc.robot.commands.ShooterCommandsUtil;
 import frc.robot.commands.SystemChecks;
 import frc.robot.commands.TeleopDriveCommand;
@@ -92,6 +95,7 @@ import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.FuelSim;
+import frc.robot.util.HubShiftTracker;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -400,6 +404,10 @@ public class RobotContainer {
                 .withName("Just Shoot Command")
                 .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY)));
 
+    fixedRPMShootTrigger
+        .and(inAllianceZoneTrigger.negate())
+        .whileTrue(RumbleCommands.Rumble(controller.getHID()).withName("Out of Alliance Zone"));
+
     // -------------------------------------------------------------- Aim and Shoot
     //
     // Run the shooter and indexer to dump fuel from the hopper.
@@ -416,6 +424,10 @@ public class RobotContainer {
                         new AgitateCommand(intakeLinkage, intakeRoller),
                         simLaunchFuelCommand())
                     .withName("Aim And Shoot Command")));
+
+    aimAndShootTrigger
+        .and(inAllianceZoneTrigger.negate())
+        .whileTrue(RumbleCommands.Rumble(controller.getHID()).withName("Out of Alliance Zone"));
 
     // -------------------------------------------------------------- Collect and Shoot
     //
@@ -509,11 +521,29 @@ public class RobotContainer {
                 })
             .withName("Blurp Command"));
 
-    // Align to camera's best AprilTag: POV Left = front left, POV Up = front right, POV Right =
-    // rear right
-    // controller.povLeft().whileTrue(AlignToTargetCommand.alignToFrontLeftCamera(drive, vision));
-    // controller.povRight().whileTrue(AlignToTargetCommand.alignToFrontRightCamera(drive, vision));
-    // controller.povDown().whileTrue(AlignToTargetCommand.alignToRearRightCamera(drive, vision));
+    // --------------------------------------------------------------
+    // Alliance Shift Triggers
+    //
+    new Trigger(() -> HubShiftTracker.isActiveIn(Seconds.of(5)))
+        .onTrue(
+            RumbleCommands.AlertRumble(controller.getHID(), Seconds.of(3))
+                .withName("Active Shift Upcoming")
+                .onlyIf(DriverStation::isFMSAttached));
+
+    // new Trigger(HubShiftTracker::canStartShooting)
+    //     .onTrue(
+    //         RumbleCommands.PulseRumble(controller.getHID(), Seconds.of(1))
+    //             .withName("Can Start Shooting")
+    //             .onlyIf(DriverStation::isFMSAttached));
+
+    // --------------------------------------------------------------
+    // Robot Triggers.
+
+    // Reset hub shift timer when enabling
+    RobotModeTriggers.teleop().onTrue(Commands.runOnce(HubShiftTracker::initialize));
+    RobotModeTriggers.autonomous().onTrue(Commands.runOnce(HubShiftTracker::initialize));
+    RobotModeTriggers.disabled()
+        .onTrue(Commands.runOnce(HubShiftTracker::initialize).ignoringDisable(true));
 
     // --------------------------------------------------------------
     // Test commands for subsystems.
