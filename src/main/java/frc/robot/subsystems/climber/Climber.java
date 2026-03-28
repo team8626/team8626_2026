@@ -88,6 +88,7 @@ public class Climber extends SubsystemBase {
                     .CLIMB_LOCK_VOLTAGE), // Sets volts to a constant to "lock" the motors into
             // position
             Commands.idle()) // pauses command until interupted
+        .onlyIf(() -> inputs.isZeroed)
         .finallyDo(io::stop) // stops motors
         .unless(() -> disabled); // negates last command if subsystem is disabled
   }
@@ -106,6 +107,7 @@ public class Climber extends SubsystemBase {
             // positions
             setVoltage(ClimberConstants.CLIMB_LOCK_VOLTAGE),
             Commands.idle())
+        .onlyIf(() -> inputs.isZeroed)
         .finallyDo(io::stop)
         .unless(() -> disabled);
   }
@@ -117,9 +119,8 @@ public class Climber extends SubsystemBase {
             Commands.waitUntil(
                 () ->
                     inputs.leftPosition.lte(ClimberConstants.STOW_SLOW_POSITION)
-                        || inputs.rightPosition.lte(
-                            ClimberConstants
-                                .STOW_SLOW_POSITION)), // pauses until either motor has reached a
+                        || inputs.rightPosition.lte(ClimberConstants.STOW_SLOW_POSITION)),
+            // pauses until either motor has reached a
             // targeted position before completely
             // stowing
             setVoltage(ClimberConstants.STOW_SLOW_VOLTAGE), // Slows voltage on motors
@@ -132,9 +133,14 @@ public class Climber extends SubsystemBase {
                     Commands.waitUntil(
                             () -> inputs.rightPosition.lte(ClimberConstants.STOW_POSITION))
                         .finallyDo(io::stopRight)),
-            stop()) // stops the io at end of command sequence
+            stop())
+        .onlyIf(
+            () ->
+                inputs.isZeroed
+                    && inputs.leftPosition.gte(ClimberConstants.STOW_POSITION)
+                    && inputs.rightPosition.gte(ClimberConstants.STOW_POSITION))
         .finallyDo(io::stop) // finally stops the io (in case of interuption)
-        .unless(() -> disabled); // unless its disabled
+        .unless(() -> disabled || !inputs.isZeroed); // unless its disabled
   }
 
   /* extends the arms */
@@ -150,6 +156,7 @@ public class Climber extends SubsystemBase {
                         () -> inputs.rightPosition.gte(ClimberConstants.EXTEND_POSITION_RIGHT))
                     .finallyDo(io::stopRight)),
             stop()) // finally stops the io (in case of interuption)
+        .onlyIf(() -> inputs.isZeroed)
         .finallyDo(io::stop) // stops io
         .unless(() -> disabled); // unless disabled
   }
@@ -159,6 +166,7 @@ public class Climber extends SubsystemBase {
     return Commands.sequence(
             this.runOnce(
                 () -> {
+                  inputs.isZeroed = false;
                   io.setLeftVoltage(ClimberConstants.ZERO_VOLTAGE);
                   io.setRightVoltage(ClimberConstants.ZERO_VOLTAGE);
                 }), // sets each motor side to zero_voltage constant

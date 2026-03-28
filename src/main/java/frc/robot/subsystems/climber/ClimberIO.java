@@ -29,6 +29,7 @@ public interface ClimberIO {
     public Current rightCurrent = Amps.of(0);
     public Voltage rightAppliedVoltage = Volts.of(0);
 
+    public boolean isZeroed = false;
     public Angle averagePosition = Radians.of(0);
   }
 
