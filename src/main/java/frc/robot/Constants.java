@@ -17,6 +17,7 @@ import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.CANBus;
 import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -135,7 +136,7 @@ public final class Constants {
   public static class AutoConstants {
     // --------------------------------------------------------------------------
     // PathPlanner configuration
-    public static final double robotMassKg = 60;
+    public static final double robotMassKg = 50;
     public static final double robotMOI = 13.4;
     public static final RobotConfig PP_CONFIG =
         new RobotConfig(
@@ -150,6 +151,9 @@ public final class Constants {
                 DriveConstants.DRIVE_MOTOR_CURRENT_LIMIT,
                 1),
             DriveConstants.MODULE_TRANSLATIONS.get());
+
+    public static final PIDConstants PP_DRIVE_GAINS = new PIDConstants(5.0, 0.0, 0.0);
+    public static final PIDConstants PP_STEER_GAINS = new PIDConstants(5.0, 0.0, 0.0);
 
     // --------------------------------------------------------------------------
     // Dump duration for Autos

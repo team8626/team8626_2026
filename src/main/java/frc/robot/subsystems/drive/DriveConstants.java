@@ -203,14 +203,20 @@ public class DriveConstants {
         new Slot0Configs()
             .withKP(100)
             .withKI(0)
-            .withKD(.5)
+            .withKD(1)
             .withKS(.1)
-            .withKV(1.5)
+            .withKV(2)
             .withKA(0)
             .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseVelocitySign);
 
     public static final Slot0Configs DRIVE_GAINS =
-        new Slot0Configs().withKP(.4).withKI(0.0).withKD(0.0).withKS(0.0).withKV(0.124).withKA(0.0);
+        new Slot0Configs().withKP(0.7).withKI(0.0).withKD(0.0).withKS(0.3).withKV(.6).withKA(0.0);
+    // CLOSE TO IT new
+    // Slot0Configs().withKP(0).withKI(0.0).withKD(0.0).withKS(0.3).withKV(.6).withKA(0.0);
+    // BARELY MOVING new
+    // Slot0Configs().withKP(0).withKI(0.0).withKD(0.0).withKS(0.3).withKV(0).withKA(0.0);
+    // ORIGINAL new
+    // Slot0Configs().withKP(.4).withKI(0.0).withKD(0.0).withKS(0.0).withKV(0.124).withKA(0.0);
 
     private static final ClosedLoopOutputType STEER_CLOSED_LOOP_OUTPUT =
         ClosedLoopOutputType.Voltage;

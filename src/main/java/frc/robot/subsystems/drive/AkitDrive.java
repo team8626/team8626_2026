@@ -17,7 +17,6 @@ import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.PathPlannerLogging;
@@ -45,6 +44,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+import frc.robot.Constants.AutoConstants;
 import frc.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -98,7 +98,7 @@ public class AkitDrive extends SubsystemBase {
           this::getChassisSpeeds,
           this::runVelocity,
           new PPHolonomicDriveController(
-              new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
+              AutoConstants.PP_DRIVE_GAINS, AutoConstants.PP_STEER_GAINS),
           Constants.AutoConstants.PP_CONFIG,
           () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
           this);
