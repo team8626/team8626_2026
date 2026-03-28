@@ -35,7 +35,9 @@ public class AgitateCommand extends Command {
     if (timer.hasElapsed(IntakeLinkageConstants.AGITATE_PERIOD)) {
       agitating = !agitating;
       linkage.setPosition(
-          agitating ? IntakeLinkageConstants.AGITAGE_ANGLE : IntakeLinkageConstants.STOW_ANGLE);
+          agitating
+              ? IntakeLinkageConstants.AGITAGE_IN_ANGLE
+              : IntakeLinkageConstants.AGITAGE_OUT_ANGLE);
       rollers.start(agitating ? IntakeRollerConstants.AGITATE_VELOCITY : RPM.of(0));
 
       timer.reset();
