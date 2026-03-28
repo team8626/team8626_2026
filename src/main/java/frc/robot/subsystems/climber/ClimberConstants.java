@@ -24,7 +24,7 @@ public class ClimberConstants {
 
   // Inputs Values
   public static final Voltage CLIMB_VOLTAGE = Volts.of(-8);
-  public static final Voltage STOW_VOLTAGE = Volts.of(-4);
+  public static final Voltage STOW_VOLTAGE = Volts.of(-6);
   public static final Voltage STOW_SLOW_VOLTAGE = Volts.of(-0.5);
   public static final Voltage EXTEND_VOLTAGE = Volts.of(4);
   public static final Voltage ZERO_VOLTAGE = Volts.of(-1);
@@ -33,19 +33,17 @@ public class ClimberConstants {
   public static final Current STALL_CURRENT = Amps.of(10);
   public static final AngularVelocity STALL_ANGULAR_VELOCITY = RadiansPerSecond.of(6);
 
-  public static final Angle CLIMB_POSITION = Rotations.of(75);
+  public static final Angle CLIMB_POSITION = Rotations.of(70);
   public static final Angle AUTO_CLIMB_POSITION = Rotations.of(75);
   public static final Angle STOW_POSITION = Rotations.of(10);
-  public static final Angle STOW_SLOW_POSITION = Rotations.of(30);
-  public static final Angle EXTEND_POSITION_LEFT = Rotations.of(106);
-  public static final Angle EXTEND_POSITION_RIGHT = Rotations.of(105);
+  public static final Angle STOW_SLOW_POSITION = Rotations.of(20);
+  public static final Angle EXTEND_POSITION_LEFT = Rotations.of(100);
+  public static final Angle EXTEND_POSITION_RIGHT = Rotations.of(99);
 
   // Positions for auto climb
   public static enum ClimbPosition {
-    FRONT_LEFT(new Pose2d(1.54, 3.91, Rotation2d.kCW_90deg)),
-    FRONT_RIGHT(new Pose2d(1.54, 3.50, Rotation2d.kCW_90deg)),
-    BACK_LEFT(new Pose2d(0.67, 3.91, Rotation2d.kCCW_90deg)),
-    BACK_RIGHT(new Pose2d(0.67, 3.50, Rotation2d.kCCW_90deg));
+    FRONT_LEFT(new Pose2d(1.54, 3.91, Rotation2d.kZero)),
+    FRONT_RIGHT(new Pose2d(1.54, 3.50, Rotation2d.kZero));
 
     private Pose2d pose;
 
