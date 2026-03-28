@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.6267695847602743,
-        "y": 0.5361970248287673
+        "x": 3.60089207175926,
+        "y": 0.6651774450231482
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.8633160562423035,
-        "y": 0.5420393488107104
+        "x": 2.837438543241289,
+        "y": 0.6710197690050913
       },
       "isLocked": false,
       "linkedName": "Trench Start Right"
@@ -33,10 +33,10 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
-    "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 720.0,
+    "maxVelocity": 2.5,
+    "maxAcceleration": 2.0,
+    "maxAngularVelocity": 360.0,
+    "maxAngularAcceleration": 260.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },

@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.6267695847602743,
-        "y": 0.5361970248287673
+        "x": 3.60089207175926,
+        "y": 0.6651774450231482
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.089769584760274,
-        "y": 0.5361970248287673
+        "x": 4.06389207175926,
+        "y": 0.6651774450231482
       },
       "isLocked": false,
       "linkedName": "Trench Start Right"
     },
     {
       "anchor": {
-        "x": 6.525047445776256,
-        "y": 0.5361970248287673
+        "x": 6.413353153935185,
+        "y": 0.6651774450231482
       },
       "prevControl": {
-        "x": 5.87358567894571,
-        "y": 0.5361970248287676
+        "x": 5.761891387104639,
+        "y": 0.6651774450231486
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,16 +33,16 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
-    "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 720.0,
+    "maxVelocity": 2.5,
+    "maxAcceleration": 2.0,
+    "maxAngularVelocity": 360.0,
+    "maxAngularAcceleration": 260.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
   "goalEndState": {
     "velocity": 2.0,
-    "rotation": 0.0
+    "rotation": 90.0
   },
   "reversed": false,
   "folder": null,
