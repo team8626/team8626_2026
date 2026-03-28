@@ -27,8 +27,6 @@ public class IndexerConstants {
   public static final Voltage DEFAULT_OUTPUT = Volts.of(9);
   public static final Voltage UNJAM_OUTPUT = Volts.of(-2);
 
-  public static final Current MAX_CURRENT = Amps.of(80);
-
   public static final AngularVelocity VELOCITY_TOLERANCE = RevolutionsPerSecond.of(1);
 
   private static final double MOI = 0.1;
