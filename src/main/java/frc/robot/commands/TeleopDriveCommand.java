@@ -269,7 +269,7 @@ public class TeleopDriveCommand extends Command {
     return commandTargetTracking && commandLockThenX;
   }
 
-    private enum DriveMode {
+  private enum DriveMode {
     NORMAL,
     TARGET_TRACK,
     TARGET_AIM
