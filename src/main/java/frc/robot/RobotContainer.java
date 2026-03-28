@@ -139,7 +139,7 @@ public class RobotContainer {
 
   private static final Trigger collectTrigger = controller.leftBumper();
   private static final Trigger plowTrigger = controller.leftTrigger();
-//   private static final Trigger blurpTrigger = controller.y();
+  //   private static final Trigger blurpTrigger = controller.y();
   private static final Trigger unjamTrigger = controller.x();
 
   private static final Trigger fixedRPMShootTrigger = controller.rightBumper();
@@ -427,7 +427,18 @@ public class RobotContainer {
 
     aimAndShootTrigger
         .and(inAllianceZoneTrigger.negate())
-        .whileTrue(RumbleCommands.Rumble(controller.getHID()).withName("Out of Alliance Zone"));
+        .whileTrue(
+            teleopDrive.withTargetLock(
+                () -> ShooterCommandsUtil.getPassingTarget(akitDrive),
+                Commands.parallel(
+                        new TrackTargetAndShootCommand(
+                            () -> ShooterCommandsUtil.getPassingTarget(akitDrive),
+                            index,
+                            anotherShooter,
+                            akitDrive),
+                        new AgitateCommand(intakeLinkage, intakeRoller),
+                        simLaunchFuelCommand())
+                    .withName("Passing Shoot Command")));
 
     // -------------------------------------------------------------- Collect and Shoot
     //
