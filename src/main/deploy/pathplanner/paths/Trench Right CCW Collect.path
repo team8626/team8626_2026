@@ -88,8 +88,14 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
+      "name": "CollectStart",
+      "waypointRelativePos": 0.08561306063122905,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
       "name": "CollectDone",
-      "waypointRelativePos": 1.64578217092338,
+      "waypointRelativePos": 1.543643583887044,
       "endWaypointRelativePos": null,
       "command": null
     }
