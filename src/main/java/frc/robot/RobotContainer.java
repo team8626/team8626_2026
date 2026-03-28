@@ -47,6 +47,7 @@ import frc.robot.Constants.ControllerConstants;
 import frc.robot.Constants.Dimensions;
 import frc.robot.Constants.Mode;
 import frc.robot.commands.AgitateCommand;
+import frc.robot.commands.PlanPathAlignToTowerCommand;
 import frc.robot.commands.AnotherShooterRampupCommand;
 import frc.robot.commands.CollectCommand;
 import frc.robot.commands.DriveCommands;
@@ -309,6 +310,10 @@ public class RobotContainer {
 
     // Set up SysId routines
     configureSysIdRoutines();
+
+    // Add auto-align to tower command to SmartDashboard
+    SmartDashboard.putData(
+        new PlanPathAlignToTowerCommand(akitDrive, vision).withName("Climb/Plan Path Align To Tower"));
 
     // Set up commands
     teleopDrive = new TeleopDriveCommand(akitDrive, controller);
@@ -659,6 +664,9 @@ public class RobotContainer {
                     new AgitateCommand(intakeLinkage, intakeRoller)))
             .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY))
             .withName("AimAndDumpLong"));
+
+    NamedCommands.registerCommand(
+        "PlanPathAlignToTower", new PlanPathAlignToTowerCommand(akitDrive, vision).withName("PlanPathAlignToTower"));
   }
 
   /**
