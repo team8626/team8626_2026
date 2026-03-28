@@ -504,8 +504,18 @@ public class RobotContainer {
     // --------------------------------------------------------------
     // Climber Triggers.
     climberStowTrigger.onTrue(climber.stow().withName("Climber Stow Command"));
-    climberExtendTrigger.onTrue(climber.extend().withName("Climber Extend Command"));
+
+    climberExtendTrigger.onTrue(
+        Commands.sequence(
+                Commands.runOnce(
+                    () -> {
+                      intakeLinkage.setPosition(IntakeLinkageConstants.STOW_ANGLE);
+                    }),
+                climber.extend())
+            .withName("Climber Extend Command"));
+
     climberZeroTrigger.onTrue(climber.zero().withName("Climber Zero Command"));
+
     climberClimbTrigger.onTrue(climber.climb().withName("Climber Climb Command"));
 
     // new Trigger(HubShiftTracker::canStartShooting)
@@ -519,6 +529,7 @@ public class RobotContainer {
     // Reset hub shift timer when enabling
     RobotModeTriggers.teleop().onTrue(Commands.runOnce(HubShiftTracker::initialize));
     RobotModeTriggers.autonomous().onTrue(Commands.runOnce(HubShiftTracker::initialize));
+    RobotModeTriggers.autonomous().onTrue(climber.zero());
     RobotModeTriggers.disabled()
         .onTrue(Commands.runOnce(HubShiftTracker::initialize).ignoringDisable(true));
 
