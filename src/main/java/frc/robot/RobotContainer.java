@@ -154,6 +154,11 @@ public class RobotContainer {
   private static final Trigger passingTrigger = controller.y();
   private static final Trigger collectAndPassTrigger = controller.povDown();
 
+  private static final Trigger climberExtendTrigger = controller.povUp();
+  private static final Trigger climberClimbTrigger = controller.povDown();
+  private static final Trigger climberZeroTrigger = controller.povLeft();
+  private static final Trigger climberStowTrigger = controller.povRight();
+
   private static final Trigger hubTrackTrigger = controller.b();
   private static final Trigger hubAimTrigger = controller.a();
 
@@ -534,6 +539,13 @@ public class RobotContainer {
                 .withName("Active Shift Upcoming")
                 .onlyIf(DriverStation::isFMSAttached));
 
+    // --------------------------------------------------------------
+    // Climber Triggers.
+    climberStowTrigger.onTrue(climber.stow().withName("Climber Stow Command"));
+    climberExtendTrigger.onTrue(climber.extend().withName("Climber Extend Command"));
+    climberZeroTrigger.onTrue(climber.zero().withName("Climber Zero Command"));
+    climberClimbTrigger.onTrue(climber.climb().withName("Climber Climb Command"));
+
     // new Trigger(HubShiftTracker::canStartShooting)
     //     .onTrue(
     //         RumbleCommands.PulseRumble(controller.getHID(), Seconds.of(1))
@@ -542,7 +554,6 @@ public class RobotContainer {
 
     // --------------------------------------------------------------
     // Robot Triggers.
-
     // Reset hub shift timer when enabling
     RobotModeTriggers.teleop().onTrue(Commands.runOnce(HubShiftTracker::initialize));
     RobotModeTriggers.autonomous().onTrue(Commands.runOnce(HubShiftTracker::initialize));
