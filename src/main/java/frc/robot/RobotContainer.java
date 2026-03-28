@@ -26,6 +26,9 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.EventTrigger;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -47,6 +50,7 @@ import frc.robot.commands.AgitateCommand;
 import frc.robot.commands.AnotherShooterRampupCommand;
 import frc.robot.commands.CollectCommand;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.DriveToPose;
 import frc.robot.commands.RumbleCommands;
 import frc.robot.commands.ShooterCommandsUtil;
 import frc.robot.commands.SystemChecks;
@@ -59,6 +63,7 @@ import frc.robot.subsystems.anotherShooter.AnotherShooterIO;
 import frc.robot.subsystems.anotherShooter.AnotherShooterIOSim;
 import frc.robot.subsystems.anotherShooter.AnotherShooterIOSparkFlex;
 import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberConstants;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberIOSim;
 import frc.robot.subsystems.climber.ClimberIOSpark;
@@ -317,6 +322,9 @@ public class RobotContainer {
     // Configure named commands
     // configureNamedCommands();
 
+    // Configure Smart Dashboard commands
+    SmartDashboard.putData("Climb/Drive To Pose Left", new DriveToPose(() -> ClimberConstants.ClimbPosition.FRONT_LEFT.getPose(), akitDrive));
+    SmartDashboard.putData("Climb/Drive To Pose Right", new DriveToPose(() -> ClimberConstants.ClimbPosition.FRONT_RIGHT.getPose(), akitDrive));
   }
 
   public void configureDefaultCommands() {
