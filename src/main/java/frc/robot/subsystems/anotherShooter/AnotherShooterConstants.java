@@ -19,7 +19,7 @@ public class AnotherShooterConstants {
   public static final AngularVelocity VELOCITY_TOLERANCE = RPM.of(25);
   public static final AngularVelocity UNJAM_VELOCITY = RPM.of(-500);
 
-  public static final double DEFAULT_SHOT_EFFICIENCY = 1.00;
+  public static final double DEFAULT_SHOT_EFFICIENCY = 1.10;
 
   public static final Time STOP_DELAY = Milliseconds.of(200);
 
@@ -92,13 +92,13 @@ public class AnotherShooterConstants {
 
   static {
     // format is (distance to target in feet, required shooter output in volts)
-    IndexerOutputMap.put(1.0, 7.0);
-    IndexerOutputMap.put(4.68, 7.0);
-    IndexerOutputMap.put(6.85, 7.0);
-    IndexerOutputMap.put(8.63, 7.0);
-    IndexerOutputMap.put(9.92, 7.0);
-    IndexerOutputMap.put(11.20, 7.0);
-    IndexerOutputMap.put(17.33, 5.0);
+    IndexerOutputMap.put(1.0, 9.0);
+    IndexerOutputMap.put(4.68, 9.0);
+    IndexerOutputMap.put(6.85, 9.0);
+    IndexerOutputMap.put(8.63, 9.0);
+    IndexerOutputMap.put(9.92, 9.0);
+    IndexerOutputMap.put(11.20, 9.0);
+    IndexerOutputMap.put(17.33, 7.0);
   }
 
   static {
