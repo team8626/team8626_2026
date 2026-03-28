@@ -14,6 +14,7 @@
 package frc.robot.subsystems.climber;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.subsystems.climber.ClimberConstants.MOTOR_CONFIG;
 import static frc.robot.util.SparkUtil.sparkStickyFault;
 import static frc.robot.util.SparkUtil.tryUntilOk;
 
@@ -45,10 +46,9 @@ public class ClimberIOSpark implements ClimberIO {
   private SparkFlexConfig configright;
   // private ArmFeedforward armFF = new ArmFeedforward(GAINS.kS(), GAINS.kG(), GAINS.kV());
 
-  private double absoluteOffsetRotations = 0.0;
-
   private boolean leftIsEnabled = false;
   private boolean rightIsEnabled = false;
+  private boolean isZeroed = false;
 
   public ClimberIOSpark() {
 
@@ -62,7 +62,7 @@ public class ClimberIOSpark implements ClimberIO {
     configleft
         .inverted(ClimberConstants.MOTOR_CONFIG.INVERTED())
         .idleMode(IdleMode.kBrake)
-        .smartCurrentLimit((int) ClimberConstants.MAX_CURRENT.in(Amps))
+        .smartCurrentLimit((int) MOTOR_CONFIG.MAX_CURRENT().in(Amps))
         .voltageCompensation(12.0);
 
     tryUntilOk(
@@ -72,15 +72,15 @@ public class ClimberIOSpark implements ClimberIO {
             motorleft.configure(
                 configleft, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
 
-    motorright = new SparkFlex(ClimberConstants.MOTOR_CONFIG.CANID_RIGHT(), MotorType.kBrushless);
+    motorright = new SparkFlex(MOTOR_CONFIG.CANID_RIGHT(), MotorType.kBrushless);
     encoderright = motorright.getEncoder();
     controllerright = motorright.getClosedLoopController();
     configright = new SparkFlexConfig();
 
     configright
-        .inverted(!ClimberConstants.MOTOR_CONFIG.INVERTED()) // Motors are mirrored
+        .inverted(!MOTOR_CONFIG.INVERTED()) // Motors are mirrored
         .idleMode(IdleMode.kBrake)
-        .smartCurrentLimit((int) ClimberConstants.MAX_CURRENT.in(Amps))
+        .smartCurrentLimit((int) MOTOR_CONFIG.MAX_CURRENT().in(Amps))
         .voltageCompensation(12.0);
 
     tryUntilOk(
@@ -108,6 +108,7 @@ public class ClimberIOSpark implements ClimberIO {
     inputs.rightAppliedVoltage = Volts.of(motorright.getAppliedOutput() * 12.0);
 
     inputs.averagePosition = inputs.leftPosition.plus(inputs.rightPosition).div(2.0);
+    inputs.isZeroed = isZeroed;
   }
 
   @Override
@@ -152,6 +153,7 @@ public class ClimberIOSpark implements ClimberIO {
   public void zeroPosition() {
     encoderleft.setPosition(0);
     encoderright.setPosition(0);
+    isZeroed = true;
   }
 
   @Override
