@@ -150,9 +150,7 @@ public class RobotContainer {
 
   private static final Trigger fixedRPMShootTrigger = controller.rightBumper();
   private static final Trigger aimAndShootTrigger = controller.rightTrigger();
-  private static final Trigger collectAndShootTrigger = controller.povUp();
   private static final Trigger passingTrigger = controller.y();
-  private static final Trigger collectAndPassTrigger = controller.povDown();
 
   private static final Trigger climberExtendTrigger = controller.povUp();
   private static final Trigger climberClimbTrigger = controller.povDown();
@@ -458,23 +456,6 @@ public class RobotContainer {
                         simLaunchFuelCommand())
                     .withName("Passing Shoot Command")));
 
-    // -------------------------------------------------------------- Collect and Shoot
-    //
-    // Run the intake, shooter, and indexer to collect fuel and dump it into the hub.
-    // The robot will align to target while doing this.
-    //
-    collectAndShootTrigger
-        .and(inAllianceZoneTrigger)
-        .toggleOnTrue(
-            teleopDrive.withHubLock(
-                teleopDrive.withSpeed(
-                    DriveSpeed.INTAKE,
-                    Commands.parallel(
-                            new CollectCommand(intakeLinkage, intakeRoller),
-                            new TrackTargetAndShootCommand(index, anotherShooter, akitDrive),
-                            simLaunchFuelCommand())
-                        .withName("Collect And Shoot Command"))));
-
     // -------------------------------------------------------------- Passing
     //
     // Pass Fuel to the closest side (Depot or Outpost)
@@ -491,25 +472,6 @@ public class RobotContainer {
                     new AgitateCommand(intakeLinkage, intakeRoller),
                     simLaunchFuelCommand())
                 .withName("Passing Shoot Command")));
-
-    // -------------------------------------------------------------- Collect and Pass
-    //
-    // Pass Fuel to the closest side (Depot or Outpost)
-    //
-    collectAndPassTrigger.toggleOnTrue(
-        teleopDrive.withTargetLock(
-            () -> ShooterCommandsUtil.getPassingTarget(akitDrive),
-            teleopDrive.withSpeed(
-                DriveSpeed.INTAKE,
-                Commands.parallel(
-                        new CollectCommand(intakeLinkage, intakeRoller),
-                        new TrackTargetAndShootCommand(
-                            () -> ShooterCommandsUtil.getPassingTarget(akitDrive),
-                            index,
-                            anotherShooter,
-                            akitDrive),
-                        simLaunchFuelCommand())
-                    .withName("Collect And Pass Command"))));
 
     // -------------------------------------------------------------- Unjam
     //
