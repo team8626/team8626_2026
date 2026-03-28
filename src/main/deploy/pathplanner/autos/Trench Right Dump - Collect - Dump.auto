@@ -1,0 +1,43 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "AimAndDumpShort"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Trench Start Right to Trench Right"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Trench Right CCW Collect"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Trench Right to Trench Start Right"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AimAndDumpLong"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
