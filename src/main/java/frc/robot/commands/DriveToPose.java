@@ -188,7 +188,9 @@ public class DriveToPose extends Command {
   }
 
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    m_drive.stop();
+  }
 
   @Override
   public boolean isFinished() {
