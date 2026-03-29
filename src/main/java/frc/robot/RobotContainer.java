@@ -26,8 +26,6 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.EventTrigger;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -334,22 +332,18 @@ public class RobotContainer {
     SmartDashboard.putData(
         "Climb/Drive To Pose Left",
         Commands.sequence(
-                new DriveToPose(() -> new Pose2d(2.336, 3.804, new Rotation2d()), akitDrive),
-                Commands.parallel(
-                    climber.extend(),
-                    new DriveToPose(
-                        () -> ClimberConstants.ClimbPosition.FRONT_LEFT.getPose(), akitDrive)),
+                Commands.parallel(climber.extend(), Commands.waitSeconds(1)),
+                new DriveToPose(
+                    () -> ClimberConstants.ClimbPosition.FRONT_LEFT.getPose(), akitDrive),
                 climber.climb())
             .withName("Climbing Front Left"));
 
     SmartDashboard.putData(
         "Climb/Drive To Pose Right",
         Commands.sequence(
-                new DriveToPose(() -> new Pose2d(2.336, 3.804, new Rotation2d()), akitDrive),
-                Commands.parallel(
-                    climber.extend(),
-                    new DriveToPose(
-                        () -> ClimberConstants.ClimbPosition.FRONT_RIGHT.getPose(), akitDrive)),
+                Commands.parallel(climber.extend(), Commands.waitSeconds(1)),
+                new DriveToPose(
+                    () -> ClimberConstants.ClimbPosition.FRONT_RIGHT.getPose(), akitDrive),
                 climber.climb())
             .withName("Climbing Front Right"));
   }
@@ -671,22 +665,20 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "ClimbFrontRight",
         Commands.sequence(
-                Commands.parallel(
-                    climber.extend(),
-                    new DriveToPose(
-                        () -> ClimberConstants.ClimbPosition.FRONT_RIGHT.getPose(), akitDrive)),
+                Commands.parallel(climber.extend(), Commands.waitSeconds(1)),
+                new DriveToPose(
+                    () -> ClimberConstants.ClimbPosition.FRONT_RIGHT.getPose(), akitDrive),
                 climber.climb())
-            .withName("Climbing Front Right"));
+            .withName("ClimbFrontRight"));
 
     NamedCommands.registerCommand(
         "ClimbFrontLeft",
         Commands.sequence(
-                Commands.parallel(
-                    climber.extend(),
-                    new DriveToPose(
-                        () -> ClimberConstants.ClimbPosition.FRONT_LEFT.getPose(), akitDrive)),
+                Commands.parallel(climber.extend(), Commands.waitSeconds(1)),
+                new DriveToPose(
+                    () -> ClimberConstants.ClimbPosition.FRONT_LEFT.getPose(), akitDrive),
                 climber.climb())
-            .withName("Climbing Front Left"));
+            .withName("ClimbFrontLeft"));
 
     NamedCommands.registerCommand("ExtendClimber", climber.climb().withName("Climbing"));
 
