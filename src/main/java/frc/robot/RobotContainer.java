@@ -281,7 +281,7 @@ public class RobotContainer {
           intakeRoller = new IntakeRoller(new IntakeRollerIOSpark() {});
           hopper = new Hopper(new HopperIO() {});
           anotherShooter = new AnotherShooter(new AnotherShooterIOSparkFlex());
-          climber = new Climber(new ClimberIOSpark() {});
+          climber = new Climber(new ClimberIO() {});
 
           vision =
               new Vision(
@@ -667,7 +667,8 @@ public class RobotContainer {
         Commands.sequence(
                 Commands.parallel(climber.extend(), Commands.waitSeconds(1)),
                 new DriveToPose(
-                    () -> ClimberConstants.ClimbPosition.FRONT_RIGHT.getPose(), akitDrive).asProxy(),
+                        () -> ClimberConstants.ClimbPosition.FRONT_RIGHT.getPose(), akitDrive)
+                    .asProxy(),
                 climber.climb())
             .withName("ClimbFrontRight"));
 
@@ -676,7 +677,8 @@ public class RobotContainer {
         Commands.sequence(
                 Commands.parallel(climber.extend(), Commands.waitSeconds(1)),
                 new DriveToPose(
-                    () -> ClimberConstants.ClimbPosition.FRONT_LEFT.getPose(), akitDrive).asProxy(),
+                        () -> ClimberConstants.ClimbPosition.FRONT_LEFT.getPose(), akitDrive)
+                    .asProxy(),
                 climber.climb())
             .withName("ClimbFrontLeft"));
 
