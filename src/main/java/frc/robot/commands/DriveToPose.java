@@ -39,7 +39,7 @@ public class DriveToPose extends Command {
       new LoggedTunableNumber("DriveToPose/ToleranceRotationRadians", Degrees.of(3).in(Radians));
 
   private final ControlConstants POSITION_CONSTANTS =
-      new ControlConstants().withPID(0.5, 0, 0).withTolerance(positionTolerance.get());
+      new ControlConstants().withPID(2.0, 0, 0).withTolerance(positionTolerance.get());
   private final ControlConstants ROTATION_CONSTANTS =
       new ControlConstants()
           .withPID(0.5, 0, 0)
@@ -47,9 +47,9 @@ public class DriveToPose extends Command {
           .withTolerance(rotationTolerance.get());
 
   private final TunableControlConstants controllerPositionConstants =
-      new TunableControlConstants("DrivetToPose/PositionConstants", POSITION_CONSTANTS);
+      new TunableControlConstants("DriveToPose/PositionConstants", POSITION_CONSTANTS);
   private final TunableControlConstants controllerRotationConstants =
-      new TunableControlConstants("DrivetToPose/RotationConstants", ROTATION_CONSTANTS);
+      new TunableControlConstants("DriveToPose/RotationConstants", ROTATION_CONSTANTS);
 
   private final TunablePIDController positionXController =
       new TunablePIDController(controllerPositionConstants);

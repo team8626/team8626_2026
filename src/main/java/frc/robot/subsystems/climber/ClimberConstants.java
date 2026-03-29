@@ -42,8 +42,8 @@ public class ClimberConstants {
 
   // Positions for auto climb
   public static enum ClimbPosition {
-    FRONT_LEFT(new Pose2d(1.6, 3.91, Rotation2d.kZero)),
-    FRONT_RIGHT(new Pose2d(1.6, 3.50, Rotation2d.kZero));
+    FRONT_LEFT(new Pose2d(1.56, 3.88, Rotation2d.kZero)),
+    FRONT_RIGHT(new Pose2d(1.56, 3.48, Rotation2d.kZero));
 
     private Pose2d pose;
 
