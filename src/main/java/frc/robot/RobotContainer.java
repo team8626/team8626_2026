@@ -685,10 +685,12 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "DriveToClimbPoseLeft",
         new DriveToPose(() -> ClimberConstants.ClimbPosition.FRONT_LEFT.getPose(), akitDrive)
+            .withTimeout(5)
             .asProxy());
     NamedCommands.registerCommand(
         "DriveToClimbPoseRight",
         new DriveToPose(() -> ClimberConstants.ClimbPosition.FRONT_RIGHT.getPose(), akitDrive)
+            .withTimeout(5)
             .asProxy());
     NamedCommands.registerCommand("Climb", climber.climb().asProxy());
 
