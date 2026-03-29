@@ -680,7 +680,17 @@ public class RobotContainer {
                 climber.climb())
             .withName("ClimbFrontLeft"));
 
-    NamedCommands.registerCommand("ExtendClimber", climber.climb().withName("Climbing"));
+    // Individual Auto Climb components
+    NamedCommands.registerCommand("ExtendClimber", climber.extend().asProxy());
+    NamedCommands.registerCommand(
+        "DriveToClimbPoseLeft",
+        new DriveToPose(() -> ClimberConstants.ClimbPosition.FRONT_LEFT.getPose(), akitDrive)
+            .asProxy());
+    NamedCommands.registerCommand(
+        "DriveToClimbPoseRight",
+        new DriveToPose(() -> ClimberConstants.ClimbPosition.FRONT_RIGHT.getPose(), akitDrive)
+            .asProxy());
+    NamedCommands.registerCommand("Climb", climber.climb().asProxy());
 
     NamedCommands.registerCommand(
         "PlanPathAlignToTower",
