@@ -1,0 +1,122 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 5.732490189783104,
+        "y": 7.440683333333332
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 6.732490189783104,
+        "y": 7.440683333333332
+      },
+      "isLocked": false,
+      "linkedName": "Trench Exit Left"
+    },
+    {
+      "anchor": {
+        "x": 7.705815031828704,
+        "y": 6.127582320601851
+      },
+      "prevControl": {
+        "x": 7.671457404821358,
+        "y": 7.461984556398143
+      },
+      "nextControl": {
+        "x": 7.788989413884133,
+        "y": 2.8972055151255716
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.421063739654681,
+        "y": 5.511884096746575
+      },
+      "prevControl": {
+        "x": 6.422600643906963,
+        "y": 4.338659924372147
+      },
+      "nextControl": {
+        "x": 6.419839702108401,
+        "y": 6.44627570575941
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.732490189783104,
+        "y": 7.440683333333332
+      },
+      "prevControl": {
+        "x": 6.267211535031392,
+        "y": 7.352448273401826
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Trench Exit Left"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.49184827302631556,
+      "rotationDegrees": -89.32047864233374
+    },
+    {
+      "waypointRelativePos": 1.6,
+      "rotationDegrees": -90.0
+    }
+  ],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.3812292358803985,
+      "maxWaypointRelativePos": 1.8622689991694354,
+      "constraints": {
+        "maxVelocity": 2.0,
+        "maxAcceleration": 2.0,
+        "maxAngularVelocity": 360.0,
+        "maxAngularAcceleration": 260.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "CollectStart",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "CollectDone",
+      "waypointRelativePos": 1.8723753683693536,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 2.5,
+    "maxAcceleration": 2.0,
+    "maxAngularVelocity": 360.0,
+    "maxAngularAcceleration": 260.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 4.0,
+    "rotation": -90.0
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 4.0,
+    "rotation": -90.0
+  },
+  "useDefaultConstraints": true
+}

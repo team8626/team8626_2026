@@ -1,0 +1,122 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 5.832024962542809,
+        "y": 0.6651774450231482
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 7.409761435343734,
+        "y": 0.9305720486111113
+      },
+      "isLocked": false,
+      "linkedName": "Trench Exit Right"
+    },
+    {
+      "anchor": {
+        "x": 7.757319299768518,
+        "y": 2.224018084490741
+      },
+      "prevControl": {
+        "x": 7.754913571465983,
+        "y": 0.7886551226153014
+      },
+      "nextControl": {
+        "x": 7.762108868634259,
+        "y": 5.081684823495371
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.171033684717465,
+        "y": 2.029946623501713
+      },
+      "prevControl": {
+        "x": 6.2423491536869395,
+        "y": 2.8368422364200625
+      },
+      "nextControl": {
+        "x": 6.102479666095891,
+        "y": 1.2542953142836768
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.832024962542809,
+        "y": 0.6651774450231482
+      },
+      "prevControl": {
+        "x": 6.0860186126569635,
+        "y": 1.2611709385702057
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Trench Exit Right"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.29303042763157855,
+      "rotationDegrees": 89.24712284495789
+    },
+    {
+      "waypointRelativePos": 1.3317125822368414,
+      "rotationDegrees": 90.0
+    }
+  ],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.7347817411591346,
+      "maxWaypointRelativePos": 1.400448182711198,
+      "constraints": {
+        "maxVelocity": 2.0,
+        "maxAcceleration": 1.0,
+        "maxAngularVelocity": 360.0,
+        "maxAngularAcceleration": 260.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "CollectStart",
+      "waypointRelativePos": 0.08561306063122905,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "CollectDone",
+      "waypointRelativePos": 1.543643583887044,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 2.5,
+    "maxAcceleration": 2.0,
+    "maxAngularVelocity": 360.0,
+    "maxAngularAcceleration": 260.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 4.0,
+    "rotation": 90.0
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 90.0
+  },
+  "useDefaultConstraints": true
+}

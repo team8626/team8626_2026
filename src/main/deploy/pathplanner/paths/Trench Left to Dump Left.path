@@ -44,7 +44,12 @@
       "linkedName": "Dump Left"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1.1825175382653064,
+      "rotationDegrees": -90.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [

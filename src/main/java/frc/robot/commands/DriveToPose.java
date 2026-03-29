@@ -26,6 +26,7 @@ import frc.robot.util.TunableControls.ControlConstants;
 import frc.robot.util.TunableControls.TunableControlConstants;
 import frc.robot.util.TunableControls.TunablePIDController;
 import java.util.function.Supplier;
+import org.littletonrobotics.frc2026.util.geometry.AllianceFlipUtil;
 import org.littletonrobotics.junction.Logger;
 
 public class DriveToPose extends Command {
@@ -125,7 +126,7 @@ public class DriveToPose extends Command {
     m_drive = drive;
 
     positionOffsetX = offset.get();
-    desiredPose = new_pose;
+    desiredPose = () -> AllianceFlipUtil.apply(new_pose.get());
 
     setName("DriveToPose");
 

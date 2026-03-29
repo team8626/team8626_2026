@@ -26,7 +26,6 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.EventTrigger;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -47,11 +46,11 @@ import frc.robot.Constants.ControllerConstants;
 import frc.robot.Constants.Dimensions;
 import frc.robot.Constants.Mode;
 import frc.robot.commands.AgitateCommand;
-import frc.robot.commands.PlanPathAlignToTowerCommand;
 import frc.robot.commands.AnotherShooterRampupCommand;
 import frc.robot.commands.CollectCommand;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveToPose;
+import frc.robot.commands.PlanPathAlignToTowerCommand;
 import frc.robot.commands.RumbleCommands;
 import frc.robot.commands.ShooterCommandsUtil;
 import frc.robot.commands.SystemChecks;
@@ -316,7 +315,8 @@ public class RobotContainer {
 
     // Add auto-align to tower command to SmartDashboard
     SmartDashboard.putData(
-        new PlanPathAlignToTowerCommand(akitDrive, vision).withName("Climb/Plan Path Align To Tower"));
+        new PlanPathAlignToTowerCommand(akitDrive, vision)
+            .withName("Climb/Plan Path Align To Tower"));
 
     // Set up commands
     teleopDrive = new TeleopDriveCommand(akitDrive, controller);
@@ -331,8 +331,27 @@ public class RobotContainer {
     // configureNamedCommands();
 
     // Configure Smart Dashboard commands
-    SmartDashboard.putData("Climb/Drive To Pose Left", new DriveToPose(() -> ClimberConstants.ClimbPosition.FRONT_LEFT.getPose(), akitDrive));
-    SmartDashboard.putData("Climb/Drive To Pose Right", new DriveToPose(() -> ClimberConstants.ClimbPosition.FRONT_RIGHT.getPose(), akitDrive));
+    SmartDashboard.putData(
+        "Climb/Drive To Pose Left",
+        Commands.sequence(
+                new DriveToPose(() -> new Pose2d(2.336, 3.804, new Rotation2d()), akitDrive),
+                Commands.parallel(
+                    climber.extend(),
+                    new DriveToPose(
+                        () -> ClimberConstants.ClimbPosition.FRONT_LEFT.getPose(), akitDrive)),
+                climber.climb())
+            .withName("Climbing Front Left"));
+
+    SmartDashboard.putData(
+        "Climb/Drive To Pose Right",
+        Commands.sequence(
+                new DriveToPose(() -> new Pose2d(2.336, 3.804, new Rotation2d()), akitDrive),
+                Commands.parallel(
+                    climber.extend(),
+                    new DriveToPose(
+                        () -> ClimberConstants.ClimbPosition.FRONT_RIGHT.getPose(), akitDrive)),
+                climber.climb())
+            .withName("Climbing Front Right"));
   }
 
   public void configureDefaultCommands() {
@@ -650,7 +669,30 @@ public class RobotContainer {
             .withName("AimAndDumpLong"));
 
     NamedCommands.registerCommand(
-        "PlanPathAlignToTower", new PlanPathAlignToTowerCommand(akitDrive, vision).withName("PlanPathAlignToTower"));
+        "ClimbFrontRight",
+        Commands.sequence(
+                Commands.parallel(
+                    climber.extend(),
+                    new DriveToPose(
+                        () -> ClimberConstants.ClimbPosition.FRONT_RIGHT.getPose(), akitDrive)),
+                climber.climb())
+            .withName("Climbing Front Right"));
+
+    NamedCommands.registerCommand(
+        "ClimbFrontLeft",
+        Commands.sequence(
+                Commands.parallel(
+                    climber.extend(),
+                    new DriveToPose(
+                        () -> ClimberConstants.ClimbPosition.FRONT_LEFT.getPose(), akitDrive)),
+                climber.climb())
+            .withName("Climbing Front Left"));
+
+    NamedCommands.registerCommand("ExtendClimber", climber.climb().withName("Climbing"));
+
+    NamedCommands.registerCommand(
+        "PlanPathAlignToTower",
+        new PlanPathAlignToTowerCommand(akitDrive, vision).withName("PlanPathAlignToTower"));
   }
 
   /**
