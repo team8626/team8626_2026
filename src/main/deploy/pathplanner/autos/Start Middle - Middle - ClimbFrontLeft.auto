@@ -19,25 +19,7 @@
         {
           "type": "named",
           "data": {
-            "name": "ExtendClimber"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "DriveToClimbPoseLeft"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Climb"
+            "name": "ClimbFrontLeft"
           }
         }
       ]
