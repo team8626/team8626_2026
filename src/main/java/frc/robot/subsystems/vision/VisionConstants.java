@@ -31,8 +31,9 @@ public class VisionConstants {
   public static final double[] LINEAR_STD_DEV_BASELINES = {0.2, 0.2, 0.07, 0.3, 0.3, 0.3}; // Meters
   public static final double ANGULAR_STD_DEV_BASELINE = 1.0; // Radians
 
-  // Front left, rear left, rear right camera names (must match PhotonVision config)
-  public static final String[] CAMERA_NAMES = {"OV9182_1", "OV9182_2", "OV9182_3"};
+  // Rear left (8626CAM1), rear right (8626CAM2), front left (8626CAM3) camera names (must match
+  // PhotonVision config)
+  public static final String[] CAMERA_NAMES = {"8626CAM1", "8626CAM2", "8626CAM3"};
 
   public static final double MAX_AMBIGUITY = 0.3;
   public static final Distance MAX_Z_HEIGHT = Meters.of(0.2);
