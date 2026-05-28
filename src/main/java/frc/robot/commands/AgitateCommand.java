@@ -47,7 +47,7 @@ public class AgitateCommand extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    linkage.stow();
+    // linkage.stow();
     rollers.stop();
   }
 

@@ -91,7 +91,7 @@ import frc.robot.subsystems.intakeRoller.IntakeRoller;
 import frc.robot.subsystems.intakeRoller.IntakeRollerConstants;
 import frc.robot.subsystems.intakeRoller.IntakeRollerIO;
 import frc.robot.subsystems.intakeRoller.IntakeRollerIOSim;
-import frc.robot.subsystems.intakeRoller.IntakeRollerIOSpark;
+import frc.robot.subsystems.intakeRoller.IntakeRollerIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
@@ -141,7 +141,8 @@ public class RobotContainer {
   private static final Trigger testAgitateTrigger = operator.y();
 
   private static final Trigger collectTrigger = controller.leftBumper();
-  private static final Trigger plowTrigger = controller.leftTrigger();
+  //   private static final Trigger plowTrigger = controller.leftTrigger();
+  private static final Trigger agitateTrigger = controller.leftTrigger();
   //   private static final Trigger blurpTrigger = controller.y();
   private static final Trigger unjamTrigger = controller.x();
 
@@ -249,7 +250,7 @@ public class RobotContainer {
 
           index = new Indexer(new IndexerIOSpark() {});
           intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSpark() {});
-          intakeRoller = new IntakeRoller(new IntakeRollerIOSpark() {});
+          intakeRoller = new IntakeRoller(new IntakeRollerIOTalonFX() {});
           hopper = new Hopper(new HopperIO() {});
           anotherShooter = new AnotherShooter(new AnotherShooterIOSparkFlex());
           climber = new Climber(new ClimberIOSpark() {});
@@ -278,7 +279,7 @@ public class RobotContainer {
 
           index = new Indexer(new IndexerIOSpark() {});
           intakeLinkage = new IntakeLinkage(new IntakeLinkageIOSpark() {});
-          intakeRoller = new IntakeRoller(new IntakeRollerIOSpark() {});
+          intakeRoller = new IntakeRoller(new IntakeRollerIOTalonFX() {});
           hopper = new Hopper(new HopperIO() {});
           anotherShooter = new AnotherShooter(new AnotherShooterIOSparkFlex());
           climber = new Climber(new ClimberIO() {});
@@ -408,17 +409,19 @@ public class RobotContainer {
             .alongWith(teleopDrive.withSpeed(DriveSpeed.INTAKE))
             .withName("Collect Command"));
 
+    agitateTrigger.whileTrue(new AgitateCommand(intakeLinkage, intakeRoller));
+
     // -------------------------------------------------------------- Plow
     //
     // Run the intake roller backwards and moves the intake to plow position
     //
-    plowTrigger.whileTrue(
-        new CollectCommand(
-                () -> IntakeLinkageConstants.PLOW_ANGLE,
-                () -> IntakeRollerConstants.PLOW_VELOCITY,
-                intakeLinkage,
-                intakeRoller)
-            .withName("Plow Command"));
+    // plowTrigger.whileTrue(
+    //     new CollectCommand(
+    //             () -> IntakeLinkageConstants.PLOW_ANGLE,
+    //             () -> IntakeRollerConstants.PLOW_VELOCITY,
+    //             intakeLinkage,
+    //             intakeRoller)
+    //         .withName("Plow Command"));
 
     // -------------------------------------------------------------- Just Shoot
     //
@@ -427,15 +430,15 @@ public class RobotContainer {
     // Activates agitation
     //
     fixedRPMShootTrigger
-        .and(inAllianceZoneTrigger)
+        // .and(inAllianceZoneTrigger)
         .whileTrue(
-            Commands.sequence(new AnotherShooterRampupCommand(anotherShooter), feedShooterCommand())
-                .withName("Just Shoot Command")
-                .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY)));
+        Commands.sequence(new AnotherShooterRampupCommand(anotherShooter), feedShooterCommand())
+            .withName("Just Shoot Command")
+            .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY)));
 
-    fixedRPMShootTrigger
-        .and(inAllianceZoneTrigger.negate())
-        .whileTrue(RumbleCommands.Rumble(controller.getHID()).withName("Out of Alliance Zone"));
+    // fixedRPMShootTrigger
+    //     .and(inAllianceZoneTrigger.negate())
+    //     .whileTrue(RumbleCommands.Rumble(controller.getHID()).withName("Out of Alliance Zone"));
 
     // -------------------------------------------------------------- Aim and Shoot
     //
@@ -450,7 +453,7 @@ public class RobotContainer {
             teleopDrive.withHubLock(
                 Commands.parallel(
                         new TrackTargetAndShootCommand(index, anotherShooter, akitDrive),
-                        new AgitateCommand(intakeLinkage, intakeRoller),
+                        // new AgitateCommand(intakeLinkage, intakeRoller),
                         simLaunchFuelCommand())
                     .withName("Aim And Shoot Command")));
 
@@ -465,7 +468,7 @@ public class RobotContainer {
                             index,
                             anotherShooter,
                             akitDrive),
-                        new AgitateCommand(intakeLinkage, intakeRoller),
+                        // new AgitateCommand(intakeLinkage, intakeRoller),
                         simLaunchFuelCommand())
                     .withName("Passing Shoot Command")));
 
@@ -482,7 +485,7 @@ public class RobotContainer {
                         index,
                         anotherShooter,
                         akitDrive),
-                    new AgitateCommand(intakeLinkage, intakeRoller),
+                    // new AgitateCommand(intakeLinkage, intakeRoller),
                     simLaunchFuelCommand())
                 .withName("Passing Shoot Command")));
 
@@ -636,9 +639,7 @@ public class RobotContainer {
         "AimAndDumpShort",
         Commands.deadline(
                 Commands.waitSeconds(AutoConstants.DUMP_DURATION_SHORT.in(Seconds)),
-                Commands.parallel(
-                    new TrackTargetAndShootCommand(index, anotherShooter, akitDrive),
-                    new AgitateCommand(intakeLinkage, intakeRoller)))
+                Commands.parallel(new TrackTargetAndShootCommand(index, anotherShooter, akitDrive)))
             .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY))
             .withName("AimAndDumpShort"));
 
@@ -646,9 +647,7 @@ public class RobotContainer {
         "AimAndDumpMedium",
         Commands.deadline(
                 Commands.waitSeconds(AutoConstants.DUMP_DURATION_MEDIUM.in(Seconds)),
-                Commands.parallel(
-                    new TrackTargetAndShootCommand(index, anotherShooter, akitDrive),
-                    new AgitateCommand(intakeLinkage, intakeRoller)))
+                Commands.parallel(new TrackTargetAndShootCommand(index, anotherShooter, akitDrive)))
             .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY))
             .withName("AimAndDumpMedium"));
 
@@ -656,9 +655,7 @@ public class RobotContainer {
         "AimAndDumpLong",
         Commands.deadline(
                 Commands.waitSeconds(AutoConstants.DUMP_DURATION_LONG.in(Seconds)),
-                Commands.parallel(
-                    new TrackTargetAndShootCommand(index, anotherShooter, akitDrive),
-                    new AgitateCommand(intakeLinkage, intakeRoller)))
+                Commands.parallel(new TrackTargetAndShootCommand(index, anotherShooter, akitDrive)))
             .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY))
             .withName("AimAndDumpLong"));
 
@@ -851,8 +848,7 @@ public class RobotContainer {
               index.stop();
             },
             index),
-        simLaunchFuelCommand(),
-        new AgitateCommand(intakeLinkage, intakeRoller));
+        simLaunchFuelCommand());
   }
 
   private Command simLaunchFuelCommand() {
@@ -876,7 +872,7 @@ public class RobotContainer {
 
   private void stopShooting(Time delay) {
     index.stop();
-    intakeLinkage.stow();
+    // intakeLinkage.stow();
 
     CommandScheduler.getInstance()
         .schedule(
