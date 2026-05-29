@@ -56,7 +56,7 @@ public class DriveConstants {
   public static final AngularVelocity SLOW_ROT_SPEED = RotationsPerSecond.of(0.75);
 
   public static final LinearVelocity FAST_DRIVE_SPEED = MetersPerSecond.of(5.74);
-  public static final AngularVelocity FAST_ROT_SPEED = RotationsPerSecond.of(2.5);
+  public static final AngularVelocity FAST_ROT_SPEED = RotationsPerSecond.of(1.5);
 
   public static final LinearVelocity INTAKE_DRIVE_SPEED = MetersPerSecond.of(2);
   public static final AngularVelocity INTAKE_ROT_SPEED = RotationsPerSecond.of(0.75);
@@ -100,7 +100,7 @@ public class DriveConstants {
 
         WHEEL_RADIUS = Inches.of(1.985);
         WHEEL_COF = 2.255;
-        DRIVE_MOTOR_CURRENT_LIMIT = Amps.of(80);
+        DRIVE_MOTOR_CURRENT_LIMIT = Amps.of(60);
         DRIVE_GEAR_RATIO = 5.8909090909090915; // WCP Swerve x2i 11t pinion, X3 configuration
         DRIVE_GEARBOX = DCMotor.getKrakenX60Foc(1);
         SPEED_AT_12V = MetersPerSecond.of(5.24);
