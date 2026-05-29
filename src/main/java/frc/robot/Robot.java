@@ -14,12 +14,14 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -106,6 +108,8 @@ public class Robot extends LoggedRobot {
     // Log hub state
     Logger.recordOutput("HubShift/Official", HubShiftTracker.getOfficialShiftInfo());
     Logger.recordOutput("HubShift/Shifted", HubShiftTracker.getShiftedShiftInfo());
+
+    RobotController.setBrownoutVoltage(Volts.of(6));
 
     // Start webserver
     WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
