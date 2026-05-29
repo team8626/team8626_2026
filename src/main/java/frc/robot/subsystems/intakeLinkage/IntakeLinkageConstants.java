@@ -24,16 +24,16 @@ public class IntakeLinkageConstants {
   public static final boolean MOTOR_INVERTED = false;
   public static final Current MOTOR_CURRENT_LIMIT = Amps.of(40);
 
-  public static final Angle MIN_ANGLE = Degrees.of(80);
-  public static final Angle MAX_ANGLE = Degrees.of(220);
+  public static final Angle MIN_ANGLE = Degrees.of(180);
+  public static final Angle MAX_ANGLE = Degrees.of(225);
 
-  public static final Angle STOW_ANGLE = Degrees.of(120);
-  public static final Angle AGITAGE_IN_ANGLE = Degrees.of(100);
-  public static final Angle AGITAGE_OUT_ANGLE = Degrees.of(150);
-  public static final Angle DEPLOY_ANGLE = Degrees.of(195);
-  public static final Angle PLOW_ANGLE = Degrees.of(210);
-  public static final Angle BLURP_ANGLE = Degrees.of(175);
-  public static final Angle HOPPER_OPEN_ANGLE = Degrees.of(145);
+  public static final Angle STOW_ANGLE = Degrees.of(180);
+  public static final Angle AGITAGE_IN_ANGLE = Degrees.of(195);
+  public static final Angle AGITAGE_OUT_ANGLE = Degrees.of(220);
+  public static final Angle DEPLOY_ANGLE = Degrees.of(217.5);
+  public static final Angle PLOW_ANGLE = Degrees.of(220);
+  public static final Angle BLURP_ANGLE = Degrees.of(200);
+  public static final Angle HOPPER_OPEN_ANGLE = Degrees.of(210);
 
   public static final Angle STARTING_ANGLE = STOW_ANGLE;
 
@@ -68,7 +68,7 @@ public class IntakeLinkageConstants {
   // PID Constants
   public static final Gains GAINS =
       switch (Constants.robot) {
-        case REBUILT_PHOENIX, REBUILT_AKIT -> new Gains(0.007, 0.0, 0.0, 0.0, 0.0, 0.0);
+        case REBUILT_PHOENIX, REBUILT_AKIT -> new Gains(0.007, 0.00001, 0.0, 0.0, 0.0, 0.0);
         default -> new Gains(0.05, 0.0, 0.0, 0.10395, 0.00296, 0.0);
       };
 
