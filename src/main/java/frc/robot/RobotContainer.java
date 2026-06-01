@@ -195,10 +195,6 @@ public class RobotContainer {
               new VisionIOPhotonVisionSim(
                   VisionConstants.CAMERA_NAMES[1],
                   VisionConstants.CAMERA_TRANSFORMS[1],
-                  akitDrive::getPose),
-              new VisionIOPhotonVisionSim(
-                  VisionConstants.CAMERA_NAMES[2],
-                  VisionConstants.CAMERA_TRANSFORMS[2],
                   akitDrive::getPose));
       //   vision.setPoseSupplier(drive::getPose);
       configureFuelSim();
@@ -261,9 +257,7 @@ public class RobotContainer {
                   new VisionIOPhotonVision(
                       VisionConstants.CAMERA_NAMES[0], VisionConstants.CAMERA_TRANSFORMS[0]),
                   new VisionIOPhotonVision(
-                      VisionConstants.CAMERA_NAMES[1], VisionConstants.CAMERA_TRANSFORMS[1]),
-                  new VisionIOPhotonVision(
-                      VisionConstants.CAMERA_NAMES[2], VisionConstants.CAMERA_TRANSFORMS[2]));
+                      VisionConstants.CAMERA_NAMES[1], VisionConstants.CAMERA_TRANSFORMS[1]));
 
           break;
         case REBUILT_AKIT:
@@ -290,9 +284,7 @@ public class RobotContainer {
                   new VisionIOPhotonVision(
                       VisionConstants.CAMERA_NAMES[0], VisionConstants.CAMERA_TRANSFORMS[0]),
                   new VisionIOPhotonVision(
-                      VisionConstants.CAMERA_NAMES[1], VisionConstants.CAMERA_TRANSFORMS[1]),
-                  new VisionIOPhotonVision(
-                      VisionConstants.CAMERA_NAMES[2], VisionConstants.CAMERA_TRANSFORMS[2]));
+                      VisionConstants.CAMERA_NAMES[1], VisionConstants.CAMERA_TRANSFORMS[1]));
 
           break;
 
