@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.817603660300927,
+        "x": 3.152760342368045,
         "y": 7.440683333333332
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.0113607662671233,
-        "y": 7.36482439711758
+        "x": 1.9703706620956485,
+        "y": 7.444336661911555
       },
       "isLocked": false,
       "linkedName": "Trench Start Left"
@@ -28,7 +28,12 @@
       "linkedName": "Dump Left"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.6419108791649943,
+      "rotationDegrees": 0.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -48,7 +53,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": 1.2750255178363528
   },
   "useDefaultConstraints": true
 }

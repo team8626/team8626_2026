@@ -9,7 +9,7 @@
       "prevControl": null,
       "nextControl": {
         "x": 0.9073792897402975,
-        "y": 2.3662859856592466
+        "y": 2.366285985659247
       },
       "isLocked": false,
       "linkedName": "Outpost"
@@ -55,7 +55,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }
