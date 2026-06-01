@@ -7,13 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Bump Right CCW Collect"
+            "pathName": "Under Trench Start Right to Trench Right"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Bump Right to Dump Right"
+            "pathName": "Trench Right CW Collect Long"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Trench Right to Dump Right"
           }
         },
         {

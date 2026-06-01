@@ -4,24 +4,24 @@
     {
       "anchor": {
         "x": 3.5439444444444446,
-        "y": 0.65
+        "y": 0.6439333333333332
       },
       "prevControl": null,
       "nextControl": {
         "x": 5.109522190521478,
-        "y": 0.8958345221112687
+        "y": 0.889767855444602
       },
       "isLocked": false,
       "linkedName": "Trench Start Right"
     },
     {
       "anchor": {
-        "x": 5.986326676176889,
-        "y": 2.126547788873039
+        "x": 6.048266666666667,
+        "y": 0.6439333333333332
       },
       "prevControl": {
-        "x": 5.316279408768213,
-        "y": 2.090439368139592
+        "x": 5.378219399257991,
+        "y": 0.6078249125998865
       },
       "nextControl": null,
       "isLocked": false,
@@ -54,13 +54,13 @@
   },
   "goalEndState": {
     "velocity": 4.0,
-    "rotation": 0.7641956827656347
+    "rotation": 180.0
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

@@ -4,12 +4,12 @@
     {
       "anchor": {
         "x": 3.5439444444444446,
-        "y": 0.65
+        "y": 0.6439333333333332
       },
       "prevControl": null,
       "nextControl": {
         "x": 2.7804909159264737,
-        "y": 0.655842323981943
+        "y": 0.6497756573152762
       },
       "isLocked": false,
       "linkedName": "Trench Start Right"
@@ -48,7 +48,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

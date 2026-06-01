@@ -3,13 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.5439444444444446,
+        "x": 6.048266666666667,
         "y": 0.6439333333333332
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.7979257277397265,
-        "y": 0.7042851366295656
+        "x": 5.062809544058588,
+        "y": 0.6124166784786198
+      },
+      "isLocked": false,
+      "linkedName": "Trench Exit Right Reversed"
+    },
+    {
+      "anchor": {
+        "x": 3.5439444444444446,
+        "y": 0.6439333333333332
+      },
+      "prevControl": {
+        "x": 4.050779430613857,
+        "y": 0.6345475002561214
+      },
+      "nextControl": {
+        "x": 2.7546444444444447,
+        "y": 0.65855
       },
       "isLocked": false,
       "linkedName": "Trench Start Right"
@@ -20,18 +36,30 @@
         "y": 2.207024956597222
       },
       "prevControl": {
-        "x": 3.0880670470756058,
-        "y": 2.5405848787446508
+        "x": 2.8496433867246966,
+        "y": 2.8479949194967653
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": "Dump Right"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1.1825175382653064,
+      "rotationDegrees": 0.4557258540437037
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "RampUp",
+      "waypointRelativePos": 0.3881999017681729,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 2.5,
     "maxAcceleration": 2.0,
@@ -47,8 +75,8 @@
   "reversed": false,
   "folder": null,
   "idealStartingState": {
-    "velocity": 0,
-    "rotation": 180.0
+    "velocity": 4.0,
+    "rotation": 0.7641956827656347
   },
   "useDefaultConstraints": true
 }
