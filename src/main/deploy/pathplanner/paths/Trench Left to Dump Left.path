@@ -12,20 +12,20 @@
         "y": 7.409166678478619
       },
       "isLocked": false,
-      "linkedName": "Trench Exit Left"
+      "linkedName": "Trench Exit Left Reversed"
     },
     {
       "anchor": {
-        "x": 3.152760342368045,
+        "x": 3.4075222222222226,
         "y": 7.440683333333332
       },
       "prevControl": {
-        "x": 4.3816213474495385,
-        "y": 7.425653449628995
+        "x": 3.914357208391635,
+        "y": 7.431297500256121
       },
       "nextControl": {
-        "x": 2.516898210699794,
-        "y": 7.448460399943345
+        "x": 2.6182222222222227,
+        "y": 7.455299999999999
       },
       "isLocked": false,
       "linkedName": "Trench Start Left"

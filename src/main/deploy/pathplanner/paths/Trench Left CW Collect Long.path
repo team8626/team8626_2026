@@ -57,13 +57,13 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Trench Exit Left"
+      "linkedName": "Trench Exit Left Reversed"
     }
   ],
   "rotationTargets": [
     {
       "waypointRelativePos": 0.49184827302631556,
-      "rotationDegrees": -89.32047864233374
+      "rotationDegrees": -90.0
     },
     {
       "waypointRelativePos": 1.6,
@@ -73,10 +73,10 @@
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.3812292358803985,
-      "maxWaypointRelativePos": 1.8622689991694354,
+      "minWaypointRelativePos": 0.8881294964028813,
+      "maxWaypointRelativePos": 1.4579136690647623,
       "constraints": {
-        "maxVelocity": 2.0,
+        "maxVelocity": 0.9,
         "maxAcceleration": 2.0,
         "maxAngularVelocity": 360.0,
         "maxAngularAcceleration": 260.0,
@@ -116,7 +116,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 4.0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

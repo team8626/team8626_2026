@@ -5,33 +5,9 @@
     "data": {
       "commands": [
         {
-          "type": "named",
-          "data": {
-            "name": "AimAndDumpShort"
-          }
-        },
-        {
           "type": "path",
           "data": {
-            "pathName": "Bump Start Right to Bump Right"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Bump Right CCW Collect"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Bump Right to Bump Start Right"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "AimAndDumpLong"
+            "pathName": "Under Trench Start Right to Trench Right"
           }
         }
       ]
