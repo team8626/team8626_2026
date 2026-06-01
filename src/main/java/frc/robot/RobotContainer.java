@@ -712,8 +712,8 @@ public class RobotContainer {
         .onTrue(
             Commands.runOnce(
                     () -> {
-                      intakeLinkage.setPosition(IntakeLinkageConstants.STOW_ANGLE);
-                      intakeRoller.stop();
+                      // intakeLinkage.setPosition(IntakeLinkageConstants.STOW_ANGLE);
+                      // intakeRoller.stop();
                     })
                 .withName("PP Collect Done"));
 
