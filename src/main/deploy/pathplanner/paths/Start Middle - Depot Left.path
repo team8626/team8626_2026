@@ -3,35 +3,42 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.152760342368045,
-        "y": 7.440683333333332
+        "x": 3.5,
+        "y": 4.0
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.6157692737340508,
-        "y": 7.440683333333332
+        "x": 0.3838873038516404,
+        "y": 4.015592011412269
       },
       "isLocked": false,
-      "linkedName": "Trench Start Left"
+      "linkedName": "Start Middle"
     },
     {
       "anchor": {
-        "x": 5.732490189783104,
-        "y": 7.440683333333332
+        "x": 0.5520898716119826,
+        "y": 7.224379457917262
       },
       "prevControl": {
-        "x": 5.081028422952558,
-        "y": 7.440683333333332
+        "x": 2.0917902995720397,
+        "y": 7.974821683309559
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Trench Exit Left"
+      "linkedName": "Depot Left"
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "CollectStart",
+      "waypointRelativePos": 0.4002862595419858,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 2.5,
     "maxAcceleration": 2.0,
@@ -41,14 +48,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 4.0,
-    "rotation": 0.0
+    "velocity": 0,
+    "rotation": -90.0
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 1.2750255178363528
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }

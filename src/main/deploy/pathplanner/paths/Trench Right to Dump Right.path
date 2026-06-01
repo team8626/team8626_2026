@@ -3,32 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.832024962542809,
-        "y": 0.6651774450231482
+        "x": 5.856940085592011,
+        "y": 2.695848787446506
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.84656783993473,
-        "y": 0.6336607901684351
+        "x": 4.871482962983932,
+        "y": 2.6643321325917935
       },
       "isLocked": false,
-      "linkedName": "Trench Exit Right"
-    },
-    {
-      "anchor": {
-        "x": 3.0621639901620377,
-        "y": 0.6651774450231482
-      },
-      "prevControl": {
-        "x": 3.6601639901620375,
-        "y": 0.6651774450231481
-      },
-      "nextControl": {
-        "x": 2.7264309298658573,
-        "y": 0.6651774450231482
-      },
-      "isLocked": false,
-      "linkedName": "Trench Start Right"
+      "linkedName": "Bump Exit Right"
     },
     {
       "anchor": {
@@ -36,8 +20,8 @@
         "y": 2.207024956597222
       },
       "prevControl": {
-        "x": 2.7792514148224354,
-        "y": 1.1428306833647344
+        "x": 2.808699522943338,
+        "y": 2.331001072881785
       },
       "nextControl": null,
       "isLocked": false,
@@ -46,8 +30,8 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 1.08,
-      "rotationDegrees": 90.0
+      "waypointRelativePos": 0.4,
+      "rotationDegrees": 35.0
     }
   ],
   "constraintZones": [],
@@ -55,7 +39,7 @@
   "eventMarkers": [
     {
       "name": "RampUp",
-      "waypointRelativePos": 0.5159166257367387,
+      "waypointRelativePos": 0.25,
       "endWaypointRelativePos": null,
       "command": null
     }
@@ -76,7 +60,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 2.0,
-    "rotation": 90.0
+    "rotation": 0.7641956827656347
   },
   "useDefaultConstraints": true
 }
