@@ -48,8 +48,8 @@ public class CollectCommand extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    // linkage.stow();
-    roller.stop();
+    linkage.stow();
+    // roller.stop();
 
     // CommandScheduler.getInstance()
     //     .schedule(
