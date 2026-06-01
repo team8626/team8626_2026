@@ -13,19 +13,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Trench Start Right to Trench Right"
+            "pathName": "Bump Start Right to Bump Right"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Trench Right CCW Collect"
+            "pathName": "Bump Right CCW Collect"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Trench Right to Trench Start Right"
+            "pathName": "Bump Right to Bump Start Right"
           }
         },
         {
