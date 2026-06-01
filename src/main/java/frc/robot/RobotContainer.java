@@ -647,7 +647,9 @@ public class RobotContainer {
         "AimAndDumpLong",
         Commands.deadline(
                 Commands.waitSeconds(AutoConstants.DUMP_DURATION_LONG.in(Seconds)),
-                Commands.parallel(new TrackTargetAndShootCommand(index, anotherShooter, akitDrive)))
+                Commands.parallel(
+                    new AgitateCommand(intakeLinkage, intakeRoller).asProxy(),
+                    new TrackTargetAndShootCommand(index, anotherShooter, akitDrive)))
             .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY))
             .withName("AimAndDumpLong"));
 
