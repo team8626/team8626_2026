@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.048266666666667,
-        "y": 0.643933333333333
+        "x": 7.734055555555555,
+        "y": 0.6926555555555569
       },
       "isLocked": false,
       "linkedName": "Trench Exit Right"
@@ -20,12 +20,28 @@
         "y": 2.9046444444444446
       },
       "prevControl": {
-        "x": 7.718740557732324,
-        "y": 2.4173426625289016
+        "x": 7.613562947308537,
+        "y": 2.4279068890740736
       },
       "nextControl": {
-        "x": 7.675588888888889,
-        "y": 7.455299999999999
+        "x": 7.958177777777777,
+        "y": 4.054488888888889
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.447788888888888,
+        "y": 2.6415444444444462
+      },
+      "prevControl": {
+        "x": 6.1652,
+        "y": 3.8401111111111126
+      },
+      "nextControl": {
+        "x": 6.912888416595187,
+        "y": 0.6688809303797956
       },
       "isLocked": false,
       "linkedName": null
@@ -54,7 +70,7 @@
     {
       "name": "Constraints Zone",
       "minWaypointRelativePos": 0.5349896480331242,
-      "maxWaypointRelativePos": 1.243892339544511,
+      "maxWaypointRelativePos": 1.5,
       "constraints": {
         "maxVelocity": 0.9,
         "maxAcceleration": 2.0,
@@ -75,7 +91,7 @@
     },
     {
       "name": "CollectDone",
-      "waypointRelativePos": 1.45,
+      "waypointRelativePos": 1.9,
       "endWaypointRelativePos": null,
       "command": null
     }
