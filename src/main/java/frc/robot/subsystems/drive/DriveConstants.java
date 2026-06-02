@@ -233,7 +233,7 @@ public class DriveConstants {
 
     private static final SteerFeedbackType STEER_FEEDBACK_TYPE = SteerFeedbackType.FusedCANcoder;
 
-    private static final Current SLIP_CURRENT = Amps.of(80);
+    private static final Current SLIP_CURRENT = Amps.of(60);
 
     private static final TalonFXConfiguration DRIVE_CONFIGS =
         new TalonFXConfiguration()
