@@ -65,6 +65,7 @@ public class DriveConstants {
   public static final AngularVelocity DEFAULT_ROT_SPEED = FAST_ROT_SPEED;
 
   public static final LinearAcceleration MAX_TELEOP_ACCEL = MetersPerSecondPerSecond.of(15);
+  public static final AngularAcceleration MAX_TELEOP_ROT_ACCEL = RadiansPerSecondPerSecond.of(15);
 
   public static enum DriveSpeed {
     SLOW,

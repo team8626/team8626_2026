@@ -3,8 +3,10 @@ package frc.robot.commands;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -38,6 +40,7 @@ public class TeleopDriveCommand extends Command {
   private final DoubleSupplier ySupplier;
   private final DoubleSupplier omegaSupplier;
   private final SlewRateLimiter2d driveLimiter;
+  private final SlewRateLimiter rotLimiter;
   private final TunablePIDController rotationController =
       new TunablePIDController(DriveConstants.ROTATION_CONSTANTS);
 
@@ -68,6 +71,8 @@ public class TeleopDriveCommand extends Command {
     this.omegaSupplier = () -> -controller.getRightX();
     this.driveLimiter =
         new SlewRateLimiter2d(DriveConstants.MAX_TELEOP_ACCEL.in(MetersPerSecondPerSecond));
+    this.rotLimiter =
+        new SlewRateLimiter(DriveConstants.MAX_TELEOP_ROT_ACCEL.in(RadiansPerSecondPerSecond));
 
     RobotContainer.getTrackTrigger()
         .onTrue(Commands.runOnce(() -> manualTargetTracking = !manualTargetTracking));
@@ -139,11 +144,13 @@ public class TeleopDriveCommand extends Command {
         double omega =
             MathUtil.applyDeadband(omegaSupplier.getAsDouble(), ControllerConstants.DEADBAND);
         omega = Math.copySign(omega * omega, omega);
+        double omegaRadPerSec = maxRotSpeed.in(RadiansPerSecond) * omega;
+        omegaRadPerSec = rotLimiter.calculate(omegaRadPerSec);
 
         drive.driveFieldCentric(
             MetersPerSecond.of(linearVelocity.getX()),
             MetersPerSecond.of(linearVelocity.getY()),
-            maxRotSpeed.times(omega));
+            RadiansPerSecond.of(omegaRadPerSec));
       }
 
       case TARGET_TRACK -> {
