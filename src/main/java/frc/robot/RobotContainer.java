@@ -47,6 +47,7 @@ import frc.robot.commands.AgitateCommand;
 import frc.robot.commands.AnotherShooterRampupCommand;
 import frc.robot.commands.CollectCommand;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.DriveToDOT;
 import frc.robot.commands.DriveToPose;
 import frc.robot.commands.PlanPathAlignToTowerCommand;
 import frc.robot.commands.RumbleCommands;
@@ -672,6 +673,26 @@ public class RobotContainer {
                     .asProxy(),
                 climber.climb())
             .withName("ClimbFrontLeft"));
+
+    NamedCommands.registerCommand(
+        "DriveToRightDOT",
+        Commands.sequence(
+                Commands.parallel(climber.extend(), Commands.waitSeconds(1)),
+                new DriveToDOT(
+                        () -> DriveToDOT.Side.RIGHT, akitDrive)
+                    .asProxy(),
+                climber.climb())
+            .withName("DriveToRightDOT"));
+
+    NamedCommands.registerCommand(
+        "DriveToLeftDOT",
+        Commands.sequence(
+                Commands.parallel(climber.extend(), Commands.waitSeconds(1)),
+                new DriveToDOT(
+                        () -> DriveToDOT.Side.LEFT, akitDrive)
+                    .asProxy(),
+                climber.climb())
+            .withName("DriveToLeftDOT"));
 
     // Individual Auto Climb components
     NamedCommands.registerCommand("ExtendClimber", climber.extend().asProxy());

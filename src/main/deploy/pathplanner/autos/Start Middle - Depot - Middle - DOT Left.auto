@@ -1,0 +1,43 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Start Middle - Depot Left"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Depot Left - Depot Right"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Depot Right - Dump Middle"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AimAndDumpMedium"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Middle to Left Park"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
