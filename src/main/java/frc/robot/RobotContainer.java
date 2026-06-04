@@ -157,7 +157,8 @@ public class RobotContainer {
   private static final Trigger climberStowTrigger = controller.povRight();
 
   private static final Trigger hubTrackTrigger = controller.b();
-  private static final Trigger hubAimTrigger = controller.a();
+  private static final Trigger hubAimTrigger = controller.back();
+  private static final Trigger brakeTrigger = controller.a();
 
   private final Trigger inAllianceZoneTrigger;
 
@@ -392,6 +393,7 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+    brakeTrigger.whileTrue(teleopDrive.withSpeed(DriveSpeed.INTAKE));
     // -------------------------------------------------------------- Collect
     //
     // Run the intake roller and moves the intake to collect position.
@@ -678,9 +680,7 @@ public class RobotContainer {
         "DriveToRightDOT",
         Commands.sequence(
                 Commands.parallel(climber.extend(), Commands.waitSeconds(1)),
-                new DriveToDOT(
-                        () -> DriveToDOT.Side.RIGHT, akitDrive)
-                    .asProxy(),
+                new DriveToDOT(() -> DriveToDOT.Side.RIGHT, akitDrive).asProxy(),
                 climber.climb())
             .withName("DriveToRightDOT"));
 
@@ -688,9 +688,7 @@ public class RobotContainer {
         "DriveToLeftDOT",
         Commands.sequence(
                 Commands.parallel(climber.extend(), Commands.waitSeconds(1)),
-                new DriveToDOT(
-                        () -> DriveToDOT.Side.LEFT, akitDrive)
-                    .asProxy(),
+                new DriveToDOT(() -> DriveToDOT.Side.LEFT, akitDrive).asProxy(),
                 climber.climb())
             .withName("DriveToLeftDOT"));
 

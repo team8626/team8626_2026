@@ -2,8 +2,6 @@ package frc.robot.commands;
 
 import static edu.wpi.first.units.Units.*;
 
-import java.lang.reflect.Field;
-
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Distance;
@@ -88,13 +86,12 @@ public class TeleopDriveConstants {
 
   public static final Translation2d[] BC_DOTS = {
     new Translation2d(
-          FIELD_LENGTH.div(2.0), Meters.of(FieldConstants.fieldWidth - (FieldConstants.LeftTrench.openingWidth / 2.0))),
+        FIELD_LENGTH.div(2.0),
+        Meters.of(FieldConstants.fieldWidth - (FieldConstants.LeftTrench.openingWidth / 2.0))),
+    new Translation2d(FIELD_LENGTH.div(2.0), FIELD_WIDTH.div(2.0)),
     new Translation2d(
-          FIELD_LENGTH.div(2.0), FIELD_WIDTH.div(2.0)),
-    new Translation2d(
-          FIELD_LENGTH.div(2.0), Meters.of(FieldConstants.RightTrench.openingWidth / 2.0)),
+        FIELD_LENGTH.div(2.0), Meters.of(FieldConstants.RightTrench.openingWidth / 2.0)),
   };
-
 
   public static final Distance TRENCH_CENTER = TRENCH_WIDTH.div(2);
 }
