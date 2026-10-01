@@ -48,7 +48,7 @@ public class CollectCommand extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    linkage.stow();
+    linkage.setPosition(IntakeLinkageConstants.AGITAGE_IN_ANGLE);
     // roller.stop();
 
     // CommandScheduler.getInstance()

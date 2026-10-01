@@ -16,10 +16,10 @@ public class AnotherShooterConstants {
   public static final int MAX_CURRENT = 50; // Amps
 
   public static final AngularVelocity DEFAULT_VELOCITY = RPM.of(2500);
-  public static final AngularVelocity VELOCITY_TOLERANCE = RPM.of(25);
+  public static final AngularVelocity VELOCITY_TOLERANCE = RPM.of(65);
   public static final AngularVelocity UNJAM_VELOCITY = RPM.of(-500);
 
-  public static final double DEFAULT_SHOT_EFFICIENCY = 1.10;
+  public static final double DEFAULT_SHOT_EFFICIENCY = 1.0;
 
   public static final Time STOP_DELAY = Milliseconds.of(200);
 

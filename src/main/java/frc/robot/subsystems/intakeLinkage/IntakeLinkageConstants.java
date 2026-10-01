@@ -29,15 +29,13 @@ public class IntakeLinkageConstants {
 
   public static final Angle STOW_ANGLE = Degrees.of(180);
   public static final Angle AGITAGE_IN_ANGLE = Degrees.of(195);
-  public static final Angle AGITAGE_OUT_ANGLE = Degrees.of(220);
+  public static final Angle AGITAGE_OUT_ANGLE = Degrees.of(205);
   public static final Angle DEPLOY_ANGLE = Degrees.of(217.5);
   public static final Angle PLOW_ANGLE = Degrees.of(220);
-  public static final Angle BLURP_ANGLE = Degrees.of(200);
-  public static final Angle HOPPER_OPEN_ANGLE = Degrees.of(210);
 
   public static final Angle STARTING_ANGLE = STOW_ANGLE;
 
-  public static final Time AGITATE_PERIOD = Seconds.of(.4);
+  public static final Time AGITATE_PERIOD = Seconds.of(.6);
 
   public static final Angle POSITION_CONVERSION_FACTOR = Degrees.of(360);
   public static final AngularVelocity VELOCITY_CONVESSION_FACTOR =

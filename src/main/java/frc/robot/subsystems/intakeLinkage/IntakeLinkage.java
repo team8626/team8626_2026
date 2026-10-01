@@ -104,10 +104,6 @@ public class IntakeLinkage extends SubsystemBase {
     io.setPosition(IntakeLinkageConstants.DEPLOY_ANGLE);
   }
 
-  public void hopperOpen() {
-    io.setPosition(IntakeLinkageConstants.HOPPER_OPEN_ANGLE);
-  }
-
   private void updateTunables() {
     if (KP.hasChanged(hashCode())
         || KI.hasChanged(hashCode())

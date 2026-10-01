@@ -342,31 +342,59 @@
             }
           },
           {
-            "title": "Extend",
-            "x": 896.0,
-            "y": 320.0,
-            "width": 256.0,
+            "title": "CoveringToleranceInches",
+            "x": 864.0,
+            "y": 512.0,
+            "width": 128.0,
             "height": 128.0,
-            "type": "Command",
+            "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Climb/Extend",
-              "period": 0.06,
-              "show_type": true,
-              "maximize_button_space": true
+              "topic": "/Tuning/DriveToDOT/CoveringToleranceInches",
+              "period": 0.25,
+              "data_type": "double",
+              "show_submit_button": false
             }
           },
           {
-            "title": "Climb",
-            "x": 896.0,
-            "y": 448.0,
-            "width": 256.0,
+            "title": "HoldToleranceInches",
+            "x": 1008.0,
+            "y": 512.0,
+            "width": 128.0,
             "height": 128.0,
-            "type": "Command",
+            "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Climb/Climb",
-              "period": 0.06,
-              "show_type": true,
-              "maximize_button_space": true
+              "topic": "/Tuning/DriveToDOT/HoldToleranceInches",
+              "period": 0.25,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "NotCoveringTimeoutSeconds",
+            "x": 880.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/Tuning/DriveToDOT/NotCoveringTimeoutSeconds",
+              "period": 0.25,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "WaitUntilAutoSeconds",
+            "x": 1008.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/Tuning/DriveToDOT/WaitUntilAutoSeconds",
+              "period": 0.25,
+              "data_type": "double",
+              "show_submit_button": false
             }
           }
         ]
