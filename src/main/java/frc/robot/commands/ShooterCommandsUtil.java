@@ -17,18 +17,12 @@ import frc.robot.Robot;
 import frc.robot.subsystems.anotherShooter.AnotherShooterConstants;
 import frc.robot.subsystems.drive.AkitDrive;
 import frc.robot.subsystems.drive.DriveConstants;
-import frc.robot.util.LoggedTunableNumber;
 import org.littletonrobotics.frc2026.FieldConstants;
 import org.littletonrobotics.frc2026.util.geometry.AllianceFlipUtil;
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterCommandsUtil {
   public static record ShooterData(AngularVelocity velocityShooter, Voltage outputIndexer) {}
-
-  private static final LoggedTunableNumber shotEfficiencyMultiplier =
-      new LoggedTunableNumber(
-          "AnotherShooter/ShotEfficiencyMultiplier",
-          AnotherShooterConstants.DEFAULT_SHOT_EFFICIENCY);
 
   /**
    * Helper methods to calculate the distance to the hub or target. This can be used in commands to
@@ -53,16 +47,18 @@ public class ShooterCommandsUtil {
    * in commands to calculate the required shooter and indexer velocities based on the robot's
    * current position and the target position.
    */
-  public static ShooterData calculateRPMToHub(AkitDrive drive) {
-    return calculateRPMToTarget(drive, FieldConstants.Hub.topCenterPoint);
+  public static ShooterData calculateRPMToHub(AkitDrive drive, double efficiency) {
+    return calculateRPMToTarget(drive, FieldConstants.Hub.topCenterPoint, efficiency);
   }
 
-  public static ShooterData calculateRPMToPassingDepotSide(AkitDrive drive) {
-    return calculateRPMToTarget(drive, ShooterTargetConstants.TARGET_PASSING_DEPOT_SIDE);
+  public static ShooterData calculateRPMToPassingDepotSide(AkitDrive drive, double efficiency) {
+    return calculateRPMToTarget(
+        drive, ShooterTargetConstants.TARGET_PASSING_DEPOT_SIDE, efficiency);
   }
 
-  public static ShooterData calculateRPMToPassingOutpostSide(AkitDrive drive) {
-    return calculateRPMToTarget(drive, ShooterTargetConstants.TARGET_PASSING_OUTPOST_SIDE);
+  public static ShooterData calculateRPMToPassingOutpostSide(AkitDrive drive, double efficiency) {
+    return calculateRPMToTarget(
+        drive, ShooterTargetConstants.TARGET_PASSING_OUTPOST_SIDE, efficiency);
   }
 
   public static Translation3d getPassingTarget(AkitDrive drive) {
@@ -81,13 +77,13 @@ public class ShooterCommandsUtil {
     return selected;
   }
 
-  public static ShooterData calculateRPMToPassing(AkitDrive drive) {
-    return calculateRPMToTarget(drive, getPassingTarget(drive));
+  public static ShooterData calculateRPMToPassing(AkitDrive drive, double efficiency) {
+    return calculateRPMToTarget(drive, getPassingTarget(drive), efficiency);
   }
 
-  public static ShooterData calculateRPMToTarget(AkitDrive drive, Translation3d target) {
+  public static ShooterData calculateRPMToTarget(
+      AkitDrive drive, Translation3d target, double efficiency) {
     double distToTargetFeet = getDistToTarget(drive, target).in(Feet);
-    double efficiency = shotEfficiencyMultiplier.get();
 
     AngularVelocity velocityShooter =
         Robot.isReal()
