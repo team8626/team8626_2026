@@ -7,31 +7,43 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Start Middle - Backup"
+            "pathName": "Start Middle - Depot Left"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Depot Left - Depot Right"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Depot Right - Dump Middle"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "AimAndDumpShort"
+            "name": "AimAndDumpMedium"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Middle to Right Park"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Right Park to DOT"
+            "pathName": "Depot to Left Park"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "DriveToRightDOT"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Right Park to DOT"
           }
         }
       ]
