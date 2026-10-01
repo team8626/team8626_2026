@@ -12,6 +12,7 @@ import frc.robot.subsystems.anotherShooter.AnotherShooter;
 import frc.robot.subsystems.anotherShooter.AnotherShooterConstants;
 import frc.robot.subsystems.drive.AkitDrive;
 import frc.robot.subsystems.indexer.Indexer;
+import frc.robot.util.LoggedTunableNumber;
 import java.util.function.Supplier;
 import org.littletonrobotics.frc2026.FieldConstants;
 
@@ -20,6 +21,11 @@ public class TrackTargetAndShootCommand extends Command {
   private final AnotherShooter shooter;
   private final AkitDrive drive;
   private final Supplier<Translation3d> targetSupplier;
+
+  private static final LoggedTunableNumber shotEfficiencyMultiplier =
+      new LoggedTunableNumber(
+          "AnotherShooter/ShotEfficiencyMultiplier",
+          AnotherShooterConstants.DEFAULT_SHOT_EFFICIENCY);
 
   public TrackTargetAndShootCommand(Indexer indexer, AnotherShooter shooter, AkitDrive drive) {
     this(() -> FieldConstants.Hub.topCenterPoint, indexer, shooter, drive);
@@ -46,7 +52,9 @@ public class TrackTargetAndShootCommand extends Command {
 
   @Override
   public void execute() {
-    ShooterData shot = ShooterCommandsUtil.calculateRPMToTarget(drive, targetSupplier.get());
+    ShooterData shot =
+        ShooterCommandsUtil.calculateRPMToTarget(
+            drive, targetSupplier.get(), shotEfficiencyMultiplier.get());
     AngularVelocity requiredVelocity = shot.velocityShooter();
     AngularVelocity currentVelocity = shooter.getVelocity();
 
@@ -58,8 +66,6 @@ public class TrackTargetAndShootCommand extends Command {
 
     if (shooterAtSpeed) {
       indexer.start(shot.outputIndexer());
-    } else {
-      indexer.stop();
     }
   }
 
