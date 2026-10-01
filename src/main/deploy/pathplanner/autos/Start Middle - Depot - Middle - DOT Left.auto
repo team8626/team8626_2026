@@ -33,6 +33,18 @@
           "data": {
             "pathName": "Middle to Left Park"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Left Park to DOT"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "DriveToLeftDOT"
+          }
         }
       ]
     }

@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.5520898716119826,
-        "y": 5.012
+        "x": 0.552,
+        "y": 5.212
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.145641675914281,
-        "y": 5.047991183278367
+        "x": 1.3451322423745722,
+        "y": 5.194726384335804
       },
       "isLocked": false,
       "linkedName": "Depot Right"
     },
     {
       "anchor": {
-        "x": 1.5161093032349302,
-        "y": 5.577577878482389
+        "x": 1.9602837264823259,
+        "y": 4.900462024301596
       },
       "prevControl": {
-        "x": 1.4109380997877532,
-        "y": 5.121575979928659
+        "x": 1.6123698510547317,
+        "y": 5.081448341291335
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,19 +31,12 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 0.460457647531111,
-      "rotationDegrees": -90.0
+      "rotationDegrees": -91.62346809471065
     }
   ],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "CollectDone",
-      "waypointRelativePos": 0.29914122137404425,
-      "endWaypointRelativePos": null,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 2.5,
     "maxAcceleration": 2.0,
