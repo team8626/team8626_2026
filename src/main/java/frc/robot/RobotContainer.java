@@ -151,10 +151,9 @@ public class RobotContainer {
   private static final Trigger aimAndShootTrigger = controller.rightTrigger();
   private static final Trigger passingTrigger = controller.y();
 
-  private static final Trigger climberExtendTrigger = controller.povUp();
-  private static final Trigger climberClimbTrigger = controller.povDown();
-  private static final Trigger climberZeroTrigger = controller.povLeft();
-  private static final Trigger climberStowTrigger = controller.povRight();
+  private static final Trigger intakeStowTrigger = controller.povUp();
+  private static final Trigger intakeDropTrigger = controller.povDown();
+  private static final Trigger stopXTrigger = controller.povLeft();
 
   private static final Trigger hubTrackTrigger = controller.b();
   private static final Trigger hubAimTrigger = controller.back();
@@ -406,6 +405,12 @@ public class RobotContainer {
 
     agitateTrigger.whileTrue(new AgitateCommand(intakeLinkage, intakeRoller));
 
+    intakeStowTrigger.onTrue(
+        Commands.runOnce(() -> intakeLinkage.setPosition(IntakeLinkageConstants.STOW_ANGLE)));
+    intakeDropTrigger.onTrue(
+        Commands.runOnce(() -> intakeLinkage.setPosition(IntakeLinkageConstants.DEPLOY_ANGLE)));
+    stopXTrigger.onTrue(Commands.runOnce(() -> akitDrive.stopWithX()));
+
     // -------------------------------------------------------------- Plow
     //
     // Run the intake roller backwards and moves the intake to plow position
@@ -512,23 +517,6 @@ public class RobotContainer {
                 .withName("Active Shift Upcoming")
                 .onlyIf(DriverStation::isFMSAttached));
 
-    // --------------------------------------------------------------
-    // Climber Triggers.
-    climberStowTrigger.onTrue(climber.stow().withName("Climber Stow Command"));
-
-    climberExtendTrigger.onTrue(
-        Commands.sequence(
-                Commands.runOnce(
-                    () -> {
-                      intakeLinkage.setPosition(IntakeLinkageConstants.STOW_ANGLE);
-                    }),
-                climber.extend())
-            .withName("Climber Extend Command"));
-
-    climberZeroTrigger.onTrue(climber.zero().withName("Climber Zero Command"));
-
-    climberClimbTrigger.onTrue(climber.climb().withName("Climber Climb Command"));
-
     // new Trigger(HubShiftTracker::canStartShooting)
     //     .onTrue(
     //         RumbleCommands.PulseRumble(controller.getHID(), Seconds.of(1))
@@ -634,7 +622,9 @@ public class RobotContainer {
         "AimAndDumpShort",
         Commands.deadline(
                 Commands.waitSeconds(AutoConstants.DUMP_DURATION_SHORT.in(Seconds)),
-                Commands.parallel(new TrackTargetAndShootCommand(index, anotherShooter, akitDrive)))
+                Commands.parallel(
+                    new TrackTargetAndShootCommand(index, anotherShooter, akitDrive),
+                    new AgitateCommand(intakeLinkage, intakeRoller)))
             .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY))
             .withName("AimAndDumpShort"));
 
@@ -642,7 +632,9 @@ public class RobotContainer {
         "AimAndDumpMedium",
         Commands.deadline(
                 Commands.waitSeconds(AutoConstants.DUMP_DURATION_MEDIUM.in(Seconds)),
-                Commands.parallel(new TrackTargetAndShootCommand(index, anotherShooter, akitDrive)))
+                Commands.parallel(
+                    new AgitateCommand(intakeLinkage, intakeRoller).asProxy(),
+                    new TrackTargetAndShootCommand(index, anotherShooter, akitDrive)))
             .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY))
             .withName("AimAndDumpMedium"));
 
@@ -651,64 +643,26 @@ public class RobotContainer {
         Commands.deadline(
                 Commands.waitSeconds(AutoConstants.DUMP_DURATION_LONG.in(Seconds)),
                 Commands.parallel(
-                    new AgitateCommand(intakeLinkage, intakeRoller).asProxy(),
-                    new TrackTargetAndShootCommand(index, anotherShooter, akitDrive)))
+                    new TrackTargetAndShootCommand(index, anotherShooter, akitDrive),
+                    new AgitateCommand(intakeLinkage, intakeRoller)))
             .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY))
             .withName("AimAndDumpLong"));
 
     NamedCommands.registerCommand(
-        "ClimbFrontRight",
-        Commands.sequence(
-                Commands.parallel(climber.extend(), Commands.waitSeconds(1)),
-                new DriveToPose(
-                        () -> ClimberConstants.ClimbPosition.FRONT_RIGHT.getPose(), akitDrive)
-                    .asProxy(),
-                climber.climb())
-            .withName("ClimbFrontRight"));
-
-    NamedCommands.registerCommand(
-        "ClimbFrontLeft",
-        Commands.sequence(
-                Commands.parallel(climber.extend(), Commands.waitSeconds(1)),
-                new DriveToPose(
-                        () -> ClimberConstants.ClimbPosition.FRONT_LEFT.getPose(), akitDrive)
-                    .asProxy(),
-                climber.climb())
-            .withName("ClimbFrontLeft"));
+        "DriveToCenterDOT",
+        new DriveToDOT(() -> DriveToDOT.Side.CENTER, akitDrive)
+            .asProxy()
+            .withName("DriveToCenterDOT"));
 
     NamedCommands.registerCommand(
         "DriveToRightDOT",
-        Commands.sequence(
-                Commands.parallel(climber.extend(), Commands.waitSeconds(1)),
-                new DriveToDOT(() -> DriveToDOT.Side.RIGHT, akitDrive).asProxy(),
-                climber.climb())
+        new DriveToDOT(() -> DriveToDOT.Side.RIGHT, akitDrive)
+            .asProxy()
             .withName("DriveToRightDOT"));
 
     NamedCommands.registerCommand(
         "DriveToLeftDOT",
-        Commands.sequence(
-                Commands.parallel(climber.extend(), Commands.waitSeconds(1)),
-                new DriveToDOT(() -> DriveToDOT.Side.LEFT, akitDrive).asProxy(),
-                climber.climb())
-            .withName("DriveToLeftDOT"));
-
-    // Individual Auto Climb components
-    NamedCommands.registerCommand("ExtendClimber", climber.extend().asProxy());
-    NamedCommands.registerCommand(
-        "DriveToClimbPoseLeft",
-        new DriveToPose(() -> ClimberConstants.ClimbPosition.FRONT_LEFT.getPose(), akitDrive)
-            .withTimeout(2)
-            .asProxy());
-    NamedCommands.registerCommand(
-        "DriveToClimbPoseRight",
-        new DriveToPose(() -> ClimberConstants.ClimbPosition.FRONT_RIGHT.getPose(), akitDrive)
-            .withTimeout(2)
-            .asProxy());
-    NamedCommands.registerCommand("Climb", climber.climb().asProxy());
-
-    NamedCommands.registerCommand(
-        "PlanPathAlignToTower",
-        new PlanPathAlignToTowerCommand(akitDrive, vision).withName("PlanPathAlignToTower"));
+        new DriveToDOT(() -> DriveToDOT.Side.LEFT, akitDrive).asProxy().withName("DriveToLeftDOT"));
   }
 
   /**
@@ -731,8 +685,8 @@ public class RobotContainer {
         .onTrue(
             Commands.runOnce(
                     () -> {
-                      // intakeLinkage.setPosition(IntakeLinkageConstants.STOW_ANGLE);
-                      // intakeRoller.stop();
+                      intakeLinkage.setPosition(IntakeLinkageConstants.STOW_ANGLE);
+                      intakeRoller.stop();
                     })
                 .withName("PP Collect Done"));
 
