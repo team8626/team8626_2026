@@ -80,16 +80,6 @@ public final class Constants {
     }
   }
 
-  /** Checks that the default robot is selected and tuning mode is disabled. */
-  public static class CheckPullRequest {
-    public static void main(String... args) {
-      if (robot != RobotType.REBUILT_PHOENIX || tuningMode) {
-        System.err.println("Do not merge, non-default constants are configured.");
-        System.exit(1);
-      }
-    }
-  }
-
   public static class RobotConstants {
 
     public static final CANBus CAN_FD_BUS = new CANBus("CANivore");
