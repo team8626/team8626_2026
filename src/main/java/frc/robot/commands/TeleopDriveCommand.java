@@ -19,7 +19,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.ControllerConstants;
-import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.AkitDrive;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.drive.DriveConstants.DriveSpeed;
@@ -74,8 +73,8 @@ public class TeleopDriveCommand extends Command {
     this.rotLimiter =
         new SlewRateLimiter(DriveConstants.MAX_TELEOP_ROT_ACCEL.in(RadiansPerSecondPerSecond));
 
-    RobotContainer.getTrackTrigger()
-        .onTrue(Commands.runOnce(() -> manualTargetTracking = !manualTargetTracking));
+    // RobotContainer.getTrackTrigger()
+    //     .onTrue(Commands.runOnce(() -> manualTargetTracking = !manualTargetTracking));
 
     addRequirements(drive);
   }
@@ -99,9 +98,9 @@ public class TeleopDriveCommand extends Command {
   }
 
   private DriveMode getDriveMode() {
-    if (RobotContainer.getAimTrigger().getAsBoolean()) {
-      return DriveMode.TARGET_AIM;
-    }
+    // if (RobotContainer.getAimTrigger().getAsBoolean()) {
+    //   return DriveMode.TARGET_AIM;
+    // }
     if (manualTargetTracking || commandTargetTracking) {
       return DriveMode.TARGET_TRACK;
     }

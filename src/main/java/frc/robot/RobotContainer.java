@@ -79,7 +79,6 @@ import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.hopper.HopperIO;
 import frc.robot.subsystems.hopper.HopperIOSim;
 import frc.robot.subsystems.indexer.Indexer;
-import frc.robot.subsystems.indexer.IndexerConstants;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
 import frc.robot.subsystems.indexer.IndexerIOSpark;
@@ -145,18 +144,18 @@ public class RobotContainer {
   //   private static final Trigger plowTrigger = controller.leftTrigger();
   private static final Trigger agitateTrigger = controller.leftTrigger();
   //   private static final Trigger blurpTrigger = controller.y();
-  private static final Trigger unjamTrigger = controller.x();
+  //   private static final Trigger unjamTrigger = controller.x();
 
   private static final Trigger fixedRPMShootTrigger = controller.rightBumper();
-  private static final Trigger aimAndShootTrigger = controller.rightTrigger();
-  private static final Trigger passingTrigger = controller.y();
+  //   private static final Trigger aimAndShootTrigger = controller.rightTrigger();
+  //   private static final Trigger passingTrigger = controller.y();
 
   private static final Trigger intakeStowTrigger = controller.povUp();
   private static final Trigger intakeDropTrigger = controller.povDown();
   private static final Trigger stopXTrigger = controller.povLeft();
 
-  private static final Trigger hubTrackTrigger = controller.b();
-  private static final Trigger hubAimTrigger = controller.back();
+  //   private static final Trigger hubTrackTrigger = controller.b();
+  //   private static final Trigger hubAimTrigger = controller.back();
   private static final Trigger brakeTrigger = controller.a();
 
   private final Trigger inAllianceZoneTrigger;
@@ -433,6 +432,7 @@ public class RobotContainer {
         // .and(inAllianceZoneTrigger)
         .whileTrue(
         Commands.sequence(new AnotherShooterRampupCommand(anotherShooter), feedShooterCommand())
+            .alongWith(new AgitateCommand(intakeLinkage, intakeRoller))
             .withName("Just Shoot Command")
             .finallyDo(() -> stopShooting(AnotherShooterConstants.STOP_DELAY)));
 
@@ -447,66 +447,66 @@ public class RobotContainer {
     // The shooter will run at a velocity based on the distance to the target.
     // Activates agitation
     //
-    aimAndShootTrigger
-        .and(inAllianceZoneTrigger)
-        .whileTrue(
-            teleopDrive.withHubLock(
-                Commands.parallel(
-                        new TrackTargetAndShootCommand(index, anotherShooter, akitDrive),
-                        // new AgitateCommand(intakeLinkage, intakeRoller),
-                        simLaunchFuelCommand())
-                    .withName("Aim And Shoot Command")));
+    // aimAndShootTrigger
+    //     .and(inAllianceZoneTrigger)
+    //     .whileTrue(
+    //         teleopDrive.withHubLock(
+    //             Commands.parallel(
+    //                     new TrackTargetAndShootCommand(index, anotherShooter, akitDrive),
+    //                     // new AgitateCommand(intakeLinkage, intakeRoller),
+    //                     simLaunchFuelCommand())
+    //                 .withName("Aim And Shoot Command")));
 
-    aimAndShootTrigger
-        .and(inAllianceZoneTrigger.negate())
-        .whileTrue(
-            teleopDrive.withTargetLock(
-                () -> ShooterCommandsUtil.getPassingTarget(akitDrive),
-                Commands.parallel(
-                        new TrackTargetAndShootCommand(
-                            () -> ShooterCommandsUtil.getPassingTarget(akitDrive),
-                            index,
-                            anotherShooter,
-                            akitDrive),
-                        // new AgitateCommand(intakeLinkage, intakeRoller),
-                        simLaunchFuelCommand())
-                    .withName("Passing Shoot Command")));
+    // aimAndShootTrigger
+    //     .and(inAllianceZoneTrigger.negate())
+    //     .whileTrue(
+    //         teleopDrive.withTargetLock(
+    //             () -> ShooterCommandsUtil.getPassingTarget(akitDrive),
+    //             Commands.parallel(
+    //                     new TrackTargetAndShootCommand(
+    //                         () -> ShooterCommandsUtil.getPassingTarget(akitDrive),
+    //                         index,
+    //                         anotherShooter,
+    //                         akitDrive),
+    //                     // new AgitateCommand(intakeLinkage, intakeRoller),
+    //                     simLaunchFuelCommand())
+    //                 .withName("Passing Shoot Command")));
 
-    // -------------------------------------------------------------- Passing
-    //
-    // Pass Fuel to the closest side (Depot or Outpost)
-    //
-    passingTrigger.whileTrue(
-        teleopDrive.withTargetLock(
-            () -> ShooterCommandsUtil.getPassingTarget(akitDrive),
-            Commands.parallel(
-                    new TrackTargetAndShootCommand(
-                        () -> ShooterCommandsUtil.getPassingTarget(akitDrive),
-                        index,
-                        anotherShooter,
-                        akitDrive),
-                    // new AgitateCommand(intakeLinkage, intakeRoller),
-                    simLaunchFuelCommand())
-                .withName("Passing Shoot Command")));
+    // // -------------------------------------------------------------- Passing
+    // //
+    // // Pass Fuel to the closest side (Depot or Outpost)
+    // //
+    // passingTrigger.whileTrue(
+    //     teleopDrive.withTargetLock(
+    //         () -> ShooterCommandsUtil.getPassingTarget(akitDrive),
+    //         Commands.parallel(
+    //                 new TrackTargetAndShootCommand(
+    //                     () -> ShooterCommandsUtil.getPassingTarget(akitDrive),
+    //                     index,
+    //                     anotherShooter,
+    //                     akitDrive),
+    //                 // new AgitateCommand(intakeLinkage, intakeRoller),
+    //                 simLaunchFuelCommand())
+    //             .withName("Passing Shoot Command")));
 
     // -------------------------------------------------------------- Unjam
     //
     // Run the shooter and indexer in reverse to unjam fuel.
     //
-    unjamTrigger.whileTrue(
-        Commands.parallel(
-                Commands.runOnce(
-                        () -> anotherShooter.start(AnotherShooterConstants.UNJAM_VELOCITY),
-                        anotherShooter)
-                    .andThen(Commands.idle(anotherShooter)),
-                Commands.runOnce(() -> index.start(IndexerConstants.UNJAM_OUTPUT), index)
-                    .andThen(Commands.idle(index)))
-            .finallyDo(
-                () -> {
-                  anotherShooter.stop();
-                  index.stop();
-                })
-            .withName("Unjamming Command"));
+    // unjamTrigger.whileTrue(
+    //     Commands.parallel(
+    //             Commands.runOnce(
+    //                     () -> anotherShooter.start(AnotherShooterConstants.UNJAM_VELOCITY),
+    //                     anotherShooter)
+    //                 .andThen(Commands.idle(anotherShooter)),
+    //             Commands.runOnce(() -> index.start(IndexerConstants.UNJAM_OUTPUT), index)
+    //                 .andThen(Commands.idle(index)))
+    //         .finallyDo(
+    //             () -> {
+    //               anotherShooter.stop();
+    //               index.stop();
+    //             })
+    //         .withName("Unjamming Command"));
 
     // --------------------------------------------------------------
     // Alliance Shift Triggers
@@ -605,13 +605,13 @@ public class RobotContainer {
         Meters.of(AnotherShooterConstants.ANOTHERSHOOTER_OFFSET.getZ()));
   }
 
-  public static Trigger getTrackTrigger() {
-    return hubTrackTrigger;
-  }
+  //   public static Trigger getTrackTrigger() {
+  //     return hubTrackTrigger;
+  //   }
 
-  public static Trigger getAimTrigger() {
-    return hubAimTrigger;
-  }
+  //   public static Trigger getAimTrigger() {
+  //     return hubAimTrigger;
+  //   }
 
   /**
    * Configure named commands to be identified by autos and paths. These are for instant commands

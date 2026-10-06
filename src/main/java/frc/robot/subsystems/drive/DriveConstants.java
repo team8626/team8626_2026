@@ -61,8 +61,8 @@ public class DriveConstants {
   public static final LinearVelocity INTAKE_DRIVE_SPEED = MetersPerSecond.of(2);
   public static final AngularVelocity INTAKE_ROT_SPEED = RotationsPerSecond.of(0.75);
 
-  public static final LinearVelocity DEFAULT_DRIVE_SPEED = FAST_DRIVE_SPEED;
-  public static final AngularVelocity DEFAULT_ROT_SPEED = FAST_ROT_SPEED;
+  public static final LinearVelocity DEFAULT_DRIVE_SPEED = INTAKE_DRIVE_SPEED;
+  public static final AngularVelocity DEFAULT_ROT_SPEED = INTAKE_ROT_SPEED;
 
   public static final LinearAcceleration MAX_TELEOP_ACCEL = MetersPerSecondPerSecond.of(15);
   public static final AngularAcceleration MAX_TELEOP_ROT_ACCEL = RadiansPerSecondPerSecond.of(15);
