@@ -138,6 +138,7 @@ public class TeleopDriveCommand extends Command {
     linearVelocity = driveLimiter.calculate(linearVelocity);
 
     switch (getDriveMode()) {
+        // NORMAL: Drive with joystick input, no target tracking.
       case NORMAL -> {
         rotSpeedToTarget = 0.0;
 
@@ -153,6 +154,7 @@ public class TeleopDriveCommand extends Command {
             RadiansPerSecond.of(omegaRadPerSec));
       }
 
+        // TARGET_TRACK: Drive with joystick input, but rotate to face the target.
       case TARGET_TRACK -> {
         rotSpeedToTarget =
             rotationController.calculate(
@@ -166,6 +168,7 @@ public class TeleopDriveCommand extends Command {
             RadiansPerSecond.of(rotSpeedToTarget));
       }
 
+        // TARGET_AIM: Don't drive, but rotate to face the target.
       case TARGET_AIM -> {
         rotSpeedToTarget =
             rotationController.calculate(
@@ -192,7 +195,8 @@ public class TeleopDriveCommand extends Command {
   // -----------------------------------------------------------------
   // Helper methods to apply drive modifiers to other commands.
   public Command withSpeed(DriveSpeed speed) {
-    return Commands.startEnd(() -> setSpeed(speed), () -> setSpeed(DriveSpeed.DEFAULT));
+    DriveSpeed previousSpeed = driveSpeed;
+    return Commands.startEnd(() -> setSpeed(speed), () -> setSpeed(previousSpeed));
   }
 
   public Command withSpeed(DriveSpeed speed, Command command) {
